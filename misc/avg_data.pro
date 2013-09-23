@@ -14,7 +14,7 @@ PRO avg_data,name,res,newname=newname,append=append,trange=trange,day=day
 
 get_data,name,data=d,dlim=dlim,lim=lim
 if not keyword_set(d) then begin
-   message,/info,'data not defined!'
+   message,/info,'The given data variable does not exist!'
    return
 endif
 
