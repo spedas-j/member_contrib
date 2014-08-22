@@ -18,7 +18,7 @@ pro overlay_map_thmasi, asi_vns, cal=cal, imgscale=imgscale, geo_plot=geo_plot, 
   sd_init
   
   ;Obtain the plot time
-  plot_time = !sdarn.sd_polar.plot_time
+  plot_time = !map2d.time
   
   ;Initialize the combined arrays
   cmb_img = '' & cmb_cin = ''
