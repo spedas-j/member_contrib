@@ -40,7 +40,7 @@ pro generate_cdf_file_sample
   cdf_attput, cdfid, gattid, 0, gatt_content
 
   gatt_name = 'Rules_of_use'
-  gatt_content = 'We require all data users to cheer and even worship the marriage of Dr. Shiota and his wife on using the SUSANOO data for their researches.'
+  gatt_content = 'We require all data users to carefully study Shiota et al., Space Weather, 2014 and contact Dr. Shiota, if needed, before using the SUSANOO data for their researches.'
   gattid = cdf_attcreate( cdfid, gatt_name, /global_scope )
   cdf_attput, cdfid, gattid, 0, gatt_content
 
