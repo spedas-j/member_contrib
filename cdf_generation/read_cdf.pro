@@ -6,6 +6,23 @@ if not keyword_set(fname) then return, ''
 if ~file_test(fname) then return, ''
 
 id = CDF_OPEN(fname)
+
+cdf_control, id, get_numattr=natt
+for i=0, total(natt)-1 do begin
+  cdf_attinq, id, i, name, scope, maxentry, maxzentry
+  if strmid(scope, 0,1) eq 'G' then begin
+    cdf_control, id, attribute=name, get_attr_info=att_info
+    attval = ''
+    for j=0, att_info.maxgentry do begin 
+    cdf_attget, id, name, j, attval1
+    if j eq 0 then attval = attval1 else attval = [ attval, attval1 ]
+    endfor
+    print, name+'  ('+scope+'):     '+attval
+  endif else begin
+    print, name+'  ('+scope+')'
+  endelse
+endfor
+
 ;info=cdf_info(id);help,info.vars[12],/st
 inq=cdf_inquire(id)
 if inq.nvars ne 0 then begin
