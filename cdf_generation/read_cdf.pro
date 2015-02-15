@@ -61,4 +61,8 @@ function read_cdf, fname, debug=debug
   if keyword_set(debug) then help, dat,/st
   
   return, dat ;Return the resultant structure and finish!
+<<<<<<< HEAD
 end
+=======
+end
+>>>>>>> 996de663fedaf08e8877213c50255fa7a0da52c2
