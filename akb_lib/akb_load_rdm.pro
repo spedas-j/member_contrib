@@ -143,7 +143,11 @@ PRO akb_load_rdm, $
   store_data,prefix_project+'GLON',data={x:dblt,y:GLON}
   store_data,prefix+'FEIO',data={x:dblt,y:RDM_E3}
   store_data,prefix+'FEIO_Energy',data={x:dblt,y:Energy}  
-  
+
+  tdegap,prefix+'FEIO',/overwrite
+  options,prefix+'FEIO',psym=4
+  ylim,prefix+'FEIO',1.0,1.e5,1
+
   options,prefix_project+'L','L-value'
   options,prefix_project+'INV','Invariant Latitude [deg]'
   options,prefix_project+'FMLAT','Footprint Latitude [deg]'

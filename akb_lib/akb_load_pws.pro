@@ -70,7 +70,7 @@ PRO akb_load_pws, $
   
   prefix = 'akb_pws_' ;Prefix for tplot variable name
   ; Read CDF files and load data as tplot variables
-  cdf2tplot,file=fpaths,verbose=source.verbose,prefix=prefix
+  cdf2tplot,file=fpaths,verbose=source.verbose,prefix=prefix,varformat='RX1'
   
   ;Set labels, plot ranges, and so forth
   options, prefix+'Gain', 'ysubtitle', '[dB]'
