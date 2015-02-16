@@ -146,7 +146,7 @@ PRO akb_load_rdm, $
 
   tdegap,prefix+'FEIO',/overwrite
   options,prefix+'FEIO',psym=4
-  ylim,prefix+'FEIO',1.0,1.e5,1
+  ylim,prefix+'FEIO',0.0,0.0,1
 
   options,prefix_project+'L','L-value'
   options,prefix_project+'INV','Invariant Latitude [deg]'

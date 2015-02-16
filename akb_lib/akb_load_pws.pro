@@ -73,12 +73,10 @@ PRO akb_load_pws, $
   cdf2tplot,file=fpaths,verbose=source.verbose,prefix=prefix,varformat='RX1'
   
   ;Set labels, plot ranges, and so forth
-  options, prefix+'Gain', 'ysubtitle', '[dB]'
   ylim, prefix+'RX?', 0,0, 1  ;log scale for Y-axis
   options, prefix+'RX?', 'ztitle', '[dB]'
   options, prefix+'RX?', 'ysubtitle', '[Hz]'
   options, prefix+'RX1', 'ytitle', 'akb!Cpws!CE-field RX1'
-  options, prefix+'RX2', 'ytitle', 'akb!Cpws!CE-field RX2'
   
   return
 end
