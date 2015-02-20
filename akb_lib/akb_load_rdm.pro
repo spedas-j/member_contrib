@@ -156,7 +156,8 @@ PRO akb_load_rdm, $
   options,prefix_project+'ALT','Altitude [km]'
   options,prefix_project+'GLAT','Geographic Latitude [deg]'
   options,prefix_project+'GLON','Geographic Longitude [deg]'
-  options,prefix+'FEIO','ytitle','Omni-directional Integral Electron Flux [/cm2 sec str]
+  options,prefix+'FEIO','ytitle','Omni-directional Integral Electron Flux'
+  options,prefix+'FEIO','ysubtitle', '[/cm2 sec str]'
   options,prefix+'FEIO_Energy','ytitle','Elctron energy [MeV]'
 
  return
