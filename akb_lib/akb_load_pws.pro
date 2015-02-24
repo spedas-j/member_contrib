@@ -70,15 +70,13 @@ PRO akb_load_pws, $
   
   prefix = 'akb_pws_' ;Prefix for tplot variable name
   ; Read CDF files and load data as tplot variables
-  cdf2tplot,file=fpaths,verbose=source.verbose,prefix=prefix
+  cdf2tplot,file=fpaths,verbose=source.verbose,prefix=prefix,varformat='RX1'
   
   ;Set labels, plot ranges, and so forth
-  options, prefix+'Gain', 'ysubtitle', '[dB]'
-  ylim, prefix+'RX?', 0,0, 1  ;log scale for Y-axis
+  ylim, prefix+'RX?',2.0e4,5.1e6, 1  ;log scale for Y-axis
   options, prefix+'RX?', 'ztitle', '[dB]'
   options, prefix+'RX?', 'ysubtitle', '[Hz]'
   options, prefix+'RX1', 'ytitle', 'akb!Cpws!CE-field RX1'
-  options, prefix+'RX2', 'ytitle', 'akb!Cpws!CE-field RX2'
   
   return
 end
