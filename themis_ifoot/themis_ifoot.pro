@@ -142,6 +142,8 @@ pro themis_ifoot, $
     
     ;cartesian --> spherical coordinates
     xyz_to_polar, vn_ifootgeo, /ph_0_360 
+    vn_removed = tnames( [vn_ifootgeo+'_lat',vn_ifootgeo+'_lon'] ) 
+    if strlen(vn_removed[0]) gt 6 then store_data, delete=vn_removed
     store_data, vn_ifootgeo+'_th', newname=vn_ifootgeo+'_lat'
     store_data, vn_ifootgeo+'_phi', newname=vn_ifootgeo+'_lon'
     tkm2re, vn_ifootgeo+'_mag', /km, /replace
