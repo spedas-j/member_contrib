@@ -4,9 +4,14 @@
 ; plot is saved as a png file in a directory set by output_dir (Line 15). 
 ; 
 ; To run this script, 
+; IDL> del_data, 'th?_state_pos_ifoot*'  
 ; IDL> .r sample_script1.pro 
 
-;pro sample_script1
+; Please run del_data command above to clear the pre-existing footprint data 
+; so that the following command (sample_script1.pro) recalculates the footprint 
+; positions. You need to do this when you change the solar wind-IMF input 
+; values for the T96 model. 
+
   
   thm_init
   sd_init
@@ -32,6 +37,10 @@
   Dst = 0.0 ;[nT]
   imfby = 0.0 ;[nT]
   imfbz = 0.0 ;[nT] 
+  
+  autocalc_parmod = 0  ; Set 1 to automatically download the OMNI data and 
+                                   ; generate the input parameters based on the time-varying 
+                                   ; solar wind-IMF data for T96 model.  
   
   parmod = [solarwind_dynamic_pressure, Dst, imfby, imfbz ]
   
@@ -66,8 +75,9 @@
   for i=0, n_elements(probes)-1 do begin
     probe = strlowcase(probes[i] )
     prefix = 'th'+probe+'_state_pos_ifoot_geo_'
+    ;del_data, prefix+'*' 
     if strlen(tnames(prefix+'lat')) lt 6 then $
-      themis_ifoot, probe=probe, parmod=parmod 
+      themis_ifoot, probe=probe, parmod=parmod, auto=autocalc_parmod 
     if strlen(tnames(prefix+'lat')) gt 6 then begin
       print, 'overlay_map_sc_ifoot'
       overlay_map_sc_ifoot, prefix+'lat', prefix+'lon', [ts,te], $

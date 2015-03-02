@@ -7,7 +7,8 @@
 ; To run this script, 
 ; IDL> .r sample_script2.pro 
 
-;pro sample_script2
+; It is highly recommended to run sample_script1.pro in advance so that 
+; you can avoid doing the calculatoin of the footprint data over again.  
   
   thm_init
   sd_init
@@ -22,7 +23,7 @@
   center_glat = 57. ;[deg] Geographical latitude of the center of the plot
   center_glon = -75. ;[deg] Geographical longitude of the center of the plot 
   use_full_image = 0 ; 0: use thumbnail images,  1:use full resolution images
-                               ; CAUTION!  It may take hours to download a full resolution data. 
+                               ; CAUTION!  It may take a while to download a full resolution data. 
   
   ;THEMIS footprint
   thmifoot_ts = '2011-03-01/05:00:00' ;Start date/time
