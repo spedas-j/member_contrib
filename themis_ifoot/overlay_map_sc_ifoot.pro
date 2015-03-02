@@ -1,3 +1,6 @@
+; A generic program to draw footprint positions of spacecraft on the 
+; polar plot. 
+
 PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   plottime=plottime, $
   force_chscale=force_chscale, changle=changle,$
@@ -34,12 +37,14 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   if keyword_set(plottime) then tp=time_double(plottime) $
   ELSE tp=0
   
+  scname = (strsplit(vn_glat, '_',/ext))[0] 
+  
 ; Set the paramters
 
   ts = trange[0]
   te = trange[1]
 
-; Load the NOAA/POES or Metop data  
+; Set the plot interval  
   timespan, [ts,te]
   
 ; Clip the data for the plot interval
@@ -55,7 +60,8 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
     tmlt = {x: tglon.x, y:tglon.y/360.*24.}
       ;a dummy variable to get through the following process
   endif else begin
-    aacgmloadcoef, 2010
+    tstr = time_struct(ts) 
+    aacgmloadcoef, ts.year
     h = replicate( 100., n_elements(tglat.x) )
     aacgmconvcoord,tglat.y,tglon.y, h, mlat, mlon, err, /TO_AACGM
     tlat = {x:tglat.x, y:mlat}
@@ -123,7 +129,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
             devc[1]+dr*chsz*chunit*sin(changle*!dtor),$
             /device,/to_data)
           XYOUTS, xyzch[0],xyzch[1], $
-                  time_string(tdbl[0],tformat='hh:mm'), $
+                  time_string(tdbl[0],tformat='hh:mm')+'!C'+scname, $
                   SIZE=!P.CHARSIZE*chscale,orientation=changle,color=trace_color
           
           xch0 = x[N_ELEMENTS(tdbl)-1] & ych0 = y[N_ELEMENTS(tdbl)-1]
