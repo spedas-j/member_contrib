@@ -1,3 +1,13 @@
+; themis_ifoot 
+; This script calcuates the footprint positions of THEMIS probes and 
+; saves them in tplot variables named th?_state_pos_ifoot_geo_lat,lon,alt. 
+; Tsyganenko 1996 model and IGRF model are used for the field-line tracing. 
+; You can give a "parmod" array with the keyword "parmod". 
+; Parmod (used for the original fortran code of Tsyganenko 1996 model) 
+; is a four-element array in a form of:
+; parmod = [ Pdyn, Dst, IMF-By, IMF-Bz ], 
+; where Pdyn is the solar wind dynamic pressure [nPa], Dst, IMF-By, and IMF-Bz 
+; should be given in nT. 
 ; --------------------------------------------------------------------------------------
 ; A subordinative routine called by the main routine, themis_ifoot.
 FUNCTION calc_tsy_params, model
