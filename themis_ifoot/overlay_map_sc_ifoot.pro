@@ -28,7 +28,11 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
 ; Check the arguments 
   
   npar = n_params()
-  if npar lt 3 then return
+  if npar ne 2 and npar ne 3  then return
+  if npar eq 2 then begin
+    get_timespan, tr 
+    trange = tr 
+  endif
   
   if strlen( tnames(vn_glat) ) eq 0 then return
   if strlen( tnames(vn_glon) ) eq 0 then return
