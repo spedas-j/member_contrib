@@ -49,6 +49,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   te = trange[1]
 
 ; Set the plot interval  
+  get_timespan, tr_orig
   timespan, [ts,te]
   
 ; Clip the data for the plot interval
@@ -58,14 +59,14 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   tglat = { x:ttglat.x[tsidx:teidx], y:ttglat.y[tsidx:teidx] }
   tglon = { x:ttglon.x[tsidx:teidx], y:ttglon.y[tsidx:teidx] }
   
-  if keyword_set(geo_plot) then begin
+  if keyword_set(geo_plot) or !map2d.coord eq 0 then begin
     tlat = tglat
     tlon = tglon
     tmlt = {x: tglon.x, y:tglon.y/360.*24.}
       ;a dummy variable to get through the following process
   endif else begin
     tstr = time_struct(ts) 
-    aacgmloadcoef, ts.year
+    aacgmloadcoef, tstr.year
     h = replicate( 100., n_elements(tglat.x) )
     aacgmconvcoord,tglat.y,tglon.y, h, mlat, mlon, err, /TO_AACGM
     tlat = {x:tglat.x, y:mlat}
@@ -84,7 +85,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   
   idx=WHERE( tlat.x GE ts AND tlat.x LE te, cnt)
   IF cnt LT 1 THEN BEGIN
-    PRINT, 'overlay_map_noaa_ifoot: No data in the time range'
+    PRINT, 'No data in the time range'
     PRINT, time_string([ts,te]) 
     RETURN
   ENDIF
@@ -183,7 +184,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
 
 
 
-
+  timespan, tr_orig   ;Restore the original time range 
 
   return
 end
