@@ -21,7 +21,7 @@ asi_ts = '2011-03-01/08:02:00' ;start date/time for a series of mosaic plots
 asi_te = '2011-03-01/08:12:00' ; end date/time for a series of mosaic plots
 dt = 60. ;[sec]  time step between each plot. Set 3.0 to plot all mosaic plots for each 3 sec.
 center_glat = 57. ;[deg] Geographical latitude of the center of the plot
-center_glon = -75. ;[deg] Geographical longitude of the center of the plot
+center_glon = -85. ;[deg] Geographical longitude of the center of the plot
 map_scale = 23e+6 ;The scale of drawn world map in IDL internal unit.
                                   ; 20e+6 : The nominal scale usually used for thm_asi_create_mosaic script
                                   ; Smaller values (e. g., 10e+6, 5e+6) give a map zoomed in to its center
