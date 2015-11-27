@@ -32,6 +32,7 @@
 ;     2) DFG data should be loaded before running this procedure or use load_dfg flag
 ;     3) Information of version of the first cdf files is shown in the plot,
 ;        if multiple cdf files are loaded for DFG
+;
 ;-
 
 pro mms_dfg_plot_kitamura,trange=trange,probe=probe,load_dfg=load_dfg,no_plot=no_plot,no_avg=no_avg,no_update=no_update,dfg_ql=dfg_ql
