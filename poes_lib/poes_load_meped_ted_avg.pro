@@ -14,7 +14,7 @@
 ;  probe: Spacecraft ID of the POES satellites (m01, m02, n15, n16, n17, n18, n19)
 ;
 ; EXAMPLE:
-;  poes_load_meped_ted,probe='m02'
+;  poes_load_meped_ted_avg,probe='m02'
 ;
 ; HISTORY:
 ;   First created by Yoshi Miyoshi, Dec. 5, 2015
