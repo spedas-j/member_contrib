@@ -28,15 +28,15 @@
 ; EXAMPLE:
 ;
 ;     To plot relative positions from the averaged position of all probes and DFG data 
-;     MMS>  mms_pos_dfg_all_kitamura,['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe='0',smooth_p=40.d,/dfg
-;     MMS>  mms_pos_dfg_all_kitamura,['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe='0',smooth_p=40.d,/dfg,/no_update
+;     MMS>  mms_pos_dfg_all_kitamura,['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe_orig='0',smooth_p=40.d,/plot_dfg
+;     MMS>  mms_pos_dfg_all_kitamura,['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe_orig='0',smooth_p=40.d,/plot_dfg,/no_update
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
 ;     2) Large memory space is necessary to use ql data (not recommended)
 ;-
 
-pro mms_pos_dfg_all_kitamura,trange,probe=probe,smooth_p=smooth_p,no_load=no_load,dfg_ql=dfg_ql,no_update=no_update,delete=delete,plot_dfg=plot_dfg,fac=fac
+pro mms_pos_dfg_all_kitamura,trange,probe_orig=probe_orig,smooth_p=smooth_p,no_load=no_load,dfg_ql=dfg_ql,no_update=no_update,delete=delete,plot_dfg=plot_dfg,fac=fac
 
   mms_init
 ;  mstart=time_double(time_string(trange[0],format=0,precision=-3))
@@ -44,9 +44,8 @@ pro mms_pos_dfg_all_kitamura,trange,probe=probe,smooth_p=smooth_p,no_load=no_loa
   
   if undefined(smooth_p) then smooth_p=40.d
   if not undefined(delete) then store_data,'*',/delete
-  if undefined(probe) then probe='0'
+  if undefined(probe_orig) then probe_orig='0'
   if undefined(no_load) then begin
-;    mms_load_fgm,trange=[mstart,trange[1]],probes=['1','2','3','4'],no_update=no_update,/no_attitude_data
     if undefined(dfg_ql) then mms_load_fgm,trange=trange,instrument='dfg',probes=['1','2','3','4'],data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
     if strlen(tnames('mms1_dfg_srvy_l2pre_gse')) eq 0 then begin
       mms_load_fgm,trange=trange,instrument='dfg',probes=['1','2','3','4'],data_rate='srvy',level='ql',no_update=no_update;,/no_attitude_data
@@ -74,7 +73,7 @@ pro mms_pos_dfg_all_kitamura,trange,probe=probe,smooth_p=smooth_p,no_load=no_loa
   get_data,'mms2'+name_ql+'_pos_gse',data=pos2
   get_data,'mms3'+name_ql+'_pos_gse',data=pos3
   get_data,'mms4'+name_ql+'_pos_gse',data=pos4
-  case fix(probe) of
+  case fix(probe_orig) of
     0: origin=(pos1.y+pos2.y+pos3.y+pos4.y)/4.d
     1: origin=pos1.y
     2: origin=pos2.y
@@ -104,7 +103,7 @@ pro mms_pos_dfg_all_kitamura,trange,probe=probe,smooth_p=smooth_p,no_load=no_loa
   options,'mms'+name_ql+'_relpos_gse_z',constant=0.0,colors=[0,2,4,6],ytitle='Relative!CPosition!CGSE Z',ysubtitle='[km]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
   options,'mms'+name_ql+'_relpos_gse_r',constant=0.0,colors=[0,2,4,6],ytitle='Distance!Cfrom!COrigin',ysubtitle='[km]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
 
-  if fix(probe) eq 0 then begin
+  if fix(probe_orig) eq 0 then begin
     probe=''
     avg_data,'mms1_dfg_'+name_level,0.5d,trange=trange
     avg_data,'mms2_dfg_'+name_level,0.5d,trange=trange
@@ -117,7 +116,7 @@ pro mms_pos_dfg_all_kitamura,trange,probe=probe,smooth_p=smooth_p,no_load=no_loa
     endelse
     tsmooth_in_time,'mms_dfg_'+name_level+'_avg',smooth_p,newname='mms_dfg_srvy_gse_bvec_smoothed'
   endif else begin
-    probe=strcompress(string(probe),/rem)
+    probe=strcompress(string(probe_orig),/rem)
     tsmooth_in_time,'mms'+probe+'_dfg_'+name_level,smooth_p,newname='mms_dfg_srvy_gse_bvec_smoothed'
     copy_data,'mms'+probe+'_dfg_'+name_level,'mms_dfg_'+name_level
   endelse
