@@ -39,12 +39,14 @@ pro mms_load_plot_hpca_kitamura,trange,probe=probe,brst=brst,no_load_dfg=no_load
   mms_load_hpca,probes=probe,trange=trange,datatype='moments',data_rate=data_rate,no_update=no_update_hpca
   mms_load_hpca,probes=probe,trange=trange,datatype='rf_corr',data_rate=data_rate,no_update=no_update_hpca
   mms_hpca_calc_anodes,fov=[0,360],probe=probe
+
+  ion_sp=[['hplus','heplusplus','heplus','oplusplus','oplus'],['H!U+!N','He!U++!N','He!U+!N','O!U++!N','O!U+!N']]
   if undefined(brst) then begin
-    options,[prefix+'_hpca_*plus_RF_corrected_elev_0-360'],spec=1,datagap=600.d
+    for s=0,n_elements(ion_sp[*,0])-1 do options,[prefix+'_hpca_'+ion_sp[s,0]+'_RF_corrected_elev_0-360'],spec=1,datagap=600.d,ytitle='HPCA!C'+ion_sp[s,1]+' fast!CELEV 0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle=ion_sp[s,1]+'!CRF_corrected',ztickformat='mms_exponent2'
     zlim,[prefix+'_hpca_*plus_RF_corrected_elev_0-360'],0.1d,1000.d,1
     options,prefix+'_hpca_*plus_number_density',datagap=600.d
   endif else begin
-    options,[prefix+'_hpca_*plus_RF_corrected_elev_0-360'],spec=1,datagap=0.75d
+    for s=0,n_elements(ion_sp[*,0])-1 do options,[prefix+'_hpca_'+ion_sp[s,0]+'_RF_corrected_elev_0-360'],spec=1,datagap=0.75d,ytitle='HPCA!C'+ion_sp[s,1]+' burst!CELEV 0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle=ion_sp[s,1]+'!CRF_corrected',ztickformat='mms_exponent2'
     zlim,[prefix+'_hpca_*plus_RF_corrected_elev_0-360'],1.d,1000.d,1
     options,prefix+'_hpca_*plus_number_density',datagap=25.d
   endelse
