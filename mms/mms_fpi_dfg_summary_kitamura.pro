@@ -38,7 +38,7 @@
 ;        if multiple cdf files are loaded for DFG or FPI
 ;-
 
-pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,no_output=no_output,add_scpot=add_scpot,no_update_edp=no_update_edp
+pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,no_output=no_output,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm
 
   probe=string(probe,format='(i0)')
   ;set directory for plots
@@ -63,11 +63,20 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
 
   if undefined(no_load) then begin
     if undefined(dfg_ql) then mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_dfg,/no_attitude_data
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_dfg,/no_attitude_data
+    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
+      mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_dfg,/no_attitude_data
+    endif else begin
+      get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d
+      if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+        store_data,'mms'+probe+'_dfg_srvy_l2pre*',/delete
+        store_data,'mms'+probe+'_pos*',/delete
+        mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_dfg,/no_attitude_data
+      endif
+    endelse
 ;    mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi
-     mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,no_update_fpi=no_update_fpi,/load_fpi,/magplot
+     mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,/load_fpi,/magplot
   endif else begin
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,/magplot
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,/magplot
   endelse
   
   if undefined(no_bss) then begin
@@ -109,7 +118,7 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     tplot_options,'ymargin'
     tplot_options,'tickinterval',3600
     set_plot,'ps'
-    device,filename=dn+'\mms'+probe+'_fpi_fast_sitl_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
+    device,filename=dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
     tplot,trange=trange
     device,/close
     set_plot,thisDevice
@@ -119,7 +128,7 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     window,xsize=1600,ysize=900
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
-    makepng,dn+'\mms'+probe+'_fpi_fast_sitl_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver
+    makepng,dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver
     options,'mms_bss',thick=10.0,panel_size=0.5
     tplot_options,'tickinterval'
     tplot_options,'ymargin'
@@ -129,7 +138,7 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
       tplot_options,'tickinterval',600
       while start_time lt roi[1] do begin
         set_plot,'ps'
-        device,filename=dn+'\mms'+probe+'_fpi_fast_sitl_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
+        device,filename=dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
         tplot,trange=[start_time,start_time+2.d*3600.d]
         device,/close
         set_plot,thisDevice
@@ -139,7 +148,7 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
         window,xsize=1600,ysize=900
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+2.d*3600.d]
-        makepng,dn+'\mms'+probe+'_fpi_fast_sitl_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours'
+        makepng,dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours'
         options,'mms_bss',thick=10.0,panel_size=0.5
         tplot_options,'ymargin'
         start_time=start_time+2.d*3600.d

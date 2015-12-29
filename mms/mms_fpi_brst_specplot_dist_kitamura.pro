@@ -40,13 +40,13 @@ pro mms_fpi_brst_specplot_dist_kitamura,trange=trange,probe=probe,no_plot=no_plo
     nonspecie='i'
     dt=0.03d
     fact=6.1869e+30
-    etable=mms_fpi_energies('electron')
+    etable=mms_fpi_energies('e')
   endif else begin
     specie='i'
     nonspecie='e'
     dt=0.15d
     fact=1.8351e+24
-    etable=mms_fpi_energies('ion')
+    etable=mms_fpi_energies('i')
   endelse
   if undefined(trange) then trange=timerange() else trange=time_double(trange)
   if undefined(estep) then begin
