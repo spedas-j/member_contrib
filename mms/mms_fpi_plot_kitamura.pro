@@ -58,7 +58,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 
   if not undefined(load_fpi) then begin
     if undefined(fpi_sitl) then mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix='_fast_ql'
-    mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi
+    if strlen(tnames('mms'+probe+'_dis_energySpectr_pX_fast_ql')) eq 0 and strlen(tnames('mms'+probe+'_des_energySpectr_pX_fast_ql')) eq 0 then mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi
   endif
   
   if strlen(tnames('mms'+probe+'_dis_energySpectr_pX_fast_ql')) gt 0 and undefined(fpi_sitl) then begin
@@ -82,7 +82,21 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     copy_data,'mms'+probe+'_dis_bulkX_fast_ql','mms'+probe+'_fpi_iBulkV_X_DSC'
     copy_data,'mms'+probe+'_dis_bulkY_fast_ql','mms'+probe+'_fpi_iBulkV_Y_DSC'
     copy_data,'mms'+probe+'_dis_bulkZ_fast_ql','mms'+probe+'_fpi_iBulkV_Z_DSC'
-    ;calculation of TPerp and TPara will be added
+    
+    get_data,'mms'+probe+'_dis_TempXX_fast_ql',data=tixx
+    get_data,'mms'+probe+'_dis_TempYY_fast_ql',data=tiyy
+    get_data,'mms'+probe+'_dis_TempZZ_fast_ql',data=tizz
+    get_data,'mms'+probe+'_dis_TempXY_fast_ql',data=tixy
+    get_data,'mms'+probe+'_dis_TempXZ_fast_ql',data=tixz
+    get_data,'mms'+probe+'_dis_TempYZ_fast_ql',data=tiyz
+    
+    store_data,'mms'+probe+'ti_tensor_fast_ql',data={x:tixx.x,y:[[tixx.y],[tiyy.y],[tizz.y],[tixy.y],[tixz.y],[tiyz.y]]}
+    diag_t,'mms'+probe+'ti_tensor_fast_ql'
+    copy_data,'T_diag','mms'+probe+'_fpi_DIS_T_diag'
+    copy_data,'Saxis','mms'+probe+'_fpi_DIS_T_Saxis'
+    get_data,'T_diag',data=t_diag
+    store_data,'mms'+probe+'_fpi_DIStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
+    store_data,'mms'+probe+'_fpi_DIStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
   endif else begin
     dis_level='SITL'
     dgap_i=10.5d
@@ -100,7 +114,21 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     copy_data,'mms'+probe+'_des_bulkX_fast_ql','mms'+probe+'_fpi_eBulkV_X_DSC'
     copy_data,'mms'+probe+'_des_bulkY_fast_ql','mms'+probe+'_fpi_eBulkV_Y_DSC'
     copy_data,'mms'+probe+'_des_bulkZ_fast_ql','mms'+probe+'_fpi_eBulkV_Z_DSC'
-    ;calculation of TPerp and TPara will be added
+    
+    get_data,'mms'+probe+'_des_TempXX_fast_ql',data=texx
+    get_data,'mms'+probe+'_des_TempYY_fast_ql',data=teyy
+    get_data,'mms'+probe+'_des_TempZZ_fast_ql',data=tezz
+    get_data,'mms'+probe+'_des_TempXY_fast_ql',data=texy
+    get_data,'mms'+probe+'_des_TempXZ_fast_ql',data=texz
+    get_data,'mms'+probe+'_des_TempYZ_fast_ql',data=teyz
+    
+    store_data,'mms'+probe+'te_tensor_fast_ql',data={x:texx.x,y:[[texx.y],[teyy.y],[tezz.y],[texy.y],[texz.y],[teyz.y]]}
+    diag_t,'mms'+probe+'te_tensor_fast_ql'
+    copy_data,'T_diag','mms'+probe+'_fpi_DES_T_diag'
+    copy_data,'Saxis','mms'+probe+'_fpi_DES_T_Saxis'
+    get_data,'T_diag',data=t_diag
+    store_data,'mms'+probe+'_fpi_DEStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
+    store_data,'mms'+probe+'_fpi_DEStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
   endif else begin
     des_level='SITL'
     dgap_e=10.5d
@@ -188,15 +216,15 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     endif  
     
     store_data,'mms'+probe+'_fpi_DEStemp',data=['mms'+probe+'_fpi_DEStempPerp','mms'+probe+'_fpi_DEStempPara']
-;    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='mms'+probe+'_fpi!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_e,ytickformat='mms_exponent2'
-    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='mms'+probe+'_fpi!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='mms'+probe+'_fpi!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_e,ytickformat='mms_exponent2'
+;    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='mms'+probe+'_fpi!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
     store_data,'mms'+probe+'_fpi_DIStemp',data=['mms'+probe+'_fpi_DIStempPerp','mms'+probe+'_fpi_DIStempPara']
-;    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='mms'+probe+'_fpi!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_i,ytickformat='mms_exponent2'
-    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='mms'+probe+'_fpi!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='mms'+probe+'_fpi!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_i,ytickformat='mms_exponent2'
+;    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='mms'+probe+'_fpi!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
     store_data,'mms'+probe+'_fpi_temp',data=['mms'+probe+'_fpi_DIStempPerp','mms'+probe+'_fpi_DIStempPara','mms'+probe+'_fpi_DEStempPerp','mms'+probe+'_fpi_DEStempPara']
     ylim,'mms'+probe+'_fpi_temp',5.d,50000.d,1
-;    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='mms'+probe+'_fpi!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,ytickformat='mms_exponent2'
-    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='mms'+probe+'_fpi!CSITL!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='mms'+probe+'_fpi!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,ytickformat='mms_exponent2'
+;    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='mms'+probe+'_fpi!CSITL!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
     
     options,'mms'+probe+'_fpi_bentPipeB_?_DSC',constant=0.0,datagap=10.5d
     store_data,'mms'+probe+'_fpi_bentPipeB_DSC',data=['mms'+probe+'_fpi_bentPipeB_X_DSC','mms'+probe+'_fpi_bentPipeB_Y_DSC','mms'+probe+'_fpi_bentPipeB_Z_DSC']
