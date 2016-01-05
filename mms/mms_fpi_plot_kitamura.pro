@@ -164,8 +164,8 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     options,['mms'+probe+'_fpi_eEnergySpectr_??'],datagap=dgap_e
     options,['mms'+probe+'_fpi_iEnergySpectr_??'],datagap=dgap_i
     
-    mms_load_fpi_calc_omni,probe,datatype='ion',level='sitl'
-    mms_load_fpi_calc_omni,probe,datatype='electron',level='sitl'
+    mms_load_fpi_calc_omni,probe,datatype='dis',level='sitl'
+    mms_load_fpi_calc_omni,probe,datatype='des',level='sitl'
     store_data,'mms'+probe+'_fpi_eEnergySpectr_omni_avg',newname='mms'+probe+'_fpi_eEnergySpectr_omni'
     store_data,'mms'+probe+'_fpi_iEnergySpectr_omni_avg',newname='mms'+probe+'_fpi_iEnergySpectr_omni'
     
