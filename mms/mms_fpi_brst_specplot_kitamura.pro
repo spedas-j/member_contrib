@@ -56,159 +56,114 @@ pro mms_fpi_brst_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,mag
     trange=time_double(trange)
   endelse
 
-  en_table=mms_get_fpi_info()
-
   if undefined(no_ele) then begin
     if undefined(no_load) then mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-dist'],no_update=no_update
     
-    get_data,'mms'+probe+'_des_stepTable_parity',data=step_parity
-    energy=dblarr(n_elements(step_parity.x),32)
-    for i=0,n_elements(step_parity.x)-1 do begin
-      energy[i,*]=en_table.electron_energy[step_parity.y[i],*]
-    endfor
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_omni'
+  
+    phi_cent=180.d
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_pX'
     
-    get_data,'mms'+probe+'_des_brstSkyMap_dist',data=Skymap
-    avgcounts=total(total(Skymap.y,2),2)*(6.1869e+30)/512.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_omni',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,0:3,4:11,*],2),2)+total(total(Skymap.y[*,28:31,4:11,*],2),2))*(6.1869e+30)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_pX',data={x:Skymap.x,y:avgcounts,v:energy}
+    phi_cent=0.d
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_mX'
+
+    phi_cent=270.d
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_pY'
+
+    phi_cent=90.d
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_mY'
+
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_pZ'
+
+    mms_part_products,'mms'+probe+'_des_brstSkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
+    store_data,'mms'+probe+'_des_brstSkyMap_distenergy',newname='mms'+probe+'_des_brst_EnergySpectr_mZ'
     
-    avgcounts=(total(total(Skymap.y[*,12:19,4:11,*],2),2))*(6.1869e+30)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_mX',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,4:11,4:11,*],2),2))*(6.1869e+30)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_pY',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,20:27,4:11,*],2),2))*(6.1869e+30)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_mY',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,*,0:3,*],2),2))*(6.1869e+30)/128.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_pZ',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,*,12:15,*],2),2))*(6.1869e+30)/128.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_des_brst_EnergySpectr_mZ',data={x:Skymap.x,y:avgcounts,v:energy}
   endif
 
   if undefined(no_ion) then begin    
     if undefined(no_load) then mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['dis-dist'],no_update=no_update
   
-    get_data,'mms'+probe+'_dis_stepTable_parity',data=step_parity
-    energy=dblarr(n_elements(step_parity.x),32)
-    for i=0,n_elements(step_parity.x)-1 do begin
-      energy[i,*]=en_table.ion_energy[step_parity.y[i],*]
-    endfor
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_omni'
+  
+    phi_cent=180.d
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_pX'
     
-    get_data,'mms'+probe+'_dis_brstSkyMap_dist',data=Skymap
-    avgcounts=total(total(Skymap.y,2),2)*(1.8351e+24)/512.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_omni',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,0:3,4:11,*],2),2)+total(total(Skymap.y[*,28:31,4:11,*],2),2))*(1.8351e+24)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_pX',data={x:Skymap.x,y:avgcounts,v:energy}
+    phi_cent=0.d
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_mX'
+
+    phi_cent=270.d
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_pY'
+
+    phi_cent=90.d
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_mY'
+
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_pZ'
+
+    mms_part_products,'mms'+probe+'_dis_brstSkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
+    store_data,'mms'+probe+'_dis_brstSkyMap_distenergy',newname='mms'+probe+'_dis_brst_EnergySpectr_mZ'
     
-    avgcounts=(total(total(Skymap.y[*,12:19,4:11,*],2),2))*(1.8351e+24)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_mX',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,4:11,4:11,*],2),2))*(1.8351e+24)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_pY',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,20:27,4:11,*],2),2))*(1.8351e+24)/64.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_mY',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,*,0:3,*],2),2))*(1.8351e+24)/128.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_pZ',data={x:Skymap.x,y:avgcounts,v:energy}
-  
-    avgcounts=(total(total(Skymap.y[*,*,12:15,*],2),2))*(1.8351e+24)/128.d
-    for i=0,n_elements(Skymap.x)-1 do begin
-      avgcounts[i,*]=avgcounts[i,*]*(energy[i,*])^2
-    endfor
-    store_data,'mms'+probe+'_dis_brst_EnergySpectr_mZ',data={x:Skymap.x,y:avgcounts,v:energy}
   endif
   
-  undefine,Skymap,avgcounts
-  
-  options,'mms'+probe+'_des_brst_EnergySpectr_omni',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  ylim,'mms'+probe+'_des_brst_EnergySpectr_omni',10.d,30000.d,1
-  zlim,'mms'+probe+'_des_brst_EnergySpectr_omni',3e5,3e9,1
-  
-  options,'mms'+probe+'_des_brst_EnergySpectr_pX',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_des_brst_EnergySpectr_mX',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_des_brst_EnergySpectr_pY',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_des_brst_EnergySpectr_mY',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_des_brst_EnergySpectr_pZ',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_des_brst_EnergySpectr_mZ',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  ylim,'mms'+probe+'_des_brst_EnergySpectr_??',10.d,30000.d,1
-  zlim,'mms'+probe+'_des_brst_EnergySpectr_??',3e5,3e9,1
-  
-  options,'mms'+probe+'_dis_brst_EnergySpectr_omni',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  ylim,'mms'+probe+'_dis_brst_EnergySpectr_omni',10.d,30000.d,1
-  zlim,'mms'+probe+'_dis_brst_EnergySpectr_omni',3e4,3e8,1
-  
-  options,'mms'+probe+'_dis_brst_EnergySpectr_pX',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_dis_brst_EnergySpectr_mX',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_dis_brst_EnergySpectr_pY',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_dis_brst_EnergySpectr_mY',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_dis_brst_EnergySpectr_pZ',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  options,'mms'+probe+'_dis_brst_EnergySpectr_mZ',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV'
-  ylim,'mms'+probe+'_dis_brst_EnergySpectr_??',10.d,30000.d,1
-  zlim,'mms'+probe+'_dis_brst_EnergySpectr_??',3e4,3e8,1
+
+  if undefined(no_ele) then begin  
+    options,'mms'+probe+'_des_brst_EnergySpectr_omni',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    ylim,'mms'+probe+'_des_brst_EnergySpectr_omni',10.d,30000.d,1
+    zlim,'mms'+probe+'_des_brst_EnergySpectr_omni',3e5,3e9,1
+    
+    options,'mms'+probe+'_des_brst_EnergySpectr_pX',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_des_brst_EnergySpectr_mX',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_des_brst_EnergySpectr_pY',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_des_brst_EnergySpectr_mY',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_des_brst_EnergySpectr_pZ',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_des_brst_EnergySpectr_mZ',spec=1,datagap=0.032,ytitle='mms'+probe+'_des!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    ylim,'mms'+probe+'_des_brst_EnergySpectr_??',10.d,30000.d,1
+    zlim,'mms'+probe+'_des_brst_EnergySpectr_??',3e5,3e9,1
+  endif
+
+  if undefined(no_ion) then begin
+    options,'mms'+probe+'_dis_brst_EnergySpectr_omni',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    ylim,'mms'+probe+'_dis_brst_EnergySpectr_omni',10.d,30000.d,1
+    zlim,'mms'+probe+'_dis_brst_EnergySpectr_omni',3e4,3e8,1
+    
+    options,'mms'+probe+'_dis_brst_EnergySpectr_pX',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_dis_brst_EnergySpectr_mX',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_dis_brst_EnergySpectr_pY',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_dis_brst_EnergySpectr_mY',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_dis_brst_EnergySpectr_pZ',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    options,'mms'+probe+'_dis_brst_EnergySpectr_mZ',spec=1,datagap=0.16,ytitle='mms'+probe+'_dis!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+    ylim,'mms'+probe+'_dis_brst_EnergySpectr_??',10.d,30000.d,1
+    zlim,'mms'+probe+'_dis_brst_EnergySpectr_??',3e4,3e8,1
+  endif
   
   
   if not undefined(direc_plot) then begin
     mms_dfg_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,/no_avg,/no_plot
     tplot_options,'xmargin',[20,10]
     if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
-      tplot,['mms'+probe+'_des_brst_EnergySpectr_mX','mms'+probe+'_des_brst_EnergySpectr_mY','mms'+probe+'_des_brst_EnergySpectr_pX','mms'+probe+'_des_brst_EnergySpectr_pY','mms'+probe+'_des_brst_EnergySpectr_pZ','mms'+probe+'_des_brst_EnergySpectr_mZ','mms'+probe+'_des_bulkV','mms'+probe+'_dis_brst_EnergySpectr_mX','mms'+probe+'_dis_brst_EnergySpectr_mY','mms'+probe+'_dis_brst_EnergySpectr_pX','mms'+probe+'_dis_brst_EnergySpectr_pY','mms'+probe+'_dis_brst_EnergySpectr_pZ','mms'+probe+'_dis_brst_EnergySpectr_mZ','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_dmpa_xyz']
+      tplot,['mms'+probe+'_des_brst_EnergySpectr_mX','mms'+probe+'_des_brst_EnergySpectr_mY','mms'+probe+'_des_brst_EnergySpectr_pX','mms'+probe+'_des_brst_EnergySpectr_pY','mms'+probe+'_des_brst_EnergySpectr_pZ','mms'+probe+'_des_brst_EnergySpectr_mZ','mms'+probe+'_des_bulkV','mms'+probe+'_dis_brst_EnergySpectr_mX','mms'+probe+'_dis_brst_EnergySpectr_mY','mms'+probe+'_dis_brst_EnergySpectr_pX','mms'+probe+'_dis_brst_EnergySpectr_pY','mms'+probe+'_dis_brst_EnergySpectr_pZ','mms'+probe+'_dis_brst_EnergySpectr_mZ','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_dmpa_bvec']
     endif else begin
-      tplot,['mms'+probe+'_des_brst_EnergySpectr_mX','mms'+probe+'_des_brst_EnergySpectr_mY','mms'+probe+'_des_brst_EnergySpectr_pX','mms'+probe+'_des_brst_EnergySpectr_pY','mms'+probe+'_des_brst_EnergySpectr_pZ','mms'+probe+'_des_brst_EnergySpectr_mZ','mms'+probe+'_des_bulkV','mms'+probe+'_dis_brst_EnergySpectr_mX','mms'+probe+'_dis_brst_EnergySpectr_mY','mms'+probe+'_dis_brst_EnergySpectr_pX','mms'+probe+'_dis_brst_EnergySpectr_pY','mms'+probe+'_dis_brst_EnergySpectr_pZ','mms'+probe+'_dis_brst_EnergySpectr_mZ','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_l2pre_gse_xyz']
+      tplot,['mms'+probe+'_des_brst_EnergySpectr_mX','mms'+probe+'_des_brst_EnergySpectr_mY','mms'+probe+'_des_brst_EnergySpectr_pX','mms'+probe+'_des_brst_EnergySpectr_pY','mms'+probe+'_des_brst_EnergySpectr_pZ','mms'+probe+'_des_brst_EnergySpectr_mZ','mms'+probe+'_des_bulkV','mms'+probe+'_dis_brst_EnergySpectr_mX','mms'+probe+'_dis_brst_EnergySpectr_mY','mms'+probe+'_dis_brst_EnergySpectr_pX','mms'+probe+'_dis_brst_EnergySpectr_pY','mms'+probe+'_dis_brst_EnergySpectr_pZ','mms'+probe+'_dis_brst_EnergySpectr_mZ','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_l2pre_gse_bvec']
     endelse
   endif else begin
     if not undefined(magplot) then begin
       mms_dfg_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,/no_avg,/no_plot
       tplot_options,'xmargin',[20,10]
       if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
-        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_des_brst_EnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_dis_brst_EnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_dmpa_xyz','mms'+probe+'_dfg_srvy_dmpa_m']
+        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_des_brst_EnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_dis_brst_EnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_dmpa_bvec','mms'+probe+'_dfg_srvy_dmpa_btot']
       endif else begin
-        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_des_brst_EnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_dis_brst_EnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_l2pre_gse_xyz','mms'+probe+'_dfg_srvy_l2pre_gse_m']
+        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_des_brst_EnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_dis_brst_EnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
       endelse
     endif else begin
       if undefined(no_plot) then begin
