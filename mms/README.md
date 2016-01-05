@@ -2,5 +2,6 @@
 ----
 
 ### Instruction
-* Please download _misc/avg_data.pro_ and save it together with these scripts. 
+* Please download _misc/avg_data.pro_ and save it together with these scripts.
+* SPEDAS bleeding_edge r19679 or later is necessary.
 
