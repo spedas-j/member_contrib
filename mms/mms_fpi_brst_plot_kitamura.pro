@@ -51,10 +51,10 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   endif else begin
     store_data,'mms'+probe+'_fpi_dis_des_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity','mms'+probe+'_des_numberDensity']
     options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='mms'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,6],labels=['Ni','Ni_brst','Ne_brst'],labflag=-1
-    options,'mms'+probe+'_dis_numberDensity',ytitle='mms'+probe+'_fpi!CDIS!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.16d
   endelse
   ylim,'mms'+probe+'_fpi_dis_des_numberDensity',0.03d,300.d,1
   
+  options,'mms'+probe+'_dis_numberDensity',ytitle='mms'+probe+'_fpi!CDIS!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.16d
   options,'mms'+probe+'_des_numberDensity',ytitle='mms'+probe+'_fpi!CDES!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.032d
   
   store_data,'mms'+probe+'_dis_bulkV',data=['mms'+probe+'_dis_bulkX','mms'+probe+'_dis_bulkY','mms'+probe+'_dis_bulkZ']
@@ -104,5 +104,3 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   endelse
 
 end
-
-
