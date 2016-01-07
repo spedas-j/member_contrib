@@ -9,11 +9,14 @@ pro mms_load_plot_hpca_kitamura,trange,probe=probe,brst=brst,no_load_dfg=no_load
   if not undefined(delete) then store_data,'*',/delete
 
   if n_elements(trange) eq 1 then begin
-    trange=mms_get_roi(trange,/next)
-    trange[0]=trange[0]-60.d*180.d
-    trange[1]=trange[1]+60.d*180.d
-  endif
-  trange=time_double(trange)
+    roi=mms_get_roi(trange,/next)
+    trange=dblarr(2)
+    trange[0]=roi[0]-60.d*180.d
+    trange[1]=roi[1]+60.d*180.d
+  endif else begin
+    trange=time_double(trange)
+    roi=trange
+  endelse
   if undefined(probe) then probe=['3']
   probe=strcompress(string(probe),/rem)
 

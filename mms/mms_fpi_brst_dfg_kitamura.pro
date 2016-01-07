@@ -14,14 +14,16 @@
 ;                       ROI just after the specified time to 30 minutes after the end of the ROI.
 ;         probe:        a probe - value for MMS SC #
 ;         no_update_fpi:set this flag to preserve the original fpi data. if not set and
-;                       newer data is found the existing data will be overwritten
+;                       newer data are found the existing data will be overwritten
 ;         no_update_dfg:set this flag to preserve the original dfg data. if not set and
-;                       newer data is found the existing data will be overwritten
+;                       newer data are found the existing data will be overwritten
 ;         no_bss:       set this flag to skip loading bss data
 ;         no_load:      set this flag to skip loading data
 ;         delete:       set this flag to delete all tplot variables at the beginning
 ;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       is used, if available
+;                       are used, if available
+;         fpi_sitl:     set this flag to use fpi fast sitl data forcibly. if not set, fast ql data
+;                       are used, if available
 ;
 ; EXAMPLE:
 ;
@@ -33,7 +35,7 @@
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
 ;-
 
-pro mms_fpi_brst_dfg_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,delete=delete,dfg_ql=dfg_ql
+pro mms_fpi_brst_dfg_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,delete=delete,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl
 
   mms_init
   if not undefined(delete) then store_data,'*',/delete
@@ -54,7 +56,7 @@ pro mms_fpi_brst_dfg_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update
 ;    mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi
   endif
   
-  mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,/load_fpi,/no_plot,/no_avg
+  mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,/load_fpi,/no_plot,/no_avg
   mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,/magplot
 
 end

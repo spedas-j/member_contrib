@@ -32,7 +32,6 @@
 ;     2) DFG data should be loaded before running this procedure or use load_dfg flag
 ;     3) Information of version of the first cdf files is shown in the plot,
 ;        if multiple cdf files are loaded for DFG
-;
 ;-
 
 pro mms_dfg_plot_kitamura,trange=trange,probe=probe,load_dfg=load_dfg,no_plot=no_plot,no_avg=no_avg,no_update=no_update,dfg_ql=dfg_ql
@@ -55,11 +54,13 @@ pro mms_dfg_plot_kitamura,trange=trange,probe=probe,load_dfg=load_dfg,no_plot=no
     endelse
   endif else begin
     if n_elements(trange) eq 1 then begin
-      trange=mms_get_roi(trange,/next)
-      trange[0]=trange[0]-60.d*30.d
-      trange[1]=trange[1]+60.d*30.d
+      roi=mms_get_roi(trange,/next)
+      trange=dblarr(2)
+      trange[0]=roi[0]-60.d*30.d
+      trange[1]=roi[1]+60.d*30.d
     endif else begin
       trange=time_double(trange)
+      roi=trange
     endelse
     dt=trange[1]-trange[0]
     timespan,trange[0],dt,/seconds
@@ -67,7 +68,16 @@ pro mms_dfg_plot_kitamura,trange=trange,probe=probe,load_dfg=load_dfg,no_plot=no
 
   if not undefined(load_dfg) then begin
     if undefined(dfg_ql) then mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
+    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
+      mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
+    endif else begin
+      get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d
+      if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+        store_data,'mms'+probe+'_dfg_srvy_l2pre*',/delete
+        store_data,'mms'+probe+'_pos*',/delete
+        mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
+      endif
+    endelse
   endif
 
   if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d,dlim=dl else get_data,'mms'+probe+'_dfg_srvy_dmpa',data=d,dlim=dl

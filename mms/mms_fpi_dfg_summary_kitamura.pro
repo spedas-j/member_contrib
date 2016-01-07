@@ -22,8 +22,10 @@
 ;         no_load:      set this flag to skip loading data
 ;         no_delete:    set this flag not to delete all tplot variables at the beginning
 ;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       is used, if available
+;                       are used, if available
 ;         no_output:    set this flag to skip making png and ps files
+;         fpi_sitl:     set this flag to use fpi fast sitl data forcibly. if not set, fast ql data
+;                       are used, if available
 ;
 ; EXAMPLE:
 ;
@@ -38,7 +40,7 @@
 ;        if multiple cdf files are loaded for DFG or FPI
 ;-
 
-pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,no_output=no_output,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm
+pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,no_output=no_output,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_sitl=fpi_sitl
 
   probe=string(probe,format='(i0)')
   ;set directory for plots
@@ -57,6 +59,7 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     trange[1]=roi[1]+60.d*30.d
   endif else begin
     trange=stime
+    roi=trange
   endelse
 
   timespan,trange[0],trange[1]-trange[0],/seconds
@@ -74,9 +77,9 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
       endif
     endelse
 ;    mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi
-     mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,/load_fpi,/magplot
+     mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,/load_fpi,/magplot
   endif else begin
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,/magplot
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_sitl=fpi_sitl,/magplot
   endelse
   
   if undefined(no_bss) then begin
