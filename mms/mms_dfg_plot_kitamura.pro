@@ -100,6 +100,9 @@ pro mms_dfg_plot_kitamura,trange=trange,probe=probe,load_dfg=load_dfg,no_plot=no
       options,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='mms'+probe+'_dfg!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
       options,'mms'+probe+'_dfg_srvy_l2pre_gse_btot',ytitle='mms'+probe+'_dfg!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+dfg_dv,labflag=-1,datagap=0.26d
       options,'mms'+probe+'_dfg_srvy_l2pre_gse',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='mms'+probe+'_dfg!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+      options,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='mms'+probe+'_dfg!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+      options,'mms'+probe+'_dfg_srvy_l2pre_gsm_btot',ytitle='mms'+probe+'_dfg!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+dfg_dv,labflag=-1,datagap=0.26d
+      options,'mms'+probe+'_dfg_srvy_l2pre_gsm',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='mms'+probe+'_dfg!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
       options,'mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='mms'+probe+'_dfg!CL2pre_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
       options,'mms'+probe+'_dfg_srvy_l2pre_dmpa_btot',ytitle='mms'+probe+'_dfg!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+dfg_dv,labflag=-1,datagap=0.26d
       options,'mms'+probe+'_dfg_srvy_l2pre_dmpa',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='mms'+probe+'_dfg!CL2pre_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d

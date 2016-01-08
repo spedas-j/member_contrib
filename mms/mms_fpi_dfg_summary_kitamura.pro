@@ -45,8 +45,8 @@ pro mms_fpi_dfg_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
   probe=string(probe,format='(i0)')
   ;set directory for plots
 ;  plotdir='C:\Users\Kitamura\FPIplots'
-  plotdir='P:\mms'+probe
-;  plotdir='./mms'+probe
+;  plotdir='P:\mms'+probe+'\FPI-DFG'
+  plotdir='./mms'+probe
   
 
   mms_init
