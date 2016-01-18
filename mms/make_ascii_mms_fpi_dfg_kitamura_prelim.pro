@@ -27,7 +27,8 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
   if undefined(brst) then inval=4.5d else inval=0.03d
   if undefined(fpi_ql) then fpi_level='l1b' else fpi_level='ql'
   if undefined(fpi_suffix) then fpi_suffix=''
-  if undefined(probes) or probes eq '*' then probes=['1','2','3','4']
+  if undefined(probes) then probes=['1','2','3','4']
+  if probes[0] eq '*' then probes=['1','2','3','4']
   probes=strcompress(probes,/remove_all)
 
   for i=0,n_elements(probes)-1 do begin

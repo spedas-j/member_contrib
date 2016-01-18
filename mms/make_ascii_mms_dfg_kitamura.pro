@@ -18,7 +18,8 @@ pro make_ascii_mms_dfg_kitamura,trange,probes=probes,brst=brst,no_load_dfg=no_lo
   trange=time_double(trange)
   if not undefined(delete) then store_data,'*',/delete
   if undefined(brst) then data_rate='srvy' else data_rate='brst'
-  if undefined(probes) or probes eq '*' then probes=['1','2','3','4']
+  if undefined(probes) then probes=['1','2','3','4']
+  if probes[0] eq '*' then probes=['1','2','3','4']
   probes=strcompress(probes,/remove_all)
 
   for i=0,n_elements(probes)-1 do begin
