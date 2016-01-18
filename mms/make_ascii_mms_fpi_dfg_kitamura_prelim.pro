@@ -142,7 +142,9 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
     if not undefined(brst) then begin
       box_ave_mms, variable1='mms'+probes[i]+'_dis_shifted_time', variable2='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm', var2ave='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',inval=inval
       get_data,'mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',data=Bvec
-    endif
+    endif else begin
+      copy_data,'mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ele','mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion'
+    endelse
 
     tinterpol_mxn,'mms'+probes[i]+'_pos_gsm','mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',newname='mms'+probes[i]+'_pos_gsm_ion'
     get_data,'mms'+probes[i]+'_pos_gsm_ion',data=pos_gsm
