@@ -43,23 +43,25 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
     endif
     if undefined(no_load_state) then mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],datatypes=['spinras','spindec'],no_download=no_update
 
+    get_data,'mms'+probes[i]+'_des_numberDensity',data=e_density,limit=l,dlimit=dl
+    e_density.x=e_density.x+inval*0.5d
+    store_data,'mms'+probes[i]+'_des_numberDensity',data=e_density,limit=l,dlimit=dl    
     trange_clip,'mms'+probes[i]+'_des_numberDensity'+fpi_suffix,trange[0],trange[1],newname='mms'+probes[i]+'_des_numberDensity_clip'
     get_data,'mms'+probes[i]+'_des_numberDensity_clip',data=e_density,dlimit=dl
     store_data,'mms'+probes[i]+'_des_numberDensity_clip',/delete
-    e_density.x=e_density.x+inval*0.5d
     store_data,'mms'+probes[i]+'_des_shifted_time',data={x:e_density.x,y:e_density.x}
 
     join_vec,'mms'+probes[i]+'_des_bulk'+['X','Y','Z']+fpi_suffix,'mms'+probes[i]+'_des_bulkV_DSC'
-    get_data,'mms'+probes[i]+'_des_bulkV_DSC',data=vdsc
+    get_data,'mms'+probes[i]+'_des_bulkV_DSC',data=vdsc,limit=l,dlimit=dl
     vdsc.x=vdsc.x+inval*0.5d
-    store_data,'mms'+probes[i]+'_des_bulkV_DSC',data={x:vdsc.x,y:vdsc.y}
+    store_data,'mms'+probes[i]+'_des_bulkV_DSC',data=vdsc,limit=l,dlimit=dl
     ;This part should be improved in future.
     mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
     mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
 
     trange_clip,'mms'+probes[i]+'_des_bulkV_gsm'+fpi_suffix,trange[0],trange[1],newname='mms'+probes[i]+'_des_bulkV_clip'
     get_data,'mms'+probes[i]+'_des_bulkV_clip',data=ve
-    del_data,'mms'+probes[i]+'_des_bulkV_clip'
+    store_data,'mms'+probes[i]+'_des_bulkV_clip',/delete
 
     get_data,'mms'+probes[i]+'_des_TempXX'+fpi_suffix,data=texx
     get_data,'mms'+probes[i]+'_des_TempYY'+fpi_suffix,data=teyy
@@ -68,7 +70,7 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
     get_data,'mms'+probes[i]+'_des_TempXZ'+fpi_suffix,data=texz
     get_data,'mms'+probes[i]+'_des_TempYZ'+fpi_suffix,data=teyz
 
-    store_data,'mms'+probes[i]+'te_tensor',data={x:texx.x,y:[[texx.y],[teyy.y],[tezz.y],[texy.y],[texz.y],[teyz.y]]}
+    store_data,'mms'+probes[i]+'te_tensor',data={x:texx.x+inval*0.5d,y:[[texx.y],[teyy.y],[tezz.y],[texy.y],[texz.y],[teyz.y]]}
     ;This part should be improved in future.
     diag_t,'mms'+probes[i]+'te_tensor'
     get_data,'T_diag',data=t_diag
@@ -77,17 +79,17 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
 
     trange_clip,'mms'+probes[i]+'_fpi_DEStempPara',trange[0],trange[1],newname='mms'+probes[i]+'_fpi_DEStempPara_clip'
     get_data,'mms'+probes[i]+'_fpi_DEStempPara_clip',data=Te_para
-    del_data,'mms'+probes[i]+'_fpi_DEStempPara_clip'
+    store_data,'mms'+probes[i]+'_fpi_DEStempPara_clip',/delete
     trange_clip,'mms'+probes[i]+'_fpi_DEStempPerp',trange[0],trange[1],newname='mms'+probes[i]+'_fpi_DEStempPerp_clip'
     get_data,'mms'+probes[i]+'_fpi_DEStempPerp_clip',data=Te_perp
-    del_data,'mms'+probes[i]+'_fpi_DEStempPerp_clip'
+    store_data,'mms'+probes[i]+'_fpi_DEStempPerp_clip',/delete
 
-    box_ave_mms, variable1='mms'+probes[i]+'_des_shifted_time', variable2='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm', var2ave='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ele',inval=inval
+    box_ave_mms,variable1='mms'+probes[i]+'_des_shifted_time',variable2='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm',var2ave='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ele',inval=inval
     get_data,'mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ele',data=Bvec
 
     tinterpol_mxn,'mms'+probes[i]+'_pos_gsm','mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ele',newname='mms'+probes[i]+'_pos_gsm_ele'
     get_data,'mms'+probes[i]+'_pos_gsm_ele',data=pos_gsm
-    del_data,'mms'+probes[i]+'_pos_gsm_ele'
+    store_data,'mms'+probes[i]+'_pos_gsm_ele',/delete
 
     fpiver='v'+strmid(dl.cdf.gatt.logical_file_id,4,5,/reverse_offset)
     fileout='mms'+probes[i]+'_des_'+data_rate+'_'+fpi_level+'_'+fpiver+'_'+time_string(trange[0],format=2,precision=-1)+'-'+time_string(trange[1],format=2,precision=-1)
@@ -100,23 +102,25 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
 
     if undefined(brst) then inval=4.5d else inval=0.15d
 
+    get_data,'mms'+probes[i]+'_dis_numberDensity',data=i_density,limit=l,dlimit=dl
+    i_density.x=i_density.x+inval*0.5d
+    store_data,'mms'+probes[i]+'_dis_numberDensity',data=i_density,limit=l,dlimit=dl
     trange_clip,'mms'+probes[i]+'_dis_numberDensity'+fpi_suffix,trange[0],trange[1],newname='mms'+probes[i]+'_dis_numberDensity_clip'
     get_data,'mms'+probes[i]+'_dis_numberDensity_clip',data=i_density,dlimit=dl
     store_data,'mms'+probes[i]+'_dis_numberDensity_clip',/delete
-    i_density.x=i_density.x+inval*0.5d
     store_data,'mms'+probes[i]+'_dis_shifted_time',data={x:i_density.x,y:i_density.x}
 
     join_vec,'mms'+probes[i]+'_dis_bulk'+['X','Y','Z']+fpi_suffix,'mms'+probes[i]+'_dis_bulkV_DSC'
-    get_data,'mms'+probes[i]+'_dis_bulkV_DSC',data=vdsc
+    get_data,'mms'+probes[i]+'_dis_bulkV_DSC',data=vdsc,limit=l,dlimit=dl
     vdsc.x=vdsc.x+inval*0.5d
-    store_data,'mms'+probes[i]+'_dis_bulkV_DSC',data={x:vdsc.x,y:vdsc.y}
+    store_data,'mms'+probes[i]+'_dis_bulkV_DSC',data=vdsc,limit=l,dlimit=dl
     ;This part should be improved in future.
     mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
     mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
 
     trange_clip,'mms'+probes[i]+'_dis_bulkV_gsm'+fpi_suffix,trange[0],trange[1],newname='mms'+probes[i]+'_dis_bulkV_clip'
     get_data,'mms'+probes[i]+'_dis_bulkV_clip',data=vi
-    del_data,'mms'+probes[i]+'_dis_bulkV_clip'
+    store_data,'mms'+probes[i]+'_dis_bulkV_clip',/delete
     
     get_data,'mms'+probes[i]+'_dis_TempXX'+fpi_suffix,data=tixx
     get_data,'mms'+probes[i]+'_dis_TempYY'+fpi_suffix,data=tiyy
@@ -125,7 +129,7 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
     get_data,'mms'+probes[i]+'_dis_TempXZ'+fpi_suffix,data=tixz
     get_data,'mms'+probes[i]+'_dis_TempYZ'+fpi_suffix,data=tiyz
 
-    store_data,'mms'+probes[i]+'ti_tensor',data={x:tixx.x,y:[[tixx.y],[tiyy.y],[tizz.y],[tixy.y],[tixz.y],[tiyz.y]]}
+    store_data,'mms'+probes[i]+'ti_tensor',data={x:tixx.x+inval*0.5d,y:[[tixx.y],[tiyy.y],[tizz.y],[tixy.y],[tixz.y],[tiyz.y]]}
     ;This part should be improved in future.
     diag_t,'mms'+probes[i]+'ti_tensor'
     get_data,'T_diag',data=t_diag
@@ -134,13 +138,13 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
 
     trange_clip,'mms'+probes[i]+'_fpi_DIStempPara',trange[0],trange[1],newname='mms'+probes[i]+'_fpi_DIStempPara_clip'
     get_data,'mms'+probes[i]+'_fpi_DIStempPara_clip',data=Ti_para
-    del_data,'mms'+probes[i]+'_fpi_DIStempPara_clip'
+    store_data,'mms'+probes[i]+'_fpi_DIStempPara_clip',/delete
     trange_clip,'mms'+probes[i]+'_fpi_DIStempPerp',trange[0],trange[1],newname='mms'+probes[i]+'_fpi_DIStempPerp_clip'
     get_data,'mms'+probes[i]+'_fpi_DIStempPerp_clip',data=Ti_perp
-    del_data,'mms'+probes[i]+'_fpi_DIStempPerp_clip'
+    store_data,'mms'+probes[i]+'_fpi_DIStempPerp_clip',/delete
 
     if not undefined(brst) then begin
-      box_ave_mms, variable1='mms'+probes[i]+'_dis_shifted_time', variable2='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm', var2ave='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',inval=inval
+      box_ave_mms,variable1='mms'+probes[i]+'_dis_shifted_time',variable2='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm',var2ave='mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',inval=inval
       get_data,'mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',data=Bvec
     endif else begin
       copy_data,'mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ele','mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion'
@@ -148,7 +152,7 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
 
     tinterpol_mxn,'mms'+probes[i]+'_pos_gsm','mms'+probes[i]+'_dfg_'+dfg_data_rate+'_l2pre_gsm_ion',newname='mms'+probes[i]+'_pos_gsm_ion'
     get_data,'mms'+probes[i]+'_pos_gsm_ion',data=pos_gsm
-    del_data,'mms'+probes[i]+'_pos_gsm_ion'
+    store_data,'mms'+probes[i]+'_pos_gsm_ion',/delete
 
     fpiver='v'+strmid(dl.cdf.gatt.logical_file_id,4,5,/reverse_offset)
     fileout='mms'+probes[i]+'_dis_'+data_rate+'_'+fpi_level+'_'+fpiver+'_'+time_string(trange[0],format=2,precision=-1)+'-'+time_string(trange[1],format=2,precision=-1)
