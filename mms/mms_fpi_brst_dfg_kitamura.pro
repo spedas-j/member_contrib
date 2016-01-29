@@ -24,6 +24,7 @@
 ;                       are used, if available
 ;         fpi_sitl:     set this flag to use fpi fast sitl data forcibly. if not set, fast ql data
 ;                       are used, if available
+;         fpi_l1b:      set this flag to use fpi level-1b data if available
 ;
 ; EXAMPLE:
 ;
@@ -35,7 +36,8 @@
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
 ;-
 
-pro mms_fpi_brst_dfg_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,no_load=no_load,delete=delete,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl
+pro mms_fpi_brst_dfg_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_dfg=no_update_dfg,no_bss=no_bss,$
+                              no_load=no_load,delete=delete,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,no_load_state=no_load_state
 
   mms_init
   if not undefined(delete) then store_data,'*',/delete
@@ -56,7 +58,7 @@ pro mms_fpi_brst_dfg_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update
 ;    mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi
   endif
   
-  mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,/load_fpi,/no_plot,/no_avg
-  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,/magplot
+  mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,/load_fpi,/no_plot,/no_avg,/gsm
+  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,/magplot,/no_load_state,/gsm
 
 end
