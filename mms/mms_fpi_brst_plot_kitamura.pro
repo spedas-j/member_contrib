@@ -17,6 +17,8 @@
 ;                       is used, if available (use with magplot flag)
 ;         no_update:    set this flag to preserve the original fpi data. if not set and
 ;                       newer data is found the existing data will be overwritten
+;         no_load_state:set this flag to skip loading state data
+;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
 ;
 ; EXAMPLE:
 ;
@@ -30,7 +32,7 @@
 ;-
 
 
-pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,no_bss=no_bss
+pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,no_bss=no_bss,gsm=gsm,no_load_state=no_load_state
 
   loadct2,43
   time_stamp,/off
@@ -38,13 +40,13 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   if undefined(no_load) then mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update
   if undefined(probe) then probe=['3']
-  probe=string(probe,format='(i0)')
+  probe=strcompress(string(probe),/remove_all)
   if undefined(trange) then trange=timerange()
   timespan,trange[0],trange[1]-trange[0],/seconds
   
   store_data,'mms'+probe+'_fpi_dis_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity']
   
-  if strlen(tnames('mms'+probe+'_des_bulkX_fast_ql')) gt 0 then begin
+  if strlen(tnames('mms'+probe+'_des_bulkX_fast_ql')) gt 0 or strlen(tnames('mms'+probe+'_des_bulkX_fast_l1b')) gt 0 then begin
     store_data,'mms'+probe+'_fpi_des_numberDensity',data=['mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_des_numberDensity']
     store_data,'mms'+probe+'_fpi_dis_des_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity','mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_des_numberDensity']
     options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='mms'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,0,6],labels=['Ni','Ni_brst','Ne','Ne_brst'],labflag=-1
@@ -57,11 +59,31 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   options,'mms'+probe+'_dis_numberDensity',ytitle='mms'+probe+'_fpi!CDIS!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.16d
   options,'mms'+probe+'_des_numberDensity',ytitle='mms'+probe+'_fpi!CDES!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.032d
   
-  store_data,'mms'+probe+'_dis_bulkV',data=['mms'+probe+'_dis_bulkX','mms'+probe+'_dis_bulkY','mms'+probe+'_dis_bulkZ']
-  options,'mms'+probe+'_dis_bulkV',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV',ysubtitle='[km/s]',colors=[2,4,6],labels=['Vx','Vy','Vz'],labflag=-1,datagap=0.16d
+;  store_data,'mms'+probe+'_dis_bulkV_',data=['mms'+probe+'_dis_bulkX','mms'+probe+'_dis_bulkY','mms'+probe+'_dis_bulkZ']
+  join_vec,'mms'+probe+'_dis_bulk'+['X','Y','Z'],'mms'+probe+'_dis_bulkV_DSC'
+  options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   
-  store_data,'mms'+probe+'_des_bulkV',data=['mms'+probe+'_des_bulkX','mms'+probe+'_des_bulkY','mms'+probe+'_des_bulkZ']
-  options,'mms'+probe+'_des_bulkV',constant=0.0,ytitle='mms'+probe+'_des!CBulkV',ysubtitle='[km/s]',colors=[2,4,6],labels=['Vx','Vy','Vz'],labflag=-1,datagap=0.032d
+  if undefined(no_load_state) then mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec']
+  if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
+  if undefined(skip_cotrans) then begin
+    ;This part should be improved in future.
+    mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+    options,'mms'+probe+'_dis_bulkV_gse',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+    mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
+    options,'mms'+probe+'_dis_bulkV_gsm',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+  endif
+  
+;  store_data,'mms'+probe+'_des_bulkV_DSC',data=['mms'+probe+'_des_bulkX','mms'+probe+'_des_bulkY','mms'+probe+'_des_bulkZ']
+  join_vec,'mms'+probe+'_des_bulk'+['X','Y','Z'],'mms'+probe+'_des_bulkV_DSC'
+  options,'mms'+probe+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+
+  if undefined(skip_cotrans) then begin
+    ;This part should be improved in future.
+    mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+    options,'mms'+probe+'_des_bulkV_gse',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+    mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
+    options,'mms'+probe+'_des_bulkV_gsm',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+  endif
 
   if undefined(no_bss) then begin
     mms_load_bss
@@ -79,27 +101,33 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     tplot_options,'xmargin',[20,10]
     if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
       ql_name=''
-      level_name='srvy_l2pre_gse'
+      if undefined(gsm) then level_name='srvy_l2pre_gse' else level_name='srvy_l2pre_gsm' 
     endif else begin
       ql_name='_ql'
-      level_name='srvy_dmpa'
+      if undefined(gsm) then level_name='srvy_dmpa' else level_name='srvy_gsm_dmpa'
     endelse
-    
-    tkm2re,'mms'+probe+ql_name+'_pos_gse'
-    split_vec,'mms'+probe+ql_name+'_pos_gse_re'
-    options,'mms'+probe+ql_name+'_pos_gse_re_0',ytitle='GSEX [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe+ql_name+'_pos_gse_re_1',ytitle='GSEY [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe+ql_name+'_pos_gse_re_2',ytitle='GSEZ [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe+ql_name+'_pos_gse_re_3',ytitle='R [R!DE!N]',format='(f8.4)'
-    tplot_options, var_label=['mms'+probe+ql_name+'_pos_gse_re_3','mms'+probe+ql_name+'_pos_gse_re_2','mms'+probe+ql_name+'_pos_gse_re_1','mms'+probe+ql_name+'_pos_gse_re_0']
-;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_dfg_'+level_name+'_bvec','mms'+probe+'_dfg_'+level_name+'_btot']
-    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV','mms'+probe+'_dis_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_'+level_name+'_bvec','mms'+probe+'_dfg_'+level_name+'_btot']
+
+    if undefined(gsm) then ncoord='GSE' else ncoord='GSM'
+        
+    tkm2re,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)
+    split_vec,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re'
+    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_0',ytitle=ncoord+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_1',ytitle=ncoord+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_2',ytitle=ncoord+'Z [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_3',ytitle='R [R!DE!N]',format='(f8.4)'
+    tplot_options, var_label=['mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_3','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_2','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_1','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_0']
+;    tplot_options, var_label=['mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_2','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_1','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_0']
+
+    if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+strlowcase(ncoord))) eq 0 then ncoord='DSC' else ncoord=strlowcase(ncoord)
+    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_'+level_name+'_bvec','mms'+probe+'_dfg_'+level_name+'_btot']
   
   endif else begin
     if not undefined(no_plot) then begin
+      if undefined(gsm) then ncoord='gse' else ncoord='gsm'
+      if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+ncoord)) eq 0 then ncoord='DSC'
       tplot_options,'xmargin',[20,10]
 ;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_fpi_bentPipeB_DSC']
-      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV','mms'+probe+'_dis_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_fpi_bentPipeB_DSC']
+      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fpi_bentPipeB_DSC']
     endif
   endelse
 
