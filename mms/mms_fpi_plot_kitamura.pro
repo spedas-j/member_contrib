@@ -225,11 +225,11 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     
     options,'mms'+probe+'_fpi_eEnergySpectr_omni',spec=1.0,ytitle='mms'+probe+'_fpi!CElectron!C'+des_level+'!C'+fpiver_e+'!Comni',ysubtitle='[eV]',datagap=dgap_e,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
     ylim,'mms'+probe+'_fpi_eEnergySpectr_omni',10.d,30000.d,1
-    if fpi_suffix eq '_fast_ql' then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',0.1d,50000.d,1
+    if fpi_suffix ne '_fast_l1b' then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',0.1d,50000.d,1
     
     options,'mms'+probe+'_fpi_iEnergySpectr_omni',spec=1.0,ytitle='mms'+probe+'_fpi!CIon!C'+dis_level+'!C'+fpiver_i+'!Comni',ysubtitle='[eV]',datagap=dgap_i,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
     ylim,'mms'+probe+'_fpi_iEnergySpectr_omni',10.d,30000.d,1
-    if fpi_suffix eq '_fast_ql' then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',0.1d,2000.d,1
+    if fpi_suffix ne '_fast_l1b' then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',0.1d,2000.d,1
     
     options,'mms'+probe+'_fpi_DISnumberDensity',ytitle='mms'+probe+'!Cfpi_'+dis_level+'!CIon!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=6,ylog=1,datagap=dgap_i,ytickformat='mms_exponent2'
     ylim,'mms'+probe+'_fpi_DISnumberDensity',0.05d,300.d,1
