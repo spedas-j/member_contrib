@@ -63,8 +63,14 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
   
   if undefined(suffix) then suffix=''
 
-  store_data,'mms'+probe+'_d?s_'+fpi_data_rate+'_energySpectr_omni'+suffix,/delete
-  store_data,'mms'+probe+'_d?s_'+fpi_data_rate+'_energySpectr_??'+suffix,/delete
+  if not undefined(no_ion) then begin
+    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,/delete
+    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_??'+suffix,/delete
+  endif
+  if not undefined(no_ele) then begin
+    store_data,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,/delete
+    store_data,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_??'+suffix,/delete
+  endif
 
   if undefined(probe) then probe=['3']
   probe=string(probe,format='(i0)')
