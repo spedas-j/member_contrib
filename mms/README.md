@@ -8,3 +8,8 @@
 * These procedures are tested using SPEDAS bleeding_edge r19750.
 * Coordinate transformation of FPI in these procedures are preliminary version and will be updated.
 * These codes are recomennded to use for searching interesting events but not for preparing for the data for publications.
+
+----
+### Misc. memos for MMS data analysis 
+You can find some useful memos (in Japanese) regarding MMS data analysis (https://github.com/spedas-j/member_contrib/wiki/mms_memo) 
+
