@@ -23,8 +23,14 @@
 ;                       directions) and velocities, and dfg data
 ;         no_ele:       set this flag to skip load and plot electron data
 ;         no_ion:       set this flag to skip load and plot ion data
+;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
+;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
 ;         suffix:       appends a suffix to the end of the tplot variable name. this is useful for
 ;                       preserving original tplot variable.
+;         omni_only:    set this flag to skip making E-t spectrograms except for omni-directional
+;                       spectrograms
+;         delSkyMap:    set this flag to delete SkyMaps that use large area of memory just after
+;                       making spectrograms
 ;
 ; EXAMPLE:
 ;
@@ -47,9 +53,9 @@
 ;-
 
 pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,$
-                                   no_load=no_load,dfg_ql=dfg_ql,direc_plot=direc_plot,$
-                                   no_update=no_update,no_ele=no_ele,no_ion=no_ion,gsm=gsm,$
-                                   gse=gse,fast=fast,suffix=suffix
+                              no_load=no_load,dfg_ql=dfg_ql,direc_plot=direc_plot,$
+                              no_update=no_update,no_ele=no_ele,no_ion=no_ion,gsm=gsm,gse=gse,$
+                              fast=fast,suffix=suffix,omni_only=omni_only,delSkyMap=delSkyMap
 
   if undefined(fast) then begin
     fpi_data_rate='brst'
@@ -86,28 +92,36 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
     
     mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,outputs='energy'
     store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix
-  
-    phi_cent=180.d
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix
-    
-    phi_cent=0.d
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix
 
-    phi_cent=270.d
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix
+    if undefined(omni_only) then begin
+      phi_cent=180.d
+      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix
 
-    phi_cent=90.d
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix
+      phi_cent=0.d
+      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix
 
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix
+      phi_cent=270.d
+      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix
 
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix
+      phi_cent=90.d
+      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix
+
+      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix
+
+      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix
+    endif
+
+    if not undefined(delSkyMap) then begin
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_phi',/delete
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',/delete
+      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_err',/delete
+    endif
     
   endif
 
@@ -117,27 +131,35 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
     mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,outputs='energy'
     store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix
   
-    phi_cent=180.d
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix
-    
-    phi_cent=0.d
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix
+    if undefined(omni_only) then begin
+      phi_cent=180.d
+      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix
 
-    phi_cent=270.d
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix
+      phi_cent=0.d
+      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix
 
-    phi_cent=90.d
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix
+      phi_cent=270.d
+      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix
 
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix
+      phi_cent=90.d
+      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix
 
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix
+      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix
+
+      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix
+    endif
+
+    if not undefined(delSkyMap) then begin
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_phi',/delete
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',/delete
+      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_err',/delete
+    endif
     
   endif
   
@@ -146,30 +168,34 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
     options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
     ylim,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,10.d,30000.d,1
     zlim,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,3e5,3e9,1
-    
-    options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    ylim,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_??'+suffix,10.d,30000.d,1
-    zlim,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_??'+suffix,3e5,3e9,1
+
+    if undefined(omni_only) then begin
+      options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix,spec=1,datagap=edatagap,ytitle='mms'+probe+'_des!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      ylim,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_??'+suffix,10.d,30000.d,1
+      zlim,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_??'+suffix,3e5,3e9,1
+    endif
   endif
 
   if undefined(no_ion) then begin
     options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
     ylim,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,10.d,30000.d,1
     zlim,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,3e4,3e8,1
-    
-    options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
-    ylim,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_??'+suffix,10.d,30000.d,1
-    zlim,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_??'+suffix,3e4,3e8,1
+
+    if undefined(omni_only) then begin
+      options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CTailward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CSunward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CDawnward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CDuskward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CSouthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      options,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix,spec=1,datagap=idatagap,ytitle='mms'+probe+'_dis!CEnergySpectr!CNorthward',ysubtitle='[eV]',ztitle='eV/cm!U2!N/sr/s/eV',ytickformat='mms_exponent2'
+      ylim,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_??'+suffix,10.d,30000.d,1
+      zlim,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_??'+suffix,3e4,3e8,1
+    endif
   endif
   
   if not undefined(gsm) then begin
