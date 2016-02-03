@@ -15,7 +15,7 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
 
   if not undefined(gse) then coord='gse' else if undefined(gsm) then coord='DSC' else coord='gsm'
   
-  if undefined(probe) then probe=['1','2','3','4'] else if probe eq '*' then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
+  if undefined(probe) then probe=['1','2','3','4'] else if probe[0] eq '*' then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
 
   if undefined(no_load_dfg) then begin
     for i=0,n_elements(probe)-1 do begin
