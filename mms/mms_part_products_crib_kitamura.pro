@@ -125,7 +125,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_dfg=load_dfg,
 
 
   for i=0,n_elements(outputs)-1 do begin
-    mms_part_products,name,probe=probe,mag_name=bname,pos_name=pos_name,trange=trange,probe_lc=probe,outputs=outputs,energy=erange,pitch=parange,gyro=gyrorange,regrid=regrid,fac_type=fac_type,datagap=datagap
+    mms_part_products,name,probe=probe,mag_name=bname,pos_name=pos_name,trange=trange,outputs=outputs,energy=erange,pitch=parange,gyro=gyrorange,regrid=regrid,fac_type=fac_type,datagap=datagap
     copy_data,'mms'+probe+'_d'+species+'s_brstSkyMap_dist'+outputs[i],'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
     options,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytitle='mms'+probe+'!Cd'+species+'s_'+outputs[i]+erange_title+parange_title+gyrorange_title
     if outputs[i] eq 'phi' or outputs[i] eq 'theta' or outputs[i] eq 'pa' or outputs[i] eq 'gyro' then options,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,yticks=4
