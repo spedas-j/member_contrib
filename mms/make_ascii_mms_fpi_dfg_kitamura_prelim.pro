@@ -24,7 +24,6 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
   if not undefined(delete) then store_data,'*',/delete
   if undefined(brst) then data_rate='fast' else data_rate='brst'
   if undefined(brst) then dfg_data_rate='srvy' else dfg_data_rate='brst'
-  if undefined(brst) then inval=4.5d else inval=0.03d
   if undefined(fpi_ql) then fpi_level='l1b' else fpi_level='ql'
   if undefined(fpi_suffix) then fpi_suffix=''
   if undefined(probes) then probes=['1','2','3','4']
@@ -43,6 +42,8 @@ pro make_ascii_mms_fpi_dfg_kitamura_prelim,trange,probes=probes,brst=brst,fpi_ql
     endif
     if undefined(no_load_state) then mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],datatypes=['spinras','spindec'],no_download=no_update
 
+    if undefined(brst) then inval=4.5d else inval=0.03d
+    
     get_data,'mms'+probes[i]+'_des_numberDensity',data=e_density,limit=l,dlimit=dl
     e_density.x=e_density.x+inval*0.5d
     store_data,'mms'+probes[i]+'_des_numberDensity',data=e_density,limit=l,dlimit=dl    
