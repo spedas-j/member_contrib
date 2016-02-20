@@ -33,19 +33,19 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x','mms2_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x','mms3_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x','mms4_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x']
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y','mms2_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y','mms3_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y','mms4_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y']
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z','mms2_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z','mms3_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z','mms4_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z']
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_btot',colors=[0,2,4,6],ytitle='MMS!CDFG!CB_total',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CGSE X',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CGSE Y',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CGSE Z',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_btot',colors=[0,6,4,2],ytitle='MMS!CDFG!CB_total',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CGSE X',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CGSE Y',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gse_bvec_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CGSE Z',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
     for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec'
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_btot',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gsm_btot','mms2_dfg_'+dfg_data_rate+'_l2pre_gsm_btot','mms3_dfg_'+dfg_data_rate+'_l2pre_gsm_btot','mms4_dfg_'+dfg_data_rate+'_l2pre_gsm_btot']
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x','mms2_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x','mms3_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x','mms4_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x']
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y','mms2_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y','mms3_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y','mms4_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y']
     store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z','mms2_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z','mms3_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z','mms4_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z']
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_btot',colors=[0,2,4,6],ytitle='MMS!CDFG!CB_total',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CGSM X',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CGSM Y',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CGSM Z',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_btot',colors=[0,6,4,2],ytitle='MMS!CDFG!CB_total',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CGSM X',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CGSM Y',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    options,'mms_dfg_'+dfg_data_rate+'_l2pre_gsm_bvec_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CGSM Z',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
   endif
 
   if n_elements(na) eq 3 then begin
@@ -59,7 +59,7 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
 
     if n_elements(probe) eq 4 then begin
       store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_arb',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_arb','mms2_dfg_'+dfg_data_rate+'_l2pre_arb','mms3_dfg_'+dfg_data_rate+'_l2pre_arb','mms4_dfg_'+dfg_data_rate+'_l2pre_arb']
-      options,'mms_dfg_'+dfg_data_rate+'_l2pre_arb',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!CArbitrary',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_dfg_'+dfg_data_rate+'_l2pre_arb',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!CArbitrary',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
     endif
   endif
 
@@ -87,9 +87,9 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
       store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_l',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_lmn_l','mms2_dfg_'+dfg_data_rate+'_l2pre_lmn_l','mms3_dfg_'+dfg_data_rate+'_l2pre_lmn_l','mms4_dfg_'+dfg_data_rate+'_l2pre_lmn_l']
       store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_m',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_lmn_m','mms2_dfg_'+dfg_data_rate+'_l2pre_lmn_m','mms3_dfg_'+dfg_data_rate+'_l2pre_lmn_m','mms4_dfg_'+dfg_data_rate+'_l2pre_lmn_m']
       store_data,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_n',data=['mms1_dfg_'+dfg_data_rate+'_l2pre_lmn_n','mms2_dfg_'+dfg_data_rate+'_l2pre_lmn_n','mms3_dfg_'+dfg_data_rate+'_l2pre_lmn_n','mms4_dfg_'+dfg_data_rate+'_l2pre_lmn_n']
-      options,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_l',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!Clmn-l',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_m',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!Clmn-m',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_n',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CDFG!Clmn-n',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_l',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!Clmn-l',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_m',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!Clmn-m',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_dfg_'+dfg_data_rate+'_l2pre_lmn_n',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CDFG!Clmn-n',ysubtitle='[nT]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
     endif
     
   endif
@@ -105,9 +105,9 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
       store_data,'mms_edp_'+edp_data_rate+'_dce_dsl_x',data=['mms1_edp_'+edp_data_rate+'_dce_dsl_x','mms2_edp_'+edp_data_rate+'_dce_dsl_x','mms3_edp_'+edp_data_rate+'_dce_dsl_x','mms4_edp_'+edp_data_rate+'_dce_dsl_x']
       store_data,'mms_edp_'+edp_data_rate+'_dce_dsl_y',data=['mms1_edp_'+edp_data_rate+'_dce_dsl_y','mms2_edp_'+edp_data_rate+'_dce_dsl_y','mms3_edp_'+edp_data_rate+'_dce_dsl_y','mms4_edp_'+edp_data_rate+'_dce_dsl_y']
       store_data,'mms_edp_'+edp_data_rate+'_dce_dsl_z',data=['mms1_edp_'+edp_data_rate+'_dce_dsl_z','mms2_edp_'+edp_data_rate+'_dce_dsl_z','mms3_edp_'+edp_data_rate+'_dce_dsl_z','mms4_edp_'+edp_data_rate+'_dce_dsl_z']
-      options,'mms_edp_'+edp_data_rate+'_dce_dsl_x',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CEDP!Cdsl-x',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_edp_'+edp_data_rate+'_dce_dsl_y',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CEDP!Cdsl-y',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_edp_'+edp_data_rate+'_dce_dsl_z',constant=0.0,colors=[0,2,4,6],ytitle='MMS!CEDP!Cdsl-z',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_'+edp_data_rate+'_dce_dsl_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-x',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_'+edp_data_rate+'_dce_dsl_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-y',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_'+edp_data_rate+'_dce_dsl_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-z',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
     endif
 
   endif
