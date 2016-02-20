@@ -67,7 +67,9 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
     lmn_orig=lmn
     lmn[2,*]=na
     lmn[0,*]=crossp(lmn_orig[1,*],na)
+    lmn[0,*]=lmn[0,*]/sqrt(lmn[0,0]*lmn[0,0]+lmn[0,1]*lmn[0,1]+lmn[0,2]*lmn[0,2])
     lmn[1,*]=crossp(na,lmn[0,*])
+    lmn[1,*]=lmn[1,*]/sqrt(lmn[1,0]*lmn[1,0]+lmn[1,1]*lmn[1,1]+lmn[1,2]*lmn[1,2])
   endif
   
   if n_elements(lmn) eq 9 then begin
