@@ -65,11 +65,11 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
 
   if n_elements(na) eq 3 and n_elements(lmn) eq 9 and not undefined(almn) then begin
     lmn_orig=lmn
-    lmn[2,*]=na
-    lmn[0,*]=crossp(lmn_orig[1,*],na)
-    lmn[0,*]=lmn[0,*]/sqrt(lmn[0,0]*lmn[0,0]+lmn[0,1]*lmn[0,1]+lmn[0,2]*lmn[0,2])
-    lmn[1,*]=crossp(na,lmn[0,*])
-    lmn[1,*]=lmn[1,*]/sqrt(lmn[1,0]*lmn[1,0]+lmn[1,1]*lmn[1,1]+lmn[1,2]*lmn[1,2])
+    lmn[*,2]=na
+    lmn[*,0]=crossp(lmn_orig[*,1],na)
+    lmn[*,0]=lmn[*,0]/sqrt(lmn[0,0]*lmn[0,0]+lmn[1,0]*lmn[1,0]+lmn[2,0]*lmn[2,0])
+    lmn[*,1]=crossp(na,lmn[0,*])
+    lmn[*,1]=lmn[*,1]/sqrt(lmn[0,1]*lmn[0,1]+lmn[1,1]*lmn[1,1]+lmn[2,1]*lmn[2,1])
   endif
   
   if n_elements(lmn) eq 9 then begin
@@ -132,7 +132,8 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
     mms_fpi_comp_kitamura,trange,probe=probe,/no_ele,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse
     tplot,['mms_dfg_'+dfg_data_rate+'_l2pre_'+coord+'_btot','mms_dis_bulkVpara','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
 ;    tplot,['mms1_des_brst_energySpectr_omni','mms1_dis_brst_energySpectr_omni','mms_dfg_'+dfg_data_rate+'_l2pre_'+coord+'_btot','mms_dis_bulkVpara','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
-    if not undefined(almn) then print,'almn=[['+strcompress(lmn[0,0])+','+strcompress(lmn[0,1])+','+strcompress(lmn[0,2])+'],['+strcompress(lmn[1,0])+','+strcompress(lmn[1,1])+','+strcompress(lmn[1,2])+'],['+strcompress(lmn[2,0])+','+strcompress(lmn[2,1])+','+strcompress(lmn[2,2])+']]'
   endelse
+  print,'lmn_orig=[['+strcompress(lmn_orig[0,0])+','+strcompress(lmn_orig[1,0])+','+strcompress(lmn_orig[2,0])+'],['+strcompress(lmn_orig[0,1])+','+strcompress(lmn_orig[1,1])+','+strcompress(lmn_orig[2,1])+'],['+strcompress(lmn_orig[0,2])+','+strcompress(lmn_orig[1,2])+','+strcompress(lmn_orig[2,2])+']]'
+  if not undefined(almn) then print,'almn=[['+strcompress(lmn[0,0])+','+strcompress(lmn[1,0])+','+strcompress(lmn[2,0])+'],['+strcompress(lmn[0,1])+','+strcompress(lmn[1,1])+','+strcompress(lmn[2,1])+'],['+strcompress(lmn[0,2])+','+strcompress(lmn[1,2])+','+strcompress(lmn[2,2])+']]'
 
 END
