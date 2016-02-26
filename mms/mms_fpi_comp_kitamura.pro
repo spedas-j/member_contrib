@@ -45,11 +45,7 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
         join_vec,'mms'+probe[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_des_bulkV_DSC'
         copy_data,'mms'+probe[i]+'_des_numberdensity_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_des_numberDensity'
       endelse
-      get_data,'mms'+probe[i]+'_des_bulkV_DSC',data=d,lim=l,dlim=dl
-      dl.data_att.coord_sys='DMPA'
-      store_data,'mms'+probe[i]+'_des_bulkV_DSC',data=d,lim=l,dlim=dl
       options,'mms'+probe[i]+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probe[i]+'_des!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
-      ;This part should be improved in future.
       mms_cotrans,'mms'+probe[i]+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
       options,'mms'+probe[i]+'_des_bulkV_gse',constant=0.0,ytitle='mms'+probe[i]+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
       mms_cotrans,'mms'+probe[i]+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -206,10 +202,6 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
         copy_data,'mms'+probe[i]+'_dis_numberdensity_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_dis_numberDensity'
       endelse
       options,'mms'+probe[i]+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probe[i]+'_dis!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
-      ;This part should be improved in future.
-      get_data,'mms'+probe[i]+'_dis_bulkV_DSC',data=d,lim=l,dlim=dl
-      dl.data_att.coord_sys='DMPA'
-      store_data,'mms'+probe[i]+'_dis_bulkV_DSC',data=d,lim=l,dlim=dl
       mms_cotrans,'mms'+probe[i]+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
       options,'mms'+probe[i]+'_dis_bulkV_gse',constant=0.0,ytitle='mms'+probe[i]+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
       mms_cotrans,'mms'+probe[i]+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits

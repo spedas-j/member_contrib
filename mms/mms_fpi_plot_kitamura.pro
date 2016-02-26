@@ -188,6 +188,8 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     if undefined(edp_comm) then begin
       mms_load_edp,trange=trange,data_rate='slow',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp
       mms_load_edp,trange=trange,data_rate='fast',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp
+      if strlen(tnames('mms'+probe+'_edp_fast_scpot_l2')) gt 0 then copy_data,'mms'+probe+'_edp_fast_scpot_l2','mms'+probe+'_edp_fast_scpot'
+      if strlen(tnames('mms'+probe+'_edp_slow_scpot_l2')) gt 0 then copy_data,'mms'+probe+'_edp_slow_scpot_l2','mms'+probe+'_edp_slow_scpot'
       avg_data,'mms'+probe+'_edp_slow_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
       avg_data,'mms'+probe+'_edp_fast_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
 ;      store_data,'mms'+probe+'_edp_scpot_avg',data=['mms'+probe+'_edp_slow_scpot_avg','mms'+probe+'_edp_fast_scpot_avg']
@@ -265,7 +267,6 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     if undefined(skip_cotrans) and undefined(no_load_state) then mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec']
     if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
     if undefined(skip_cotrans) then begin
-      ;This part should be improved in future.
       mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
       options,'mms'+probe+'_fpi_iBulkV_gse',constant=0.0,ytitle='mms'+probe+'!Cfpi_'+dis_level+'!CIon!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
       mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -277,7 +278,6 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       join_vec,'mms'+probe+'_fpi_eBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_eBulkV_DSC'
       options,'mms'+probe+'_fpi_eBulkV_DSC',constant=0.0,ytitle='mms'+probe+'!Cfpi_'+des_level+'!CElectron!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_e
       if undefined(skip_cotrans) then begin
-        ;This part should be improved in future.
         mms_cotrans,'mms'+probe+'_fpi_eBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
         options,'mms'+probe+'_fpi_eBulkV_gse',constant=0.0,ytitle='mms'+probe+'!Cfpi_'+des_level+'!CElectron!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
         mms_cotrans,'mms'+probe+'_fpi_eBulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits

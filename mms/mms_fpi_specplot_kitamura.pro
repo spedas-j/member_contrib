@@ -29,7 +29,7 @@
 ;                       preserving original tplot variable.
 ;         omni_only:    set this flag to skip making E-t spectrograms except for omni-directional
 ;                       spectrograms
-;         delSkyMap:    set this flag to delete SkyMaps that use large area of memory just after
+;         deldist:      set this flag to delete SkyMaps that use large area of memory just after
 ;                       making spectrograms
 ;
 ; EXAMPLE:
@@ -55,7 +55,7 @@
 pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,$
                               no_load=no_load,dfg_ql=dfg_ql,direc_plot=direc_plot,$
                               no_update=no_update,no_ele=no_ele,no_ion=no_ion,gsm=gsm,gse=gse,$
-                              fast=fast,suffix=suffix,omni_only=omni_only,delSkyMap=delSkyMap
+                              fast=fast,suffix=suffix,omni_only=omni_only,deldist=deldist
 
   if undefined(fast) then begin
     fpi_data_rate='brst'
@@ -88,36 +88,49 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
   endelse
 
   if undefined(no_ele) then begin
-    if undefined(no_load) then mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate=fpi_data_rate,datatype=['des-dist'],no_update=no_update
+    if undefined(no_load) then begin
+      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype=['des-dist'],no_update=no_update
+      if strlen(tnames('mms'+probe+'_des_dist_'+fpi_data_rate)) eq 0 then begin
+        mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['des-dist'],no_update=no_update
+        distname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist'
+        tname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_energy'
+      endif else begin
+        distname='mms'+probe+'_des_dist_'+fpi_data_rate
+        tname='mms'+probe+'_des_dist_'+fpi_data_rate+'_energy'
+      endelse
+    endif
     
-    mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,outputs='energy'
-    store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix
+    mms_part_products,distname,trange=trange,outputs='energy'
+    store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix
 
     if undefined(omni_only) then begin
       phi_cent=180.d
-      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix
 
       phi_cent=0.d
-      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix
 
       phi_cent=270.d
-      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix
 
       phi_cent=90.d
-      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix
 
-      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
-      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix
+      mms_part_products,distname,trange=trange,theta=[-90.,-45.],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix
 
-      mms_part_products,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
-      store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix
+      mms_part_products,distname,trange=trange,theta=[45.,90.],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix
     endif
 
-    if not undefined(delSkyMap) then begin
+    if not undefined(deldist) then begin
+      store_data,'mms'+probe+'_des_phi_'+fpi_data_rate,/delete
+      store_data,'mms'+probe+'_des_dist_'+fpi_data_rate,/delete
+      store_data,'mms'+probe+'_des_disterr_'+fpi_data_rate,/delete
       store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_phi',/delete
       store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',/delete
       store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_err',/delete
@@ -126,36 +139,49 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
   endif
 
   if undefined(no_ion) then begin    
-    if undefined(no_load) then mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate=fpi_data_rate,datatype=['dis-dist'],no_update=no_update
-  
-    mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,outputs='energy'
-    store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix
+    if undefined(no_load) then begin
+      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype=['dis-dist'],no_update=no_update
+      if strlen(tnames('mms'+probe+'_dis_dist_'+fpi_data_rate)) eq 0 then begin
+        mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['dis-dist'],no_update=no_update
+        distname='mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist'
+        tname='mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_energy'
+      endif else begin
+        distname='mms'+probe+'_dis_dist_'+fpi_data_rate
+        tname='mms'+probe+'_dis_dist_'+fpi_data_rate+'_energy'
+      endelse
+    endif
+
+    mms_part_products,distname,trange=trange,outputs='energy'
+    store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix
   
     if undefined(omni_only) then begin
       phi_cent=180.d
-      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix
 
       phi_cent=0.d
-      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix
 
       phi_cent=270.d
-      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix
 
       phi_cent=90.d
-      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
-      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix
+      mms_part_products,distname,trange=trange,theta=[-45.,45.],phi=[phi_cent-45.d,phi_cent+45.d],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix
 
-      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[-90.,-45.],outputs='energy'
-      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix
+      mms_part_products,distname,trange=trange,theta=[-90.,-45.],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix
 
-      mms_part_products,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',trange=trange,theta=[45.,90.],outputs='energy'
-      store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_distenergy',newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix
+      mms_part_products,distname,trange=trange,theta=[45.,90.],outputs='energy'
+      store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix
     endif
 
-    if not undefined(delSkyMap) then begin
+    if not undefined(deldist) then begin
+      store_data,'mms'+probe+'_dis_phi_'+fpi_data_rate,/delete
+      store_data,'mms'+probe+'_dis_dist_'+fpi_data_rate,/delete
+      store_data,'mms'+probe+'_dis_disterr_'+fpi_data_rate,/delete
       store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_phi',/delete
       store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',/delete
       store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_err',/delete
