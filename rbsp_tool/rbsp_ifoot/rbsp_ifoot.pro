@@ -77,7 +77,7 @@ pro rbsp_ifoot, $
   ;Check if any valid probe name is given
   sc_list = [ 'a', 'b' ]
   if ~keyword_set(probe) then return 
-  probe = thm_check_valid_name( strlowcase(probe) , sc_list, $
+  probe = ssl_check_valid_name( strlowcase(probe) , sc_list, $
     /ignore_case, /include_all, /no_warning )
   if strlen(probe[0]) lt 1 then begin & print, 'No valid probe name is given!' & return & endif
 
