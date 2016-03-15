@@ -12,7 +12,7 @@
 ; time position-GSMX[km] -GSMY[km] -GSMZ[km] fgm-GSMX[nT] -GSMY[nT] -GSMZ[nT] position-GSEX[km] -GSEY[km] -GSEZ[km] fgm-GSEX[nT] -GSEY[nT] -GSEZ[nT] fgm_Btotal[nT]
 ;-
 
-pro make_ascii_mms_fgm_l2_kitamura,trange,probes=probes,brst=brst,no_load_fgm=no_load_fgm,outdir=outdir,delete=delete,no_update=no_update
+pro make_ascii_mms_fgm_l2_kitamura,trange,probes=probes,brst=brst,no_load_fgm=no_load_fgm,no_load_state=no_load_state,outdir=outdir,delete=delete,no_update=no_update
 
   mms_init
   trange=time_double(trange)
@@ -27,16 +27,17 @@ pro make_ascii_mms_fgm_l2_kitamura,trange,probes=probes,brst=brst,no_load_fgm=no
     if undefined(no_load_fgm) then begin
       mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate=data_rate,level='l2',no_update=no_update,/no_attitude_data
     endif
+    if undefined(no_load_state) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update
 
-    get_data,'mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_btot',data=Btot,dlimit=dl
-    get_data,'mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_bvec',data=Bvec_gse
-    get_data,'mms'+probes[i]+'_fgm_b_gsm_'+data_rate+'_bvec',data=Bvec_gsm
-    tinterpol_mxn,'mms'+probes[i]+'_r_gse_'+data_rate+'_l2','mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2pre_gse_btot',newname='mms'+probes[i]+'_r_gse_'+data_rate+'_l2_intpl'
-    get_data,'mms'+probes[i]+'_r_gse_'+data_rate+'_l2_intpl',data=pos_gse
-    del_data,'mms'+probes[i]+'_r_gse_'+data_rate+'_l2_intpl'
-    tinterpol_mxn,'mms'+probes[i]+'_r_gsm_'+data_rate+'_l2','mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2pre_gse_btot',newname='mms'+probes[i]+'_r_gsm_'+data_rate+'_l2_intpl'
-    get_data,'mms'+probes[i]+'_r_gsm_'+data_rate+'_l2_intpl',data=pos_gsm
-    del_data,'mms'+probes[i]+'_r_gsm_'+data_rate+'_l2_intpl'
+    get_data,'mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2_btot',data=Btot,dlimit=dl
+    get_data,'mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2_bvec',data=Bvec_gse
+    get_data,'mms'+probes[i]+'_fgm_b_gsm_'+data_rate+'_l2_bvec',data=Bvec_gsm
+    tinterpol_mxn,'mms'+probe[i]+'_mec_r_gse','mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2_btot',newname='mms'+probe[i]+'_mec_r_gse_intpl'
+    get_data,'mms'+probe[i]+'_mec_r_gse_intpl',data=pos_gse
+    del_data,'mms'+probe[i]+'_mec_r_gse_intpl'
+    tinterpol_mxn,'mms'+probe[i]+'_mec_r_gsm','mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2_btot',newname='mms'+probe[i]+'_mec_r_gsm_intpl'
+    get_data,'mms'+probe[i]+'_mec_r_gsm_intpl',data=pos_gsm
+    del_data,'mms'+probe[i]+'_mec_r_gsm_intpl'
 
     if not undefined(outdir) then if ~file_test(outdir) then file_mkdir,outdir
     fgm_dv='v'+dl.cdf.gatt.data_version
