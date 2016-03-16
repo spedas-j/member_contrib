@@ -3,7 +3,7 @@
 ;         mms_fpi_brst_plot_kitamura
 ;
 ; PURPOSE:
-;         Plot magnetic field (DFG) and FPI data obtained by MMS
+;         Plot magnetic field (FGM (or DFG)) and FPI data obtained by MMS
 ;
 ; KEYWORDS:
 ;         trange:       time range of interest [starttime, endtime] with the format
@@ -11,7 +11,7 @@
 ;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
 ;         probe:        a probe - value for MMS SC # (default value is '3')
 ;         no_plot:      set this flag to skip plotting
-;         magplot:      set this flag to plot with dfg data
+;         magplot:      set this flag to plot with fgm(dfg) data
 ;         no_load:      set this flag to skip loading data
 ;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
 ;                       is used, if available (use with magplot flag)
@@ -22,13 +22,13 @@
 ;
 ; EXAMPLE:
 ;
-;     To plot fast plasma investigation (FPI) burst moments with fast_sitl data
+;     To plot fast plasma investigation (FPI) burst moments with fast survey (or SITL) data
 ;     MMS>  mms_fpi_brst_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='3',/magplot
 ;     MMS>  mms_fpi_brst_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='3',/magplot,/no_update,/no_bss
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
-;     2) DFG data should be loaded before running this procedure if magplot flag is set
+;     2) FGM(DFG) data should be loaded before running this procedure if magplot flag is set
 ;-
 
 
@@ -37,17 +37,20 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   loadct2,43
   time_stamp,/off
   trange=time_double(trange)
+
+  status=mms_login_lasp(login_info=login_info,username=username)
+  if username eq '' or username eq 'public' then public=1 else public=0
   
   if undefined(no_load) then begin
     if undefined(l1b) then begin
-      mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update
+      mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement
       join_vec,'mms'+probe+'_des_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_des_bulkV_DSC'
       copy_data,'mms'+probe+'_des_numberdensity_dbcs_brst','mms'+probe+'_des_numberDensity'
       join_vec,'mms'+probe+'_dis_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
       copy_data,'mms'+probe+'_dis_numberdensity_dbcs_brst','mms'+probe+'_dis_numberDensity'
     endif
     if strlen(tnames('mms'+probe+'_dis_numberdensity_dbcs_brst')) eq 0 or strlen(tnames('mms'+probe+'_des_numberdensity_dbcs_brst')) eq 0 then begin
-      mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update
+      mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement
       join_vec,'mms'+probe+'_dis_bulk'+['X','Y','Z'],'mms'+probe+'_dis_bulkV_DSC'
       join_vec,'mms'+probe+'_des_bulk'+['X','Y','Z'],'mms'+probe+'_des_bulkV_DSC'
     endif else begin
@@ -61,7 +64,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   store_data,'mms'+probe+'_fpi_dis_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity']
   
-  if strlen(tnames('mms'+probe+'_des_bulkX_fast_ql')) gt 0 or strlen(tnames('mms'+probe+'_des_bulkX_fast_l1b')) gt 0 then begin
+  if strlen(tnames('mms'+probe+'_des_bulkX_fast_ql')) gt 0 or strlen(tnames('mms'+probe+'_des_bulkX_fast_l1b')) gt 0 or strlen(tnames('mms'+probe+'_des_bulkx_dbcs_fast')) gt 0 then begin
     store_data,'mms'+probe+'_fpi_des_numberDensity',data=['mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_des_numberDensity']
     store_data,'mms'+probe+'_fpi_dis_des_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity','mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_des_numberDensity']
     options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='mms'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,0,6],labels=['Ni','Ni_brst','Ne','Ne_brst'],labflag=-1
@@ -76,7 +79,14 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   
-  if undefined(no_load_state) then mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec']
+  if undefined(no_load_state) then begin
+    if undefined(no_update) then begin
+      mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec']
+    endif else begin
+      mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec'],/no_download
+    endelse
+    mms_load_mec,trange=trange,probes=probe,no_update=no_update
+  endif
   if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
   if undefined(skip_cotrans) then begin
     ;This part should be improved in future.
@@ -102,8 +112,8 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     options,'mms'+probe+'_des_bulkV_gsm',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
   endif
 
-  if undefined(no_bss) then begin
-    mms_load_bss
+  if undefined(no_bss) and public eq 0 then begin
+    spd_mms_load_bss
     split_vec,'mms_bss_status'
     calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
     calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'
@@ -114,29 +124,41 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   endif
 
   if not undefined(magplot) then begin
-    mms_dfg_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,/no_avg,/no_plot
+    mms_fgm_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,/no_avg,/no_plot
     tplot_options,'xmargin',[20,10]
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
-      ql_name=''
-      if undefined(gsm) then level_name='srvy_l2pre_gse' else level_name='srvy_l2pre_gsm' 
-    endif else begin
-      ql_name='_ql'
-      if undefined(gsm) then level_name='srvy_dmpa' else level_name='srvy_gsm_dmpa'
-    endelse
 
     if undefined(gsm) then ncoord='GSE' else ncoord='GSM'
-        
-    tkm2re,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)
-    split_vec,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re'
-    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_0',ytitle=ncoord+'X [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_1',ytitle=ncoord+'Y [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_2',ytitle=ncoord+'Z [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_3',ytitle='R [R!DE!N]',format='(f8.4)'
-    tplot_options, var_label=['mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_3','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_2','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_1','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_0']
-;    tplot_options, var_label=['mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_2','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_1','mms'+probe+ql_name+'_pos_'+strlowcase(ncoord)+'_re_0']
+    
+    if strlen(tnames('mms'+probe+'_fgm_b_'+strlowcase(ncoord)+'_srvy_l2_bvec')) gt 0 then begin
+      fgm_name='mms'+probe+'_fgm_b_'+strlowcase(ncoord)+'_srvy_l2'
+    endif else begin
+      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+strlowcase(ncoord))) gt 0 then begin
+        fgm_name='mms'+probe+'_dfg_srvy_l2pre_'+strlowcase(ncoord)
+      endif else begin
+        if undefined(gsm) then fgm_name='mms'+probe+'_dfg_srvy_dmpa' else fgm_name='mms'+probe+'_dfg_srvy_gsm_dmpa'
+      endelse
+    endelse
+
+    if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) gt 0 then begin
+      tkm2re,'mms'+probe+'_mec_r_'+strlowcase(ncoord)
+      split_vec,'mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re'
+      options,'mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re_x',ytitle=ncoord+'X [R!DE!N]',format='(f8.4)'
+      options,'mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re_y',ytitle=ncoord+'Y [R!DE!N]',format='(f8.4)'
+      options,'mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re_z',ytitle=ncoord+'Z [R!DE!N]',format='(f8.4)'
+      tplot_options,var_label=['mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re_z','mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re_y','mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_re_x']
+    endif else begin
+      tkm2re,'mms'+probe+'_ql_pos_'+strlowcase(ncoord)
+      split_vec,'mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re'
+      options,'mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_0',ytitle=ncoord+'X [R!DE!N]',format='(f8.4)'
+      options,'mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_1',ytitle=ncoord+'Y [R!DE!N]',format='(f8.4)'
+      options,'mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_2',ytitle=ncoord+'Z [R!DE!N]',format='(f8.4)'
+      options,'mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_3',ytitle='R [R!DE!N]',format='(f8.4)'
+      tplot_options, var_label=['mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_3','mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_2','mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_1','mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_0']
+      ;    tplot_options, var_label=['mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_2','mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_1','mms'+probe+'_ql_pos_'+strlowcase(ncoord)+'_re_0']
+    endelse
 
     if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+strlowcase(ncoord))) eq 0 then ncoord='DSC' else ncoord=strlowcase(ncoord)
-    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_'+level_name+'_bvec','mms'+probe+'_dfg_'+level_name+'_btot']
+    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,fgm_name+'_bvec',fgm_name+'_btot']
   
   endif else begin
     if not undefined(no_plot) then begin

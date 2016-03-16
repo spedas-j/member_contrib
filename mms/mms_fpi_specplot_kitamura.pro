@@ -44,7 +44,7 @@
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
-;     2) DFG data should be loaded before running this procedure if magplot flag is set
+;     2) FGM(DFG) data should be loaded before running this procedure if magplot flag is set
 ;     3) A very large memory space is necessary to plot longer than ~10 minutes for electrons
 ;     4) This calculate average of differential energy fluxes obtained by detectors (not for scientific use)
 ;        Soild angles that covered by each detector are not taken into account.
@@ -226,41 +226,47 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
   
   if not undefined(gsm) then begin
     fpi_coord='gsm'
-    dfg_coord='gsm_dmpa'
+    fgm_coord='gsm_dmpa'
   endif else begin
     if not undefined(gse) then begin
       fpi_coord='gse'
-      dfg_coord='dmpa'
+      fgm_coord='dmpa'
     endif else begin
       fpi_coord='DSC'
-      dfg_coord='dmpa'
+      fgm_coord='dmpa'
     endelse
   endelse
 
   if not undefined(direc_plot) then begin
-    mms_dfg_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,gsm=gsm,/no_avg,/no_plot
+    mms_fgm_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,gsm=gsm,/no_avg,/no_plot
     tplot_options,'xmargin',[20,10]
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
-      tplot,['mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_dis_bulkV_'+fpi_coord,'mms'+probe+'_dfg_srvy_'+dfg_coord+'_bvec']
+    if strlen(tnames('mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2_bvec')) gt 0 then begin
+      mag_name='mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2_bvec'
     endif else begin
-      tplot,['mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_dis_bulkV_'+fpi_coord,'mms'+probe+'_dfg_srvy_l2pre_'+dfg_coord+'_bvec']
+      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord+'_bvec')) eq 0 then begin
+        mag_name='mms'+probe+'_dfg_srvy_'+fgm_coord+'_bvec'
+      endif else begin
+        mag_name='mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord+'_bvec'
+      endelse
     endelse
+    tplot,['mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_dis_bulkV_'+fpi_coord,mag_name]    
   endif else begin
     if not undefined(magplot) then begin
-      mms_dfg_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,gsm=gsm,/no_avg,/no_plot
+      mms_fgm_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,gsm=gsm,/no_avg,/no_plot
       tplot_options,'xmargin',[20,10]
-      if fpi_data_rate eq 'brst' then begin
-        if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
-          tplot,['mms_bss','mms'+probe+'_fpi_eenergySpectr_omni','mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_ienergySpectr_omni','mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_'+fpi_coord,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_fpi_iBulkV_'+fpi_coord,'mms'+probe+'_dis_bulkV_'+fpi_coord,'mms'+probe+'_dfg_srvy_'+dfg_coord+'_bvec','mms'+probe+'_dfg_srvy_'+dfg_coord+'_btot']
-        endif else begin
-          tplot,['mms_bss','mms'+probe+'_fpi_eenergySpectr_omni','mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_ienergySpectr_omni','mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_'+fpi_coord,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_fpi_iBulkV_'+fpi_coord,'mms'+probe+'_dis_bulkV_'+fpi_coord,'mms'+probe+'_dfg_srvy_l2pre_'+dfg_coord+'_bvec','mms'+probe+'_dfg_srvy_l2pre_'+dfg_coord+'_btot']
-        endelse
+      if strlen(tnames('mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2')) gt 0 then begin
+        mag_name='mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2'
       endif else begin
-        if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
-          tplot,['mms_bss','mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_'+fpi_coord,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_fpi_iBulkV_'+fpi_coord,'mms'+probe+'_dis_bulkV_'+fpi_coord,'mms'+probe+'_dfg_srvy_'+dfg_coord+'_bvec','mms'+probe+'_dfg_srvy_'+dfg_coord+'_btot']
+        if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord)) eq 0 then begin
+          mag_name='mms'+probe+'_dfg_srvy_'+fgm_coord
         endif else begin
-          tplot,['mms_bss','mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_'+fpi_coord,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_fpi_iBulkV_'+fpi_coord,'mms'+probe+'_dis_bulkV_'+fpi_coord,'mms'+probe+'_dfg_srvy_l2pre_'+dfg_coord+'_bvec','mms'+probe+'_dfg_srvy_l2pre_'+dfg_coord+'_btot']
+          mag_name='mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord
         endelse
+      endelse
+      if fpi_data_rate eq 'brst' then begin
+        tplot,['mms_bss','mms'+probe+'_fpi_eenergySpectr_omni','mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_ienergySpectr_omni','mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_'+fpi_coord,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_fpi_iBulkV_'+fpi_coord,'mms'+probe+'_dis_bulkV_'+fpi_coord,mag_name+'_bvec',mag_name+'_btot']
+      endif else begin
+        tplot,['mms_bss','mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_'+fpi_coord,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_fpi_iBulkV_'+fpi_coord,'mms'+probe+'_dis_bulkV_'+fpi_coord,mag_name+'_bvec',mag_name+'_btot']
       endelse
     endif else begin
       if undefined(no_plot) then begin
