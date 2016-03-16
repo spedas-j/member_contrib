@@ -31,6 +31,7 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
     endif else begin
       mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,level='def',datatypes=['spinras','spindec']
     endelse
+     mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
   endif
 
   if undefined(fast) then fpi_data_rate='brst' else fpi_data_rate='fast'
@@ -347,12 +348,21 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
 
   if not undefined(label_gsm) or not undefined(gsm) then label_coord='gsm' else label_coord='gse'
 
-  tkm2re,'mms'+probe[0]+'_pos_'+label_coord
-  split_vec,'mms'+probe[0]+'_pos_'+label_coord+'_re'
-  options,'mms'+probe[0]+'_pos_'+label_coord+'_re_0',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
-  options,'mms'+probe[0]+'_pos_'+label_coord+'_re_1',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
-  options,'mms'+probe[0]+'_pos_'+label_coord+'_re_2',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
-  tplot_options,var_label=['mms'+probe[0]+'_pos_'+label_coord+'_re_2','mms'+probe[0]+'_pos_'+label_coord+'_re_1','mms'+probe[0]+'_pos_'+label_coord+'_re_0']
+  if strlen(tnames('mms'+probe[0]+'_mec_r_'+label_coord)) gt 0 then begin
+    tkm2re,'mms'+probe[0]+'_mec_r_'+label_coord
+    split_vec,'mms'+probe[0]+'_mec_r_'+label_coord+'_re'
+    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_x',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_y',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_z',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
+    tplot_options,var_label=['mms'+probe[0]+'_mec_r_'+label_coord+'_re_z','mms'+probe[0]+'_mec_r_'+label_coord+'_re_y','mms'+probe[0]+'_mec_r_'+label_coord+'_re_x']
+  endif else begin
+    tkm2re,'mms'+probe[0]+'_pos_'+label_coord
+    split_vec,'mms'+probe[0]+'_pos_'+label_coord+'_re'
+    options,'mms'+probe[0]+'_pos_'+label_coord+'_re_0',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_pos_'+label_coord+'_re_1',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_pos_'+label_coord+'_re_2',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
+    tplot_options,var_label=['mms'+probe[0]+'_pos_'+label_coord+'_re_2','mms'+probe[0]+'_pos_'+label_coord+'_re_1','mms'+probe[0]+'_pos_'+label_coord+'_re_0']
+  endelse
 
   tplot_options,'xmargin',[20,10]
 ;  tplot,['mms_des_numberDensity','mms_des_bulk*','mms_des_T*','mms_dis_numberDensity','mms_dis_bulk*','mms_dis_T*']
