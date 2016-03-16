@@ -1,4 +1,4 @@
-PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no_B,edp_brst=edp_brst,dfg_brst=dfg_brst,lmn=lmn,na=na,almn=almn,vn=vn,gsm=gsm,no_update=no_update,label_gsm=label_gsm,ion_plot=ion_plot,delete=delete
+PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no_B,no_mec=no_mec,edp_brst=edp_brst,dfg_brst=dfg_brst,lmn=lmn,na=na,almn=almn,vn=vn,gsm=gsm,no_update=no_update,label_gsm=label_gsm,ion_plot=ion_plot,delete=delete
 
 ; MMS> mms_dfg_edp_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/gsm,/dfg_brst
 
@@ -16,16 +16,8 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
   if undefined(probe) then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
   
   if undefined(dfg_brst) then dfg_data_rate='srvy' else dfg_data_rate='brst'
-  if undefined(no_B) then begin
-    for i=0,n_elements(probe)-1 do begin
-      if strlen(tnames('mms'+probe[i]+'_pos_gse')) gt 0 then copy_data,'mms'+probe[i]+'_pos_gse','mms'+probe[i]+'_pos_gse_temp'
-      if strlen(tnames('mms'+probe[i]+'_pos_gsm')) gt 0 then copy_data,'mms'+probe[i]+'_pos_gsm','mms'+probe[i]+'_pos_gsm_temp'
-      mms_load_fgm,trange=trange,instrument='dfg',probes=probe[i],data_rate=dfg_data_rate,level='l2pre',no_update=no_update,/no_attitude_data
-      if strlen(tnames('mms'+probe[i]+'_pos_gse_temp')) gt 0 then copy_data,'mms'+probe[i]+'_pos_gse_temp','mms'+probe[i]+'_pos_gse'
-      if strlen(tnames('mms'+probe[i]+'_pos_gsm_temp')) gt 0 then copy_data,'mms'+probe[i]+'_pos_gsm_temp','mms'+probe[i]+'_pos_gsm'
-      if strlen(tnames('mms'+probe[i]+'_pos_gse_temp')) gt 0 then store_data,'mms'+probe[i]+'_pos_gs?_temp',/delete
-    endfor  
-  endif
+  if undefined(no_B) then mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate=dfg_data_rate,level='l2pre',no_update=no_update,/no_attitude_data
+  if undefined(no_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
   
   if n_elements(probe) eq 4 then begin
     for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_dfg_'+dfg_data_rate+'_l2pre_gse_bvec'
@@ -103,30 +95,39 @@ PRO mms_dfg_edp_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no
     mms_load_edp,trange=trange,probes=probes,data_rate=edp_data_rate,level='ql',datatype=efield_datatype,no_update=no_update
     
     if n_elements(probe) eq 4 then begin
-      for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_edp_'+edp_data_rate+'_dce_dsl'
-      store_data,'mms_edp_'+edp_data_rate+'_dce_dsl_x',data=['mms1_edp_'+edp_data_rate+'_dce_dsl_x','mms2_edp_'+edp_data_rate+'_dce_dsl_x','mms3_edp_'+edp_data_rate+'_dce_dsl_x','mms4_edp_'+edp_data_rate+'_dce_dsl_x']
-      store_data,'mms_edp_'+edp_data_rate+'_dce_dsl_y',data=['mms1_edp_'+edp_data_rate+'_dce_dsl_y','mms2_edp_'+edp_data_rate+'_dce_dsl_y','mms3_edp_'+edp_data_rate+'_dce_dsl_y','mms4_edp_'+edp_data_rate+'_dce_dsl_y']
-      store_data,'mms_edp_'+edp_data_rate+'_dce_dsl_z',data=['mms1_edp_'+edp_data_rate+'_dce_dsl_z','mms2_edp_'+edp_data_rate+'_dce_dsl_z','mms3_edp_'+edp_data_rate+'_dce_dsl_z','mms4_edp_'+edp_data_rate+'_dce_dsl_z']
-      options,'mms_edp_'+edp_data_rate+'_dce_dsl_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-x',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_edp_'+edp_data_rate+'_dce_dsl_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-y',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_edp_'+edp_data_rate+'_dce_dsl_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-z',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_edp_dce_xyz_dsl'
+      store_data,'mms_edp_dce_xyz_dsl_x',data=['mms1_edp_dce_xyz_dsl_x','mms2_edp_dce_xyz_dsl_x','mms3_edp_dce_xyz_dsl_x','mms4_edp_dce_xyz_dsl_x']
+      store_data,'mms_edp_dce_xyz_dsl_y',data=['mms1_edp_dce_xyz_dsl_y','mms2_edp_dce_xyz_dsl_y','mms3_edp_dce_xyz_dsl_y','mms4_edp_dce_xyz_dsl_y']
+      store_data,'mms_edp_dce_xyz_dsl_z',data=['mms1_edp_dce_xyz_dsl_z','mms2_edp_dce_xyz_dsl_z','mms3_edp_dce_xyz_dsl_z','mms4_edp_dce_xyz_dsl_z']
+      options,'mms_edp_dce_xyz_dsl_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-x',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_dce_xyz_dsl_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-y',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_dce_xyz_dsl_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-z',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
     endif
 
   endif
 
   if not undefined(label_gsm) then label_coord='gsm' else label_coord=coord
 
-  tkm2re,'mms'+probe[0]+'_pos_'+label_coord
-  split_vec,'mms'+probe[0]+'_pos_'+label_coord+'_re'
-  options,'mms'+probe[0]+'_pos_'+label_coord+'_re_0',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
-  options,'mms'+probe[0]+'_pos_'+label_coord+'_re_1',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
-  options,'mms'+probe[0]+'_pos_'+label_coord+'_re_2',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
-  tplot_options,var_label=['mms'+probe[0]+'_pos_'+label_coord+'_re_2','mms'+probe[0]+'_pos_'+label_coord+'_re_1','mms'+probe[0]+'_pos_'+label_coord+'_re_0']
+  if strlen(tnames('mms'+probe[0]+'_mec_r_'+label_coord)) gt 0 then begin
+    tkm2re,'mms'+probe[0]+'_mec_r_'+label_coord
+    split_vec,'mms'+probe[0]+'_mec_r_'+label_coord+'_re'
+    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_x',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_y',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_z',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
+    tplot_options,var_label=['mms'+probe[0]+'_mec_r_'+label_coord+'_re_z','mms'+probe[0]+'_mec_r_'+label_coord+'_re_y','mms'+probe[0]+'_mec_r_'+label_coord+'_re_x']
+  endif else begin
+    tkm2re,'mms'+probe[0]+'_pos_'+label_coord
+    split_vec,'mms'+probe[0]+'_pos_'+label_coord+'_re'
+    options,'mms'+probe[0]+'_pos_'+label_coord+'_re_0',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_pos_'+label_coord+'_re_1',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probe[0]+'_pos_'+label_coord+'_re_2',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
+    tplot_options,var_label=['mms'+probe[0]+'_pos_'+label_coord+'_re_2','mms'+probe[0]+'_pos_'+label_coord+'_re_1','mms'+probe[0]+'_pos_'+label_coord+'_re_0']
+  endelse
 
   tplot_options,'xmargin',[20,10]
 
   if undefined(ion_plot) then begin
-    tplot,['mms_dfg_'+dfg_data_rate+'_l2pre_'+coord+'_btot','mms_dfg_'+dfg_data_rate+'_l2pre_'+coord+'_bvec_?','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_?','mms_dfg_'+dfg_data_rate+'_l2pre_arb','mms_edp_'+edp_data_rate+'_dce_dsl_?']
+    tplot,['mms_dfg_'+dfg_data_rate+'_l2pre_'+coord+'_btot','mms_dfg_'+dfg_data_rate+'_l2pre_'+coord+'_bvec_?','mms_dfg_'+dfg_data_rate+'_l2pre_lmn_?','mms_dfg_'+dfg_data_rate+'_l2pre_arb','mms_edp_dce_xyz_dsl_?']
   endif else begin
     if undefined(gsm) then gse=1
     mms_fpi_comp_kitamura,trange,probe=probe,/no_ele,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse
