@@ -12,11 +12,11 @@
 ;$URL: svn+ssh://thmsvn@ambrosia.ssl.berkeley.edu/repos/spdsoft/trunk/projects/mms/spedas/beta/mms_part_products/mms_part_products_crib.pro $
 ;
 ;Modified by N. Kitamura
-; MMS> mms_part_products_crib_kitamura,trange=[],probe='1',/load_dfg,/load_fpi,/load_state,erange=[10.d,30000.d],parange=[0.d,180.d],gyrorange=[0.d,360.d],/ion,outputs='energy',/no_update
+; MMS> mms_part_products_crib_kitamura,trange=[],probe='1',/load_fgm,/load_fpi,/load_mec,erange=[10.d,30000.d],parange=[0.d,180.d],gyrorange=[0.d,360.d],/ion,outputs='energy'
 ;-
 ;
 ;
-PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,dfg_ql=dfg_ql,load_fpi=load_fpi,load_state=load_state,erange=erange,$
+PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,dfg_ql=dfg_ql,load_fpi=load_fpi,load_mec=load_mec,erange=erange,$
                                     parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,fac_type=fac_type,regrid=redrid
 
   if undefined(probe) then probe=['3']
@@ -86,10 +86,8 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
     endif
   endif
 
-  ;load state data.(needed for coordinate transforms and field aligned coordinates)
-  if not undefined(load_state) then if undefined(no_update) then mms_load_state,probes=probe,level='def' else mms_load_state,probes=probe,level='def',/no_download
-  ;Not all mms position data have coordinate systems labeled in metadata, this one does
-  pos_name='mms'+probe+'_defeph_pos'
+  if not undefined(load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+  pos_name='mms'+probe+'_mec_r_gse'
 
   ;load particle data
   if undefined(ion) then begin

@@ -37,7 +37,7 @@
 ;-
 
 pro mms_fpi_brst_fgm_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,no_bss=no_bss,$
-                              no_load=no_load,delete=delete,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,no_load_state=no_load_state
+                              no_load=no_load,delete=delete,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b
 
   mms_init
   
@@ -102,6 +102,6 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update
   endif
   
   mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,/load_fpi,/no_plot,/no_avg,/gsm
-  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,/magplot,/no_load_state,/gsm
+  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,/magplot,/no_load_mec,/gsm
 
 end

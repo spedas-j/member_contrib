@@ -17,7 +17,7 @@
 ;                       is used, if available (use with magplot flag)
 ;         no_update:    set this flag to preserve the original fpi data. if not set and
 ;                       newer data is found the existing data will be overwritten
-;         no_load_state:set this flag to skip loading state data
+;         no_load_mec:  set this flag to skip loading mec data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
 ;
 ; EXAMPLE:
@@ -32,7 +32,7 @@
 ;-
 
 
-pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,no_bss=no_bss,gsm=gsm,no_load_state=no_load_state,l1b=l1b
+pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,no_bss=no_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b
 
   loadct2,43
   time_stamp,/off
@@ -79,14 +79,8 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   
-  if undefined(no_load_state) then begin
-    if undefined(no_update) then begin
-      mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec']
-    endif else begin
-      mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec'],/no_download
-    endelse
-    mms_load_mec,trange=trange,probes=probe,no_update=no_update
-  endif
+  if undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+
   if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
   if undefined(skip_cotrans) then begin
     ;This part should be improved in future.

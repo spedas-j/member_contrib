@@ -13,7 +13,7 @@
 ;-
 
 pro make_ascii_mms_dfg_l2pre_kitamura,trange,probes=probes,brst=brst,no_load_dfg=no_load_dfg,$
-                                      no_load_state=no_load_state,outdir=outdir,delete=delete,no_update=no_update
+                                      no_load_mec=no_load_mec,outdir=outdir,delete=delete,no_update=no_update
 
   mms_init
   trange=time_double(trange)
@@ -26,7 +26,7 @@ pro make_ascii_mms_dfg_l2pre_kitamura,trange,probes=probes,brst=brst,no_load_dfg
   for i=0,n_elements(probes)-1 do begin
     
     if undefined(no_load_dfg) then mms_load_fgm,trange=trange,instrument='dfg',probes=probes[i],data_rate=data_rate,level='l2pre',no_update=no_update
-    if undefined(no_load_state) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update
+    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update
     endif
 
     get_data,'mms'+probes[i]+'_dfg_'+data_rate+'_l2pre_gse_btot',data=Btot,dlimit=dl

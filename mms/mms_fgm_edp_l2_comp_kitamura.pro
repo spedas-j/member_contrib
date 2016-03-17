@@ -1,4 +1,4 @@
-PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B=no_B,edp_brst=edp_brst,fgm_brst=fgm_brst,lmn=lmn,na=na,almn=almn,vn=vn,gsm=gsm,no_update=no_update,label_gsm=label_gsm,ion_plot=ion_plot,delete=delete
+PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst=edp_brst,fgm_brst=fgm_brst,lmn=lmn,na=na,almn=almn,vn=vn,gsm=gsm,no_update=no_update,label_gsm=label_gsm,ion_plot=ion_plot,delete=delete
 
 ; MMS> mms_fgm_edp_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/gsm,/fgm_brst
 
@@ -18,12 +18,12 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B
   if undefined(fgm_brst) then fgm_data_rate='srvy' else fgm_data_rate='brst'
   if undefined(no_B) then begin
     for i=0,n_elements(probe)-1 do begin
-      if strlen(tnames('mms'+probe[i]+'_fgm_r_gse_srvy_l2')) eq 0 and fgm_data_rate eq 'brst' then mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
-      mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate=fgm_data_rate,level='l2',no_update=no_update,/no_attitude_data
+      if strlen(tnames('mms'+probe[i]+'_fgm_r_gse_srvy_l2')) eq 0 and fgm_data_rate eq 'brst' then mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='srvy',level='l2',no_update=no_update,/time_clip,/no_attitude_data
+      mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate=fgm_data_rate,level='l2',no_update=no_update,/time_clip,/no_attitude_data
     endfor  
   endif
   
-  for i=0,n_elements(probe)-1 do if undefined(no_update) then mms_load_state,trange=trange,probes=probe[i] else mms_load_state,trange=trange,probes=probe[i],/no_download
+  mms_load_mec,trange=trange,probes=probe,no_update=no_update
   
   if n_elements(probe) eq 4 then begin
     for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_fgm_b_gse_'+fgm_data_rate+'_l2_bvec'
@@ -97,17 +97,41 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B
    
   if undefined(edp_brst) then edp_data_rate='fast' else edp_data_rate='brst'
   if undefined(no_E) then begin
-    if undefined(dce_2d) then efield_datatype='dce' else efield_datatype='dce2d'
-    mms_load_edp,trange=trange,probes=probes,data_rate=edp_data_rate,level='l2',datatype=efield_datatype,no_update=no_update
+    mms_load_edp,trange=trange,probes=probes,data_rate=edp_data_rate,level='l2',datatype=efield_datatype,no_update=no_update,/time_clip
+    if coord eq 'gsm' then for i=0,n_elements(probe)-1 do mms_cotrans,'mms'+probe[i]+'_edp_dce_gse_'+edp_data_rate+'_l2','mms'+probe[i]+'_edp_dce_gsm_'+edp_data_rate+'_l2',in_coord='gse',out_coord='gsm'
     
     if n_elements(probe) eq 4 then begin
-      for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_edp_dce_dsl_'+edp_data_rate+'_l2'
-      store_data,'mms_edp_dce_dsl_'+edp_data_rate+'_l2_x',data=['mms1_edp_dce_dsl_'+edp_data_rate+'_l2_x','mms2_edp_dce_dsl_'+edp_data_rate+'_l2_x','mms3_edp_dce_dsl_'+edp_data_rate+'_l2_x','mms4_edp_dce_dsl_'+edp_data_rate+'_l2_x']
-      store_data,'mms_edp_dce_dsl_'+edp_data_rate+'_l2_y',data=['mms1_edp_dce_dsl_'+edp_data_rate+'_l2_y','mms2_edp_dce_dsl_'+edp_data_rate+'_l2_y','mms3_edp_dce_dsl_'+edp_data_rate+'_l2_y','mms4_edp_dce_dsl_'+edp_data_rate+'_l2_y']
-      store_data,'mms_edp_dce_dsl_'+edp_data_rate+'_l2_z',data=['mms1_edp_dce_dsl_'+edp_data_rate+'_l2_z','mms2_edp_dce_dsl_'+edp_data_rate+'_l2_z','mms3_edp_dce_dsl_'+edp_data_rate+'_l2_z','mms4_edp_dce_dsl_'+edp_data_rate+'_l2_z']
-      options,'mms_edp_dce_dsl_'+edp_data_rate+'_l2_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-x',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_edp_dce_dsl_'+edp_data_rate+'_l2_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-y',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
-      options,'mms_edp_dce_dsl_'+edp_data_rate+'_l2_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Cdsl-z',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_edp_dce_'+coord+'_'+edp_data_rate+'_l2'
+      store_data,'mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_x',data=['mms1_edp_dce_'+coord+'_'+edp_data_rate+'_l2_x','mms2_edp_dce_'+coord+'_'+edp_data_rate+'_l2_x','mms3_edp_dce_'+coord+'_'+edp_data_rate+'_l2_x','mms4_edp_dce_'+coord+'_'+edp_data_rate+'_l2_x']
+      store_data,'mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_y',data=['mms1_edp_dce_'+coord+'_'+edp_data_rate+'_l2_y','mms2_edp_dce_'+coord+'_'+edp_data_rate+'_l2_y','mms3_edp_dce_'+coord+'_'+edp_data_rate+'_l2_y','mms4_edp_dce_'+coord+'_'+edp_data_rate+'_l2_y']
+      store_data,'mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_z',data=['mms1_edp_dce_'+coord+'_'+edp_data_rate+'_l2_z','mms2_edp_dce_'+coord+'_'+edp_data_rate+'_l2_z','mms3_edp_dce_'+coord+'_'+edp_data_rate+'_l2_z','mms4_edp_dce_'+coord+'_'+edp_data_rate+'_l2_z']
+      options,'mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_x',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!C'+strupcase(coord)+' X',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_y',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!C'+strupcase(coord)+' Y',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      options,'mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_z',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!C'+strupcase(coord)+' Z',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+    endif
+
+    if n_elements(lmn) eq 9 then begin
+      for i=0,n_elements(probe)-1 do begin
+        get_data,'mms'+probe[i]+'_edp_dce_'+coord+'_'+edp_data_rate+'_l2',data=E
+        E_lmn=dblarr(n_elements(E.x),3)
+        for j=0l,n_elements(E.x)-1 do begin
+          E_lmn[j,0]=E.y[j,0]*lmn[0,0]+E.y[j,1]*lmn[1,0]+E.y[j,2]*lmn[2,0]
+          E_lmn[j,1]=E.y[j,0]*lmn[0,1]+E.y[j,1]*lmn[1,1]+E.y[j,2]*lmn[2,1]
+          E_lmn[j,2]=E.y[j,0]*lmn[0,2]+E.y[j,1]*lmn[1,2]+E.y[j,2]*lmn[2,2]
+        endfor
+        store_data,'mms'+probe[i]+'_edp_dce_'+edp_data_rate+'_l2_lmn',data={x:E.x,y:E_lmn}
+      endfor
+
+      if n_elements(probe) eq 4 then begin
+        for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_edp_dce_'+edp_data_rate+'_l2_lmn',suffix=['_l','_m','_n']
+        store_data,'mms_edp_dce_'+edp_data_rate+'_l2_lmn_l',data=['mms1_edp_dce_'+edp_data_rate+'_l2_lmn_l','mms2_edp_dce_'+edp_data_rate+'_l2_lmn_l','mms3_edp_dce_'+edp_data_rate+'_l2_lmn_l','mms4_edp_dce_'+edp_data_rate+'_l2_lmn_l']
+        store_data,'mms_edp_dce_'+edp_data_rate+'_l2_lmn_m',data=['mms1_edp_dce_'+edp_data_rate+'_l2_lmn_m','mms2_edp_dce_'+edp_data_rate+'_l2_lmn_m','mms3_edp_dce_'+edp_data_rate+'_l2_lmn_m','mms4_edp_dce_'+edp_data_rate+'_l2_lmn_m']
+        store_data,'mms_edp_dce_'+edp_data_rate+'_l2_lmn_n',data=['mms1_edp_dce_'+edp_data_rate+'_l2_lmn_n','mms2_edp_dce_'+edp_data_rate+'_l2_lmn_n','mms3_edp_dce_'+edp_data_rate+'_l2_lmn_n','mms4_edp_dce_'+edp_data_rate+'_l2_lmn_n']
+        options,'mms_edp_dce_'+edp_data_rate+'_l2_lmn_l',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Clmn-l',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+        options,'mms_edp_dce_'+edp_data_rate+'_l2_lmn_m',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Clmn-m',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+        options,'mms_edp_dce_'+edp_data_rate+'_l2_lmn_n',constant=0.0,colors=[0,6,4,2],ytitle='MMS!CEDP!Clmn-n',ysubtitle='[mV/m]',labels=['mms1','mms2','mms3','mms4'],labflag=-1
+      endif
+
     endif
 
   endif
@@ -124,7 +148,7 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,dce_2d=dce_2d,no_E=no_E,no_B
   tplot_options,'xmargin',[20,10]
 
   if undefined(ion_plot) then begin
-    tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_dsl_'+edp_data_rate+'_l2_?']
+    tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms_edp_dce_'+edp_data_rate+'_l2_lmn_?']
   endif else begin
     if undefined(gsm) then gse=1
     mms_fpi_l2_comp_kitamura,trange,probe=probe,/no_ele,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse

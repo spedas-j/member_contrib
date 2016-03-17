@@ -1,4 +1,4 @@
-PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,gse=gse,no_load_state=no_load_state,$
+PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,gse=gse,no_load_mec=no_load_mec,$
                                no_load_fpi=no_load_fpi,no_load_dfg=no_load_dfg,no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast
 
 ; MMS> mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
@@ -25,14 +25,7 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
     endfor
   endif
 
-  if undefined(no_load_state) then begin
-    if not undefined(no_update) then begin
-      mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,level='def',datatypes=['spinras','spindec'],/no_download
-    endif else begin
-      mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,level='def',datatypes=['spinras','spindec']
-    endelse
-     mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
-  endif
+  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
 
   if undefined(fast) then fpi_data_rate='brst' else fpi_data_rate='fast'
 

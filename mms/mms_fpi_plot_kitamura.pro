@@ -30,7 +30,7 @@
 ;         no_update_edp:set this flag to preserve the original edp data. if not set and
 ;                       newer data is found the existing data will be overwritten
 ;         skip_cotrans: set this flag to skip coordinate transformation
-;         no_load_state:set this flag to skip loading state data
+;         no_load_mec:  set this flag to skip loading mec data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
 ;
 ; EXAMPLE:
@@ -47,7 +47,7 @@
 pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_avg=no_avg,dfg_ql=dfg_ql,$
                           load_fgm=load_fgm,no_update_fgm=no_update_fgm,load_fpi=load_fpi,no_update_fpi=no_update_fpi,$
                           fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,add_scpot=add_scpot,edp_comm=edp_comm,no_update_edp=no_update_edp,$
-                          gsm=gsm,no_load_state=no_load_state
+                          gsm=gsm,no_load_mec=no_load_mec
 
   loadct2,43
   time_stamp,/off
@@ -260,8 +260,8 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 
   if not undefined(add_scpot) then begin
     if undefined(edp_comm) then begin
-      mms_load_edp,trange=trange,data_rate='slow',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp
-      mms_load_edp,trange=trange,data_rate='fast',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp
+      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='slow',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,/time_clip
+      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='fast',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,/time_clip
       if strlen(tnames('mms'+probe+'_edp_scpot_fast_l2')) gt 0 then copy_data,'mms'+probe+'_edp_scpot_fast_l2','mms'+probe+'_edp_fast_scpot'
       if strlen(tnames('mms'+probe+'_edp_scpot_slow_l2')) gt 0 then copy_data,'mms'+probe+'_edp_scpot_slow_l2','mms'+probe+'_edp_slow_scpot'
       avg_data,'mms'+probe+'_edp_slow_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
@@ -270,7 +270,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 ;      options,'mms'+probe+'_edp'+['','_slow','_fast']+'_scpot_avg',ystyle=9,ylog=1,axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}
       options,'mms'+probe+'_edp'+['_slow','_fast']+'_scpot_avg',axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endif else begin
-      mms_load_edp,trange=trange,data_rate='comm',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp
+      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='comm',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,/time_clip
       avg_data,'mms'+probe+'_edp_comm_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
       options,'mms'+probe+'_edp_comm_scpot_avg',axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endelse
@@ -349,7 +349,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 
     join_vec,'mms'+probe+'_fpi_iBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_iBulkV_DSC'
     options,'mms'+probe+'_fpi_iBulkV_DSC',constant=0.0,ytitle='mms'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_i
-    if undefined(skip_cotrans) and undefined(no_load_state) then mms_load_state,trange=trange,probes=probe,level='def',datatypes=['spinras','spindec']
+    if undefined(skip_cotrans) and undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
     if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
     if undefined(skip_cotrans) then begin
       mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits

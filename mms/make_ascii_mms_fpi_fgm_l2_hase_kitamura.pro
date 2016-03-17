@@ -16,7 +16,7 @@
 ;-
 
 pro make_ascii_mms_fpi_fgm_l2_hase_kitamura,trange,probes=probes,brst=brst,no_load_fgm=no_load_fgm,no_load_fpi=no_load_fpi,$
-                                    no_load_state=no_load_state,fpi_suffix=fpi_suffix,outdir=outdir,delete=delete,$
+                                    no_load_mec=no_load_mec,fpi_suffix=fpi_suffix,outdir=outdir,delete=delete,$
                                     no_update=no_update
 
   mms_init
@@ -33,14 +33,7 @@ pro make_ascii_mms_fpi_fgm_l2_hase_kitamura,trange,probes=probes,brst=brst,no_lo
     
     if undefined(no_load_fgm) then mms_load_fgm,trange=[trange[0]-600.d,trange[1]+600.d],instrument='fgm',probes=probes[i],data_rate=fgm_data_rate,level='l2',no_update=no_update
     if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=data_rate,datatype=['des-moms','dis-moms'],suffix=fpi_suffix,no_update=no_update,/center_measurement
-    if undefined(no_load_state) then begin
-      if undefined(no_update) then begin
-        mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],datatypes=['spinras','spindec']
-      endif else begin
-        mms_load_state,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],datatypes=['spinras','spindec'],/no_download
-      endelse
-      mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update
-    endif
+    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update
     if undefined(brst) then inval=4.5d else inval=0.03d
     
     trange_clip,'mms'+probes[i]+'_des_numberdensity_dbcs_'+data_rate+fpi_suffix,trange[0],trange[1],newname='mms'+probes[i]+'_des_numberDensity_clip'
