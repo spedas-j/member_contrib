@@ -87,7 +87,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   endif
 
   if not undefined(load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
-  pos_name='mms'+probe+'_mec_r_gse'
+  pos_name='mms'+probe+'_mec_r_eci'
 
   ;load particle data
   if undefined(ion) then begin
