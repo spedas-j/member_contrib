@@ -197,7 +197,7 @@ pro overlay_map_thmasi, asi_vns, cal=cal, imgscale=imgscale, geo_plot=geo_plot, 
     
     tstr = time_string(t, tfor='hh:mm:ss')+' UT'
     XYOUTS, x, y, tstr, /normal, $
-      font=1, charsize=charsz*2.5    
+      font=1, charsize=charsz*2.5, color=!p.color    
   endif
   
   
