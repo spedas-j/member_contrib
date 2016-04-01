@@ -44,8 +44,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
   if undefined(no_load_fgm) then mms_fgm_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,no_update=no_update_fgm,/no_avg,/load_fgm,/no_plot
   if undefined(no_load_fpi) then mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,/no_plot,/load_fpi
   
-  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca
-  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca
+  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca,/time_clip
   mms_hpca_calc_anodes,fov=[0,360],probe=probe
 
   ion_sp=[['hplus','heplusplus','heplus','oplus'],['H!U+!N','He!U++!N','He!U+!N','O!U+!N']]
@@ -78,14 +78,14 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
   endelse
 
   if undefined(gsm) then coord='gse' else coord='gsm'
-  if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(coord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update_mec
-  tkm2re,'mms'+probe+'_mec_r_'+strlowcase(coord)
-  split_vec,'mms'+probe+'_mec_r_'+strlowcase(coord)+'_re'
-  options,'mms'+probe+'_mec_r_'+strlowcase(coord)+'_re_x',ytitle=coord+'X [R!DE!N]',format='(f8.4)'
-  options,'mms'+probe+'_mec_r_'+strlowcase(coord)+'_re_y',ytitle=coord+'Y [R!DE!N]',format='(f8.4)'
-  options,'mms'+probe+'_mec_r_'+strlowcase(coord)+'_re_z',ytitle=coord+'Z [R!DE!N]',format='(f8.4)'
-  tplot_options,var_label=['mms'+probe+'_mec_r_'+strlowcase(coord)+'_re_z','mms'+probe+'_mec_r_'+strlowcase(coord)+'_re_y','mms'+probe+'_mec_r_'+strlowcase(coord)+'_re_x']
-  tplot_options,'xmargin',[15,10]              ; Set left/right margins to 10 characters
+  if strlen(tnames('mms'+probe+'_mec_r_'+coord)) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update_mec
+  tkm2re,'mms'+probe+'_mec_r_'+coord
+  split_vec,'mms'+probe+'_mec_r_'+coord+'_re'
+  options,'mms'+probe+'_mec_r_'+coord+'_re_x',ytitle=strupcase(coord)+'X [R!DE!N]',format='(f8.4)'
+  options,'mms'+probe+'_mec_r_'+coord+'_re_y',ytitle=strupcase(coord)+'Y [R!DE!N]',format='(f8.4)'
+  options,'mms'+probe+'_mec_r_'+coord+'_re_z',ytitle=strupcase(coord)+'Z [R!DE!N]',format='(f8.4)'
+  tplot_options,var_label=['mms'+probe+'_mec_r_'+coord+'_re_z','mms'+probe+'_mec_r_'+coord+'_re_y','mms'+probe+'_mec_r_'+coord+'_re_x']
+  tplot_options,'xmargin',[17,10]
   
   if undefined(wave_plot) then begin
     tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_hpca_hplus_flux_elev_0-360','mms'+probe+'_hpca_heplusplus_flux_elev_0-360','mms'+probe+'_hpca_heplus_flux_elev_0-360','mms'+probe+'_hpca_oplus_flux_elev_0-360','mms'+probe+'_fpi_hpca_numberDensity']

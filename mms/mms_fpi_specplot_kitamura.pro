@@ -29,8 +29,10 @@
 ;                       preserving original tplot variable.
 ;         omni_only:    set this flag to skip making E-t spectrograms except for omni-directional
 ;                       spectrograms
-;         deldist:      set this flag to delete SkyMaps that use large area of memory just after
-;                       making spectrograms
+;         deldist:      set this flag to delete distribution function that use large area of memory
+;                       just after making spectrograms
+;         delerr:       set this flag to delete distribution function err that use large area of
+;                       memory just after making spectrograms
 ;
 ; EXAMPLE:
 ;
@@ -55,7 +57,8 @@
 pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,$
                               no_load=no_load,dfg_ql=dfg_ql,direc_plot=direc_plot,$
                               no_update=no_update,no_ele=no_ele,no_ion=no_ion,gsm=gsm,gse=gse,$
-                              fast=fast,suffix=suffix,omni_only=omni_only,deldist=deldist
+                              fast=fast,suffix=suffix,omni_only=omni_only,deldist=deldist,$
+                              delerr=delerr
 
   if undefined(fast) then begin
     fpi_data_rate='brst'
@@ -89,9 +92,9 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
 
   if undefined(no_ele) then begin
     if undefined(no_load) then begin
-      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype=['des-dist'],no_update=no_update
+      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype=['des-dist'],no_update=no_update,/center_measurement,/time_clip
       if strlen(tnames('mms'+probe+'_des_dist_'+fpi_data_rate)) eq 0 then begin
-        mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['des-dist'],no_update=no_update
+        mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['des-dist'],no_update=no_update,/time_clip
         distname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist'
         tname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_energy'
       endif else begin
@@ -134,15 +137,20 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
       store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_phi',/delete
       store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist',/delete
       store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_err',/delete
-    endif
+    endif else begin
+      if not undefined(delerr) then begin
+        store_data,'mms'+probe+'_des_disterr_'+fpi_data_rate,/delete
+        store_data,'mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_err',/delete
+      endif
+    endelse
     
   endif
 
   if undefined(no_ion) then begin    
     if undefined(no_load) then begin
-      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype=['dis-dist'],no_update=no_update
+      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype=['dis-dist'],no_update=no_update,/center_measurement,/time_clip
       if strlen(tnames('mms'+probe+'_dis_dist_'+fpi_data_rate)) eq 0 then begin
-        mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['dis-dist'],no_update=no_update
+        mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['dis-dist'],no_update=no_update,/time_clip
         distname='mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist'
         tname='mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_energy'
       endif else begin
@@ -185,7 +193,12 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
       store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_phi',/delete
       store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist',/delete
       store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_err',/delete
-    endif
+    endif else begin
+      if not undefined(delerr) then begin
+        store_data,'mms'+probe+'_dis_disterr_'+fpi_data_rate,/delete
+        store_data,'mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_err',/delete
+      endif
+    endelse
     
   endif
   
