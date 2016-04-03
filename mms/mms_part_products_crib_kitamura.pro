@@ -99,9 +99,9 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   endelse
   
   if not undefined(load_fpi) then begin
-    mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l2',datatype='d'+species+'s-dist',no_update=no_update,/center_measurement
+    mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l2',datatype='d'+species+'s-dist',no_update=no_update,/center_measurement,/time_clip
     if strlen(tnames('mms'+probe+'_d'+species+'s_dist_brst')) eq 0 then begin
-      mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l1b',datatype='d'+species+'s-dist',no_update=no_update,/center_measurement
+      mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l1b',datatype='d'+species+'s-dist',no_update=no_update,/time_clip
     endif
   endif
   if strlen(tnames('mms'+probe+'_d'+species+'s_dist_brst')) eq 0 then begin
