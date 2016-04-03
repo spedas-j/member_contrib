@@ -85,8 +85,20 @@ pro overlay_map_thmasi, asi_vns, cal=cal, imgscale=imgscale, geo_plot=geo_plot, 
     ;;if keyword_set(debug) then print, minmax(cin)
     
     ;Load the cal file
-    if keyword_set(cal) then calstr = cal[i] else $
-      thm_load_asi_cal, stn, calstr
+    if ~keyword_set(cal) then begin
+      thm_load_asi_cal, stn, calstr 
+    endif else if ~is_struct(cal[0]) then begin 
+      thm_load_asi_cal, stn, calstr 
+    endif else begin 
+      ncal = n_elements(cal) 
+      calstns = strmid( file_basename( cal[*].filename ), 11, 4 ) 
+      idx = where( strpos( strlowcase(calstns), stn) eq 0, cnt ) 
+      if cnt ge 1 then begin
+        calstr = cal[ idx[0] ] 
+        dprint, dlevel=2, 'cal table for '+stn +':  '+file_basename( calstr.filename )
+      endif else thm_load_asi_cal, stn, calstr 
+      
+    endelse
     
     ;Obtain the elevation array
     idx = where( strpos( calstr.vars[*].name, vn+'_elev' ) eq 0 )
