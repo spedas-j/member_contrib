@@ -40,6 +40,7 @@ pro comp_vap_b_t04s, smooth=smooth, noplot=noplot
   rslt = tsy_params('t04s')
   
   timespan, tr
+  add_coord_sys, 'rbspa_emfisis_l3_4sec_gsm_coordinates', 'gsm' ;To avoid the error check in tt04s.pro
   tt04s, prefix+'emfisis_l3_4sec_gsm_coordinates',parmod='t04s_par'
   if keyword_set(smooth) then begin
     tsmooth_in_time, prefix+'emfisis_l3_4sec_gsm_coordinates_bt04s', 600., $
@@ -97,8 +98,26 @@ pro comp_vap_b_t04s, smooth=smooth, noplot=noplot
   endif
   
   if ~keyword_set(noplot) then $
-    tplot, ['OMNI_HRO_1min_SYM_H','VAP_and_T04S_B?','rbsp?_emfisis_l3_4sec_gsm_coordinates_'+['mag','lt']]
+    tplot, ['OMNI_HRO_1min_SYM_H','VAP_and_T04S_B?', 'VAP_and_T04S_dB?', $
+    'rbsp?_emfisis_l3_4sec_gsm_coordinates_'+['mag','lt']]
   
   return
   
 end
+
+pro add_coord_sys, varname, coord 
+  
+  vns = tnames(varname) 
+  if strlen(vns[0]) eq 0 then return
+  if ~keyword_set(coord) then coord='gsm'
+  
+  for i=0, n_elements(vns)-1 do begin
+    vn = vns[i]
+    get_data, vn, data=d, dl=dl, lim=lim  
+    str_element, dl, 'data_att.coord_sys', coord, /add_replace 
+    store_data, vn, data=d, dl=dl, lim=lim 
+  endfor
+  
+  return
+end
+
