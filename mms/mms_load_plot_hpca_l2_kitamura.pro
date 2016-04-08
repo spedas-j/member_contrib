@@ -21,9 +21,9 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
       trange[0]=roi[0]-60.d*180.d
       trange[1]=roi[1]+60.d*180.d
     endif else begin
-      print,''
+      print
       print,'Please input start and end time to use public data'
-      print,''
+      print
       return
     endelse
   endif else begin

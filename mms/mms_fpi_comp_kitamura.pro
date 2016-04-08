@@ -1,5 +1,6 @@
-PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,gse=gse,no_load_mec=no_load_mec,$
-                               no_load_fpi=no_load_fpi,no_load_dfg=no_load_dfg,no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast
+PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,$
+                          gse=gse,no_load_mec=no_load_mec,no_load_fpi=no_load_fpi,no_load_dfg=no_load_dfg,$
+                          no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast,time_clip=time_clip
 
 ; MMS> mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
 
@@ -31,9 +32,9 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
 
   if undefined(no_ele) then begin
     for i=0,n_elements(probe)-1 do begin
-      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update
+      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,time_clip=time_clip
       if strlen(tnames('mms'+probe[i]+'_des_bulkx_dbcs_'+fpi_data_rate)) eq 0 then begin
-        if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l1b',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update
+        if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l1b',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,time_clip=time_clip
         join_vec,'mms'+probe[i]+'_des_bulk'+['X','Y','Z'],'mms'+probe[i]+'_des_bulkV_DSC'
       endif else begin
         join_vec,'mms'+probe[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_des_bulkV_DSC'
@@ -187,9 +188,9 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
 
   if undefined(no_ion) then begin
     for i=0,n_elements(probe)-1 do begin
-      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update
+      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,time_clip=time_clip
       if strlen(tnames('mms'+probe[i]+'_dis_bulkx_dbcs_'+fpi_data_rate)) eq 0 then begin
-        if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l1b',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update
+        if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l1b',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,time_clip=time_clip
         join_vec,'mms'+probe[i]+'_dis_bulk'+['X','Y','Z'],'mms'+probe[i]+'_dis_bulkV_DSC'
       endif else begin
         join_vec,'mms'+probe[i]+'_dis_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_dis_bulkV_DSC'

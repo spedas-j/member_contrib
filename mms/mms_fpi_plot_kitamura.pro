@@ -32,6 +32,7 @@
 ;         skip_cotrans: set this flag to skip coordinate transformation
 ;         no_load_mec:  set this flag to skip loading mec data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
+;         time_clip:    set this flag to time clip the data
 ;
 ; EXAMPLE:
 ;
@@ -47,7 +48,7 @@
 pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_avg=no_avg,dfg_ql=dfg_ql,$
                           load_fgm=load_fgm,no_update_fgm=no_update_fgm,load_fpi=load_fpi,no_update_fpi=no_update_fpi,$
                           fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,add_scpot=add_scpot,edp_comm=edp_comm,no_update_edp=no_update_edp,$
-                          gsm=gsm,no_load_mec=no_load_mec
+                          gsm=gsm,no_load_mec=no_load_mec,time_clip=time_clip
 
   loadct2,43
   time_stamp,/off
@@ -81,8 +82,8 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     if undefined(fpi_sitl) then begin
       if not undefined(fpi_l1b) then begin
         fpi_suffix='_fast_l1b'
-        mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['dis-moms','des-moms']
-        mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='fast',no_update=no_update_fpi,datatype=['dis-dist','des-dist']
+        mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['dis-moms','des-moms'],time_clip=time_clip
+        mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='fast',no_update=no_update_fpi,datatype=['dis-dist','des-dist'],time_clip=time_clip
         if strlen(tnames('mms'+probe+'_dis_fastSkyMap_dist')) gt 0 and strlen(tnames('mms'+probe+'_des_fastSkyMap_dist')) gt 0 then begin
           mms_fpi_specplot_kitamura,trange=trange,probe=probe,suffix=fpi_suffix,/fast,/no_load,/no_plot
           store_data,'mms'+probe+'_dis_energySpectr_??'+fpi_suffix,/delete
@@ -106,14 +107,14 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
         endif
         if strlen(tnames('mms'+probe+'_dis_energySpectr_omni_fast_l1b')) eq 0 or strlen(tnames('mms'+probe+'_des_energySpectr_omni_fast_l1b')) eq 0 then begin
           fpi_suffix='_fast_ql'
-          mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['des','dis']
+          mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['des','dis'],time_clip=time_clip
         endif
       endif else begin
         fpi_suffix=''
-        mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='fast',no_update=no_update_fpi,datatype=['des-moms','dis-moms'],/center_measurement
+        mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='fast',no_update=no_update_fpi,datatype=['des-moms','dis-moms'],/center_measurement,time_clip=time_clip
         if strlen(tnames('mms'+probe+'_dis_energyspectr_px_fast')) eq 0 or strlen(tnames('mms'+probe+'_des_energyspectr_px_fast')) eq 0 then begin
           fpi_suffix='_fast_ql'
-          mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['des','dis']
+          mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['des','dis'],time_clip=time_clip
         endif else begin
           store_data,'mms'+probe+'_dis_energySpectr_??',/delete
           store_data,'mms'+probe+'_dis_energyspectr_px_fast',newname='mms'+probe+'_dis_energySpectr_pX'
@@ -137,7 +138,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       endelse
     endif
     if strlen(tnames('mms'+probe+'_dis_energySpectr_pX'+fpi_suffix)) eq 0 or strlen(tnames('mms'+probe+'_des_energySpectr_pX'+fpi_suffix)) eq 0 then begin
-      mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi,/center_measurement
+      mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi,/center_measurement,time_clip=time_clip
       fpi_suffix=''
     endif
   endif
@@ -260,8 +261,8 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 
   if not undefined(add_scpot) then begin
     if undefined(edp_comm) then begin
-      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='slow',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,/time_clip
-      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='fast',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,/time_clip
+      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='slow',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,time_clip=time_clip
+      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='fast',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,time_clip=time_clip
       if strlen(tnames('mms'+probe+'_edp_scpot_fast_l2')) gt 0 then copy_data,'mms'+probe+'_edp_scpot_fast_l2','mms'+probe+'_edp_fast_scpot'
       if strlen(tnames('mms'+probe+'_edp_scpot_slow_l2')) gt 0 then copy_data,'mms'+probe+'_edp_scpot_slow_l2','mms'+probe+'_edp_slow_scpot'
       avg_data,'mms'+probe+'_edp_slow_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
@@ -270,7 +271,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 ;      options,'mms'+probe+'_edp'+['','_slow','_fast']+'_scpot_avg',ystyle=9,ylog=1,axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}
       options,'mms'+probe+'_edp'+['_slow','_fast']+'_scpot_avg',axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endif else begin
-      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='comm',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,/time_clip
+      mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='comm',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,time_clip=time_clip
       avg_data,'mms'+probe+'_edp_comm_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
       options,'mms'+probe+'_edp_comm_scpot_avg',axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endelse

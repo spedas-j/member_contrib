@@ -19,6 +19,7 @@
 ;                       newer data is found the existing data will be overwritten
 ;         no_load_mec:  set this flag to skip loading mec data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
+;         time_clip:    set this flag to time clip the fpi data
 ;
 ; EXAMPLE:
 ;
@@ -32,7 +33,8 @@
 ;-
 
 
-pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,no_bss=no_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b
+pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,$
+                               no_bss=no_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b,time_clip=time_clip
 
   loadct2,43
   time_stamp,/off
@@ -43,14 +45,14 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   if undefined(no_load) then begin
     if undefined(l1b) then begin
-      mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement
+      mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement,time_clip=time_clip
       join_vec,'mms'+probe+'_des_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_des_bulkV_DSC'
       copy_data,'mms'+probe+'_des_numberdensity_dbcs_brst','mms'+probe+'_des_numberDensity'
       join_vec,'mms'+probe+'_dis_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
       copy_data,'mms'+probe+'_dis_numberdensity_dbcs_brst','mms'+probe+'_dis_numberDensity'
     endif
     if strlen(tnames('mms'+probe+'_dis_numberdensity_dbcs_brst')) eq 0 or strlen(tnames('mms'+probe+'_des_numberdensity_dbcs_brst')) eq 0 then begin
-      mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement
+      mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement,time_clip=time_clip
       join_vec,'mms'+probe+'_dis_bulk'+['X','Y','Z'],'mms'+probe+'_dis_bulkV_DSC'
       join_vec,'mms'+probe+'_des_bulk'+['X','Y','Z'],'mms'+probe+'_des_bulkV_DSC'
     endif else begin

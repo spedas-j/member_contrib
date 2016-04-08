@@ -44,12 +44,13 @@
 pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                                  no_bss=no_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,no_output=no_output,$
                                  add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,$
-                                 fpi_sitl=fpi_sitl,plotdir=plotdir
+                                 fpi_sitl=fpi_sitl,plotdir=plotdir,plotcdir=plotcdir
 
   probe=strcompress(string(probe),/remove_all)
 ;  if undefined(plotdir) then plotdir='./mms'+probe
 
   mms_init
+  loadct2,43
   if not undefined(delete) then store_data,'*',/delete
 
   status=mms_login_lasp(login_info=login_info,username=username)
@@ -138,13 +139,13 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_gsm_srvy_l2_bvec_avg','mms'+probe+'_fgm_b_gsm_srvy_l2_btot']
   endif else begin
     if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gsm')) gt 0 then begin
-      ;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_l2pre_gse_bvec_avg','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
+;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_l2pre_gse_bvec_avg','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
       tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec_avg','mms'+probe+'_dfg_srvy_l2pre_gsm_btot']
-      ;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
+;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
     endif else begin
-      ;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_dmpa_bvec_avg','mms'+probe+'_dfg_srvy_dmpa_btot']
+;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_dmpa_bvec_avg','mms'+probe+'_dfg_srvy_dmpa_btot']
       tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec_avg','mms'+probe+'_dfg_srvy_gsm_dmpa_btot']
-      ;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_dmpa_bvec','mms'+probe+'_dfg_srvy_dmpa_btot']
+;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_dmpa_bvec','mms'+probe+'_dfg_srvy_dmpa_btot']
     endelse
   endelse
 
@@ -157,7 +158,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     if undefined(roi) then roi=trange
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
     dn=plotdir+'\'+ts[0]+'\'+ts[1]
-    if ~file_test(dn) then file_mkdir, dn
+    if ~file_test(dn) then file_mkdir,dn
     
     thisDevice=!D.NAME
     tplot_options,'ymargin'
@@ -169,12 +170,13 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     set_plot,thisDevice
     !p.background=255
     !p.color=0
-    options,'mms_bss',thick=5.0,panel_size=0.55
+    options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.5
     window,xsize=1600,ysize=900
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
     makepng,dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver
     options,'mms_bss',thick=10.0,panel_size=0.5
+    options,'mms_bss','labsize'
     tplot_options,'tickinterval'
     tplot_options,'ymargin'
 
@@ -189,12 +191,13 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
         set_plot,thisDevice
         !p.background=255
         !p.color=0
-        options,'mms_bss',thick=5.0,panel_size=0.55
+        options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.5
         window,xsize=1600,ysize=900
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+2.d*3600.d]
         makepng,dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours'
         options,'mms_bss',thick=10.0,panel_size=0.5
+        options,'mms_bss','labsize'
         tplot_options,'ymargin'
         start_time=start_time+2.d*3600.d
       endwhile      
@@ -202,5 +205,50 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     endif
     
   endif
+
+  if undefined(no_output) and not undefined(plotcdir) then begin
+
+    if undefined(roi) then roi=trange
+
+    mms_curlometer,trange=[roi[0]-3600.d,roi[1]+3600.d],ref_probe=probe,data_rate='srvy',/gsm
+    if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
+      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod','Current_gsm','Current_magnitude','divB_over_rotB']
+    endif else begin
+      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gsm')) gt 0 then begin
+        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_l2pre_gsm_mod','Current_gsm','Current_magnitude','divB_over_rotB']
+      endif else begin
+        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_gsm_dmpa_mod','Current_gsm','Current_magnitude','divB_over_rotB']
+      endelse
+    endelse    
+
+    ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
+    dn=plotcdir+'\'+ts[0]+'\'+ts[1]
+    if ~file_test(dn) then file_mkdir,dn
+
+    thisDevice=!D.NAME
+    start_time=time_double(time_string(roi[0],format=0,precision=-2))
+    tplot_options,'tickinterval',300
+    while start_time lt roi[1] do begin
+      set_plot,'ps'
+      device,filename=dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
+      tplot,trange=[start_time,start_time+1.d*3600.d]
+      device,/close
+      set_plot,thisDevice
+      !p.background=255
+      !p.color=0
+      options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.4
+      window,xsize=1600,ysize=900
+      tplot_options,'ymargin',[2.5,0.2]
+      tplot,trange=[start_time,start_time+1.d*3600.d]
+      makepng,dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hours'
+      options,'mms_bss',thick=10.0,panel_size=0.5
+      options,'mms_bss','labsize'
+      tplot_options,'ymargin'
+      start_time=start_time+1.d*3600.d
+    endwhile
+    tplot_options,'tickinterval'
+
+  endif
+
 
 end
