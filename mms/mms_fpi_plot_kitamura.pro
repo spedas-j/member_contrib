@@ -268,12 +268,12 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       avg_data,'mms'+probe+'_edp_slow_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
       avg_data,'mms'+probe+'_edp_fast_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
 ;      store_data,'mms'+probe+'_edp_scpot_avg',data=['mms'+probe+'_edp_slow_scpot_avg','mms'+probe+'_edp_fast_scpot_avg']
-;      options,'mms'+probe+'_edp'+['','_slow','_fast']+'_scpot_avg',ystyle=9,ylog=1,axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}
-      options,'mms'+probe+'_edp'+['_slow','_fast']+'_scpot_avg',axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
+;      options,'mms'+probe+'_edp'+['','_slow','_fast']+'_scpot_avg',ystyle=9,ylog=1,axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[V]',yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}
+      options,'mms'+probe+'_edp'+['_slow','_fast']+'_scpot_avg',axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endif else begin
       mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='comm',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,time_clip=time_clip
       avg_data,'mms'+probe+'_edp_comm_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
-      options,'mms'+probe+'_edp_comm_scpot_avg',axis={yaxis:1,ytitle:'mms'+probe+'_edp!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
+      options,'mms'+probe+'_edp_comm_scpot_avg',axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endelse
 
   endif  
@@ -308,28 +308,28 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       endelse  
     endelse
     
-    options,'mms'+probe+'_fpi_eEnergySpectr_omni',spec=1.0,ytitle='mms'+probe+'_FPI!CElectron!C'+des_level+'!C'+fpiver_e+'!Comni',ysubtitle='[eV]',datagap=dgap_e,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_eEnergySpectr_omni',spec=1.0,ytitle='MMS'+probe+'_FPI!CElectron!C'+des_level+'!C'+fpiver_e+'!Comni',ysubtitle='[eV]',datagap=dgap_e,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
     ylim,'mms'+probe+'_fpi_eEnergySpectr_omni',10.d,30000.d,1
     if fpi_suffix ne '_fast_l1b' and strlen(tnames('mms'+probe+'_des_errorflags_fast')) eq 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',0.1d,50000.d,1
     if strlen(tnames('mms'+probe+'_des_errorflags_fast')) gt 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',3e5,3e9,1
     
-    options,'mms'+probe+'_fpi_iEnergySpectr_omni',spec=1.0,ytitle='mms'+probe+'_FPI!CIon!C'+dis_level+'!C'+fpiver_i+'!Comni',ysubtitle='[eV]',datagap=dgap_i,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_iEnergySpectr_omni',spec=1.0,ytitle='MMS'+probe+'_FPI!CIon!C'+dis_level+'!C'+fpiver_i+'!Comni',ysubtitle='[eV]',datagap=dgap_i,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
     ylim,'mms'+probe+'_fpi_iEnergySpectr_omni',10.d,30000.d,1
     if fpi_suffix ne '_fast_l1b' and strlen(tnames('mms'+probe+'_dis_errorflags_fast')) eq 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',0.1d,2000.d,1
     if strlen(tnames('mms'+probe+'_dis_errorflags_fast')) gt 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e4,3e8,1
     
-    options,'mms'+probe+'_fpi_DISnumberDensity',ytitle='mms'+probe+'!CFPI_'+dis_level+'!CIon!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=6,ylog=1,datagap=dgap_i,ytickformat='mms_exponent2',labels=''
+    options,'mms'+probe+'_fpi_DISnumberDensity',ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=6,ylog=1,datagap=dgap_i,ytickformat='mms_exponent2',labels=''
     ylim,'mms'+probe+'_fpi_DISnumberDensity',0.05d,300.d,1
     
     if strlen(tnames('mms'+probe+'_fpi_DESnumberDensity')) gt 0 and (des_level eq 'QL' or des_level eq 'L1B' or des_level eq 'L2') then begin
-      options,'mms'+probe+'_fpi_DESnumberDensity',ytitle='mms'+probe+'!CFPI_'+des_level+'!CElectron!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=6,ylog=1,datagap=dgap_e,ytickformat='mms_exponent2',labels=''
+      options,'mms'+probe+'_fpi_DESnumberDensity',ytitle='MMS'+probe+'!CFPI_'+des_level+'!CElectron!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=6,ylog=1,datagap=dgap_e,ytickformat='mms_exponent2',labels=''
       ylim,'mms'+probe+'_fpi_DESnumberDensity',0.05d,300.d,1
     endif
     
     if undefined(add_scpot) and strlen(tnames('mms'+probe+'_edp_fast_scpot_avg')) gt 0 then begin
       if des_level eq 'QL' or des_level eq 'L1B' or des_level eq 'L2' then begin
         store_data,'mms'+probe+'_fpi_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_fpi_DESnumberDensity']
-        options,'mms'+probe+'_fpi_numberDensity',ytitle='mms'+probe+'!CFPI_'+dis_level+'!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[0,6],labels=['Ni','Ne'],labflag=-1,ytickformat='mms_exponent2'
+        options,'mms'+probe+'_fpi_numberDensity',ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[0,6],labels=['Ni','Ne'],labflag=-1,ytickformat='mms_exponent2'
       endif else begin
         copy_data,'mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_fpi_numberDensity'
       endelse
@@ -338,53 +338,53 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       if des_level eq 'QL' or des_level eq 'L1B' or des_level eq 'L2' then begin
         options,'mms'+probe+'_fpi_DESnumberDensity',colors=2,ystyle=9
         store_data,'mms'+probe+'_fpi_numberDensity',data=['mms'+probe+'_edp_comm_scpot_avg','mms'+probe+'_edp_slow_scpot_avg','mms'+probe+'_edp_fast_scpot_avg','mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_fpi_DISnumberDensity']
-        options,'mms'+probe+'_fpi_numberDensity',ytitle='mms'+probe+'!CFPI_'+dis_level+'!CElectron(blue)!CIon(red)!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ytickformat='mms_exponent2'
+        options,'mms'+probe+'_fpi_numberDensity',ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CElectron(blue)!CIon(red)!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ytickformat='mms_exponent2'
         options,'mms'+probe+'_fpi_numberDensity','labels'
       endif else begin
         store_data,'mms'+probe+'_fpi_numberDensity',data=['mms'+probe+'_edp_comm_scpot_avg','mms'+probe+'_edp_slow_scpot_avg','mms'+probe+'_edp_fast_scpot_avg','mms'+probe+'_fpi_DISnumberDensity']
-        options,'mms'+probe+'_fpi_numberDensity',ytitle='mms'+probe+'!CFPI_'+dis_level+'!CIon(red)!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ytickformat='mms_exponent2'
+        options,'mms'+probe+'_fpi_numberDensity',ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon(red)!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ytickformat='mms_exponent2'
         options,'mms'+probe+'_fpi_numberDensity','labels'
       endelse
     endelse
     ylim,'mms'+probe+'_fpi_numberDensity',0.05d,300.d,1
 
     join_vec,'mms'+probe+'_fpi_iBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_iBulkV_DSC'
-    options,'mms'+probe+'_fpi_iBulkV_DSC',constant=0.0,ytitle='mms'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_i
+    options,'mms'+probe+'_fpi_iBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_i
     if undefined(skip_cotrans) and undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
     if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
     if undefined(skip_cotrans) then begin
       mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-      options,'mms'+probe+'_fpi_iBulkV_gse',constant=0.0,ytitle='mms'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
+      options,'mms'+probe+'_fpi_iBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
       mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
-      options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='mms'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
+      options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
     endif
     
     if des_level eq 'QL' or des_level eq 'L1B' or des_level eq 'L2' then begin
       join_vec,'mms'+probe+'_fpi_eBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_eBulkV_DSC'
-      options,'mms'+probe+'_fpi_eBulkV_DSC',constant=0.0,ytitle='mms'+probe+'!CFPI_'+des_level+'!CElectron!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_e
+      options,'mms'+probe+'_fpi_eBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+des_level+'!CElectron!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_e
       if undefined(skip_cotrans) then begin
         mms_cotrans,'mms'+probe+'_fpi_eBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-        options,'mms'+probe+'_fpi_eBulkV_gse',constant=0.0,ytitle='mms'+probe+'!CFPI_'+des_level+'!CElectron!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
+        options,'mms'+probe+'_fpi_eBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+des_level+'!CElectron!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
         mms_cotrans,'mms'+probe+'_fpi_eBulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
-        options,'mms'+probe+'_fpi_eBulkV_gsm',constant=0.0,ytitle='mms'+probe+'!CFPI_'+des_level+'!CElectron!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
+        options,'mms'+probe+'_fpi_eBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+des_level+'!CElectron!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
       endif
     endif  
     
     store_data,'mms'+probe+'_fpi_DEStemp',data=['mms'+probe+'_fpi_DEStempPerp','mms'+probe+'_fpi_DEStempPara']
-    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='mms'+probe+'!Cfpi_'+des_level+'!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_e,ytickformat='mms_exponent2'
-;    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='mms'+probe+'_fpi!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='MMS'+probe+'!Cfpi_'+des_level+'!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_e,ytickformat='mms_exponent2'
+;    options,'mms'+probe+'_fpi_DEStemp',ylog=1,ytitle='MMS'+probe+'_fpi!CeTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
     store_data,'mms'+probe+'_fpi_DIStemp',data=['mms'+probe+'_fpi_DIStempPerp','mms'+probe+'_fpi_DIStempPara']
-    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='mms'+probe+'!Cfpi_'+dis_level+'!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_i,ytickformat='mms_exponent2'
-;    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='mms'+probe+'_fpi!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='MMS'+probe+'!Cfpi_'+dis_level+'!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=dgap_i,ytickformat='mms_exponent2'
+;    options,'mms'+probe+'_fpi_DIStemp',ylog=1,ytitle='MMS'+probe+'_fpi!CiTemp',ysubtitle='[eV]',colors=[6,0],labels=['Perp','Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
     store_data,'mms'+probe+'_fpi_temp',data=['mms'+probe+'_fpi_DIStempPerp','mms'+probe+'_fpi_DIStempPara','mms'+probe+'_fpi_DEStempPerp','mms'+probe+'_fpi_DEStempPara']
     ylim,'mms'+probe+'_fpi_temp',5.d,50000.d,1
-    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='mms'+probe+'!CFPI_'+dis_level+'!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,datagap=(dgap_i > dgap_e),ytickformat='mms_exponent2'
-;    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='mms'+probe+'_FPI!CSITL!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,datagap=(dgap_i > dgap_e),ytickformat='mms_exponent2'
+;    options,'mms'+probe+'_fpi_temp',ylog=1,ytitle='MMS'+probe+'_FPI!CSITL!CTemp',ysubtitle='[eV]',colors=[2,4,6,0],labels=['Ti_Perp','Ti_Para','Te_Perp','Te_Para'],labflag=-1,datagap=10.5d,ytickformat='mms_exponent2'
 
     if strlen(tnames('mms'+probe+'_fpi_bentPipeB_X_DSC')) eq 0 then begin
       options,'mms'+probe+'_fpi_bentPipeB_?_DSC',constant=0.0,datagap=10.5d
       store_data,'mms'+probe+'_fpi_bentPipeB_DSC',data=['mms'+probe+'_fpi_bentPipeB_X_DSC','mms'+probe+'_fpi_bentPipeB_Y_DSC','mms'+probe+'_fpi_bentPipeB_Z_DSC']
-      options,'mms'+probe+'_fpi_bentPipeB_DSC',ytitle='mms'+probe+'_FPI!CbentPipeB!CDSC',constant=0.0,colors=[2,4,6],labels=['B!DX!N_DSC','B!DY!N_DSC','B!DZ!N_DSC'],labflag=-1,datagap=10.5d
+      options,'mms'+probe+'_fpi_bentPipeB_DSC',ytitle='MMS'+probe+'_FPI!CbentPipeB!CDSC',constant=0.0,colors=[2,4,6],labels=['B!DX!N_DSC','B!DY!N_DSC','B!DZ!N_DSC'],labflag=-1,datagap=10.5d
       ylim,'mms'+probe+'_fpi_bentPipeB_DSC',-1.0,1.0,0
     endif  
     

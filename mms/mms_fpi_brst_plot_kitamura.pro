@@ -109,7 +109,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   endif
 
   if undefined(no_bss) and public eq 0 then begin
-    spd_mms_load_bss
+    spd_mms_load_bss,datatype=['fast','status']
     split_vec,'mms_bss_status'
     calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
     calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'

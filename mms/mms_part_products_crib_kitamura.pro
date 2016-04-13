@@ -17,7 +17,7 @@
 ;
 ;
 PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,dfg_ql=dfg_ql,load_fpi=load_fpi,load_mec=load_mec,erange=erange,$
-                                    parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,fac_type=fac_type,regrid=redrid
+                                    parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,bname=banme,fac_type=fac_type,regrid=redrid
 
   if undefined(probe) then probe=['3']
   if undefined(fac_type) then fac_type='mphigeo'
@@ -110,17 +110,19 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
     name='mms'+probe+'_d'+species+'s_dist_brst'
   endelse
 
-  if strlen(tnames('mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec')) gt 0 then begin
-    bname='mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec'
-  endif else begin
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec')) eq 0 then begin
-      ;Until coordinate systems are properly labeled in mms metadata, this variable must be dmpa
-      bname='mms'+probe+'_dfg_srvy_dmpa_bvec'
+  if undefined(bname) then begin
+    if strlen(tnames('mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec')) gt 0 then begin
+      bname='mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec'
     endif else begin
-      ;Until coordinate systems are properly labeled in mms metadata, this variable must be dmpa
-      bname='mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec'
+      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec')) eq 0 then begin
+        ;Until coordinate systems are properly labeled in mms metadata, this variable must be dmpa
+        bname='mms'+probe+'_dfg_srvy_dmpa_bvec'
+      endif else begin
+        ;Until coordinate systems are properly labeled in mms metadata, this variable must be dmpa
+        bname='mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec'
+      endelse
     endelse
-  endelse
+  endif
 
   if undefined(erange) then begin
     erange_tname=''

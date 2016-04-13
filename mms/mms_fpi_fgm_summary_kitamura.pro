@@ -121,7 +121,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
   
   if undefined(no_bss) and public eq 0 then begin
     time_stamp,/on
-    spd_mms_load_bss
+    spd_mms_load_bss,datatype=['fast','status']
     split_vec,'mms_bss_status'
     calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
     calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'
