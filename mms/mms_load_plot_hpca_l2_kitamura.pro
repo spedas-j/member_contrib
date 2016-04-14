@@ -20,8 +20,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
     if public eq 0 then begin
       roi=mms_get_roi(trange,/next)
       trange=dblarr(2)
-      trange[0]=roi[0]-60.d*180.d
-      trange[1]=roi[1]+60.d*180.d
+      trange[0]=roi[0]-60.d*210.d
+      trange[1]=roi[1]+60.d*210.d
     endif else begin
       print
       print,'Please input start and end time to use public data'
@@ -170,7 +170,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
   endif else begin
     tname_velocity='mms'+probe+'_hpca_hplus_ion_bulk_velocity_GSM'
     options,tname_velocity,constant=0.0,ytitle='MMS'+probe+'!CHPCA!CH+!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=600.d
-  endelse    
+  endelse
+  ylim,tname_velocity,-500.d,500.d,0
   
   if undefined(wave_plot) then begin
     if not undefined(flux) then begin
@@ -193,7 +194,10 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
 
     thisDevice=!D.NAME
     tplot_options,'ymargin'
+    tplot_options,'charsize',0.7
     tplot_options,'tickinterval',3600
+    tplot_options,'xmargin',[15,15]
+    options,'mms_bss',labsize=0.9
     set_plot,'ps'
     device,filename=dn+'\mms'+probe+'_'+inst_name+'_ROI_'+time_string(roi[0],format=2,precision=0)+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
     tplot,trange=trange
@@ -203,6 +207,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
     !p.color=0
     options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
     window,xsize=1920,ysize=1080
+    tplot_options,'xmargin',[17,13]
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
     makepng,dn+'\mms'+probe+'_'+inst_name+'_ROI_'+time_string(roi[0],format=2,precision=0)
@@ -214,7 +219,9 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
     if undefined(no_short) then begin
       start_time=time_double(time_string(trange[0],format=0,precision=-2))
       tplot_options,'tickinterval',300
-      while start_time lt roi[1]+2.d*3600.d do begin
+      while start_time lt trange[1]-1.d*3600.d do begin
+        options,'mms_bss',labsize=0.9
+        tplot_options,'xmargin',[15,15]
         set_plot,'ps'
         device,filename=dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
         tplot,trange=[start_time,start_time+1.d*3600.d]
@@ -224,6 +231,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
         !p.color=0
         options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
         window,xsize=1920,ysize=1080
+        tplot_options,'xmargin',[17,13]
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+1.d*3600.d]
         makepng,dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour'
@@ -233,8 +241,9 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
         start_time=start_time+1.d*3600.d
       endwhile
       tplot_options,'tickinterval'
+      tplot_options,'xmargin'
     endif
-
+    tplot_options,'charsize'
   endif
-
+  
 end
