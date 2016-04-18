@@ -7,7 +7,7 @@
 pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,no_load_fpi=no_load_fpi,$
                                    no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,delete=delete,plot_wave=plot_wave,$
                                    no_bss=no_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,pa_erange=pa_erange,$
-                                   zrange=zrange,plotdir=plotdir,no_short=no_short
+                                   zrange=zrange,v_hpca=v_hpca,plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -85,8 +85,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
   zlim,prefix+'_dis_dist_fast_energy_omni',1e4,1e8,1
   options,prefix+'_dis_dist_fast_energy_omni',minzlog=0
 
-  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,/time_clip
-  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca;,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca;,/time_clip
   mms_hpca_calc_anodes,fov=[0,360],probe=probe
 
   ion_sp=[['hplus','heplusplus','heplus','oplus'],['H!U+!N','He!U++!N','He!U+!N','O!U+!N']]
@@ -163,15 +163,19 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
   tplot_options,var_label=['mms'+probe+'_mec_r_'+coord+'_re_z','mms'+probe+'_mec_r_'+coord+'_re_y','mms'+probe+'_mec_r_'+coord+'_re_x']
   tplot_options,'xmargin',[17,10]
 
-  if coord eq 'gse' then begin
-    mms_cotrans,'mms'+probe+'_hpca_hplus_ion_bulk_velocity',in_coord='gsm',in_suffix='_GSM',out_coord='gse',out_suffix='_GSE',/ignore_dlimits
-    tname_velocity='mms'+probe+'_hpca_hplus_ion_bulk_velocity_GSE'
-    options,tname_velocity,constant=0.0,ytitle='MMS'+probe+'!CHPCA!CH+!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=600.d
+  if not undefined(v_hpca) then begin
+    if coord eq 'gse' then begin
+      mms_cotrans,'mms'+probe+'_hpca_hplus_ion_bulk_velocity',in_coord='gsm',in_suffix='_GSM',out_coord='gse',out_suffix='_GSE',/ignore_dlimits
+      tname_velocity='mms'+probe+'_hpca_hplus_ion_bulk_velocity_GSE'
+      options,tname_velocity,constant=0.0,ytitle='MMS'+probe+'!CHPCA!CH+!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=600.d
+    endif else begin
+      tname_velocity='mms'+probe+'_hpca_hplus_ion_bulk_velocity_GSM'
+      options,tname_velocity,constant=0.0,ytitle='MMS'+probe+'!CHPCA!CH+!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=600.d
+    endelse
+    ylim,tname_velocity,-500.d,500.d,0
   endif else begin
-    tname_velocity='mms'+probe+'_hpca_hplus_ion_bulk_velocity_GSM'
-    options,tname_velocity,constant=0.0,ytitle='MMS'+probe+'!CHPCA!CH+!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=600.d
+    tname_velocity='mms1_fpi_iBulkV_'+coord
   endelse
-  ylim,tname_velocity,-500.d,500.d,0
   
   if undefined(wave_plot) then begin
     if not undefined(flux) then begin
@@ -245,5 +249,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
     endif
     tplot_options,'charsize'
   endif
+  
+  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,plotdir=esp_plotdir,no_short=no_short,/hpca,/gsm
   
 end

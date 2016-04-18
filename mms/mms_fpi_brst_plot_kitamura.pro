@@ -69,17 +69,17 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   if strlen(tnames('mms'+probe+'_des_bulkX_fast_ql')) gt 0 or strlen(tnames('mms'+probe+'_des_bulkX_fast_l1b')) gt 0 or strlen(tnames('mms'+probe+'_des_bulkx_dbcs_fast')) gt 0 then begin
     store_data,'mms'+probe+'_fpi_des_numberDensity',data=['mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_des_numberDensity']
     store_data,'mms'+probe+'_fpi_dis_des_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity','mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_des_numberDensity']
-    options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='mms'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,0,6],labels=['Ni','Ni_brst','Ne','Ne_brst'],labflag=-1
+    options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='MMS'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,0,6],labels=['Ni','Ni_brst','Ne','Ne_brst'],labflag=-1
   endif else begin
     store_data,'mms'+probe+'_fpi_dis_des_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity','mms'+probe+'_des_numberDensity']
-    options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='mms'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,6],labels=['Ni','Ni_brst','Ne_brst'],labflag=-1
+    options,'mms'+probe+'_fpi_dis_des_numberDensity',ytitle='MMS'+probe+'_fpi!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,colors=[3,2,6],labels=['Ni','Ni_brst','Ne_brst'],labflag=-1
   endelse
   ylim,'mms'+probe+'_fpi_dis_des_numberDensity',0.03d,300.d,1
   
-  options,'mms'+probe+'_dis_numberDensity',ytitle='mms'+probe+'_fpi!CDIS!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.16d
-  options,'mms'+probe+'_des_numberDensity',ytitle='mms'+probe+'_fpi!CDES!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.032d
+  options,'mms'+probe+'_dis_numberDensity',ytitle='MMS'+probe+'_fpi!CDIS!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.16d
+  options,'mms'+probe+'_des_numberDensity',ytitle='MMS'+probe+'_fpi!CDES!CNumber!CDensity',ysubtitle='[cm!U-3!N]',ylog=1,datagap=0.032d
   
-  options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+  options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   
   if undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
 
@@ -90,12 +90,12 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     dl.data_att.coord_sys='DMPA'
     store_data,'mms'+probe+'_dis_bulkV_DSC',data=d,lim=l,dlim=dl
     mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-    options,'mms'+probe+'_dis_bulkV_gse',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+    options,'mms'+probe+'_dis_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
-    options,'mms'+probe+'_dis_bulkV_gsm',constant=0.0,ytitle='mms'+probe+'_dis!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+    options,'mms'+probe+'_dis_bulkV_gsm',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   endif
   
-  options,'mms'+probe+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+  options,'mms'+probe+'_des_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
 
   if undefined(skip_cotrans) then begin
     ;This part should be improved in future.
@@ -103,9 +103,9 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     dl.data_att.coord_sys='DMPA'
     store_data,'mms'+probe+'_des_bulkV_DSC',data=d,lim=l,dlim=dl
     mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-    options,'mms'+probe+'_des_bulkV_gse',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+    options,'mms'+probe+'_des_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
     mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
-    options,'mms'+probe+'_des_bulkV_gsm',constant=0.0,ytitle='mms'+probe+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+    options,'mms'+probe+'_des_bulkV_gsm',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
   endif
 
   if undefined(no_bss) and public eq 0 then begin
