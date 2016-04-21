@@ -179,20 +179,3 @@ pro calc_tsyg_model_bfield, orbvn_re, bfldvn, $
   return
 end
 
-;Some helper routines used only in this procedure are defined below. 
-pro add_coord_sys, varname, coord
-
-  vns = tnames(varname)
-  if strlen(vns[0]) eq 0 then return
-  if ~keyword_set(coord) then coord='gsm'
-
-  for i=0, n_elements(vns)-1 do begin
-    vn = vns[i]
-    get_data, vn, data=d, dl=dl, lim=lim
-    str_element, dl, 'data_att.coord_sys', coord, /add_replace
-    store_data, vn, data=d, dl=dl, lim=lim
-  endfor
-
-  return
-end
-
