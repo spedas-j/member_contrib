@@ -1,5 +1,8 @@
-pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca=hpca,load_fgm=load_fgm,no_update_mec=no_update_mec,$
-                               no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,plotdir=plotdir,erangename=erangename,gsm=gsm
+; MMS> mms_plot_hfesp_l2_kitamura,['2015-10-10/07:13:00','2015-10-10/07:20:00'],probe='1',/delete,/fpi_brst,/load_fgm,/load_fpi,/lowi_brst_pa,/lowi_brst_theta,/gsm
+
+pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
+                               no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,plotdir=plotdir,$
+                               lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -24,14 +27,13 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     roi=trange
   endelse
   if undefined(probe) then probe='1'
-  probe=strcompress(string(probe),/rem)
+  probe=strcompress(string(probe),/remove_all)
 
   dt=trange[1]-trange[0]
   timespan,trange[0],dt,/seconds
   
   prefix='mms'+probe
-  if not undefined(fpi_brst) then fpi_data_rate='brst' else fpi_data_rate='srvy'
-  if undefined(erangename) then erangename=''
+  if not undefined(brst_hpca) then hpca_data_rate='brst' else hpca_data_rate='srvy'
   
   mms_init
   loadct2,43
@@ -59,7 +61,34 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     ylim,prefix+'_dis_energyspectr_omni_avg',1e1,3e4,1
     zlim,prefix+'_dis_energyspectr_omni_avg',1e4,1e8,1
     options,prefix+'_dis_energyspectr_omni_avg',minzlog=0,datagap=0.16d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
-    store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',prefix+'_dis_energyspectr_omni_avg']
+    if not undefined(lowi_brst_pa) or not undefined(lowi_brst_theta) then begin
+      if undefined(pa_erange) then pa_erange=[1.d,300.d]
+      if pa_erange[0] gt 100.d and pa_erange[1] ge 1000.d then begin
+        erangename=strcompress(string(pa_erange[0]/1000.d,format='(f5.1)'),/remove_all)+'-'+strcompress(string(pa_erange[1]/1000.d,format='(f5.1)'),/remove_all)+'keV'
+      endif else begin
+        erangename=strcompress(string(pa_erange[0],format='(i6)'),/remove_all)+'-'+strcompress(string(pa_erange[1],format='(i6)'),/remove_all)+'eV'
+      endelse
+      if strlen(tnames(prefix+'_dis_dist_brst')) eq 0 then mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l2',datatype='dis-dist',no_update=no_update_fpi,/center_measurement,/time_clip
+      mms_part_products,prefix+'_dis_dist_brst',trange=trange,outputs='energy',suffix='_omni'
+      ylim,prefix+'_dis_dist_brst_energy_omni',1e1,3e4,1
+      zlim,prefix+'_dis_dist_brst_energy_omni',1e4,1e8,1
+      options,prefix+'_dis_dist_brst_energy_omni',minzlog=0,datagap=0.16d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+      store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',prefix+'_dis_dist_brst_energy_omni']
+    endif else begin
+      store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',prefix+'_dis_energyspectr_omni_avg']
+    endelse
+    if not undefined(lowi_brst_pa) then begin
+      mms_part_products,prefix+'_dis_dist_brst',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
+      ylim,prefix+'_dis_dist_brst_pa_'+erangename,0.d,180.d,0
+      options,prefix+'_dis_dist_brst_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CFPI DIS!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=0.16d,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+      zlim,prefix+'_dis_dist_brst_pa_'+erangename,1e3,1e7,1
+    endif
+    if not undefined(lowi_brst_theta) then begin
+      mms_part_products,prefix+'_dis_dist_brst',trange=trange,energy=pa_erange,outputs='theta',suffix='_'+erangename
+      ylim,prefix+'_dis_dist_brst_theta_'+erangename,-90.d,90.d,0
+      options,prefix+'_dis_dist_brst_theta_'+erangename,spec=1,constant=0.0,ytitle='MMS'+probe+'!CFPI DIS!C'+erangename+'!CTheta',ysubtitle='[deg]',datagap=0.16d,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+      zlim,prefix+'_dis_dist_brst_theta_'+erangename,1e3,1e7,1
+    endif
     dis_spec=prefix+'_dis_energy_omni'
     options,dis_spec,minzlog=0,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
     ylim,dis_spec,1e1,3e4,1
@@ -71,13 +100,15 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     mms_cotrans,prefix+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
     options,prefix+'_dis_bulkV_gsm',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     tname_velocity=prefix+'_dis_bulkV_'+coord
+    ion_pa_rate='brst'
   endif else begin
     dis_spec=prefix+'_dis_dist_fast_energy_omni'
     tname_velocity=prefix+'_fpi_iBulkV_'+coord
+    ion_pa_rate='fast'
   endelse
 
   if not undefined(load_hpca) then begin
-    mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,/time_clip
+    mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=hpca_data_rate,no_update=no_update_hpca,/time_clip
     if undefined(hpca_brst) then begin
       options,prefix+'_hpca_*plus_number_density',datagap=600.d
     endif else begin
@@ -142,7 +173,9 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   tplot_options,var_label=['mms'+probe+'_mec_r_'+coord+'_re_z','mms'+probe+'_mec_r_'+coord+'_re_y','mms'+probe+'_mec_r_'+coord+'_re_x']
   tplot_options,'xmargin',[17,10]
 
-  tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni',dis_spec,'mms'+probe+'_dis_dist_fast_pa_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_fp_fc_hfesp',tname_density,tname_velocity]
+  if undefined(erangename) then erangename=''
+
+  tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni',dis_spec,'mms'+probe+'_dis_dist_'+ion_pa_rate+'_pa_'+erangename,'mms'+probe+'_dis_dist_brst_theta_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_fp_fc_hfesp',tname_density,tname_velocity]
 
   if not undefined(plotdir) then begin
 

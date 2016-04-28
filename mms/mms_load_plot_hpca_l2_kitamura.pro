@@ -4,10 +4,10 @@
 ;MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-01/08:00:00',probe='1',/brst,/delete,/gsm
 ;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],probe='1',/brst,/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/no_bss,/gsm
 
-pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,no_load_fpi=no_load_fpi,$
-                                   no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,delete=delete,plot_wave=plot_wave,$
+pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,$
+                                   no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
                                    no_bss=no_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,pa_erange=pa_erange,$
-                                   zrange=zrange,v_hpca=v_hpca,plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short
+                                   zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -90,23 +90,27 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
   mms_hpca_calc_anodes,fov=[0,360],probe=probe
 
   ion_sp=[['hplus','heplusplus','heplus','oplus'],['H!U+!N','He!U++!N','He!U+!N','O!U+!N']]
+  for s=0,n_elements(ion_sp[*,0])-1 do begin
+    get_data,prefix+'_hpca_'+ion_sp[s,0]+'_flux_elev_0-360',data=d
+    for i=0l,n_elements(d.x)-1 do begin
+      for j=0l,n_elements(d.v)-1 do d.y[i,j]=d.y[i,j]*d.v[j]
+    endfor
+    store_data,prefix+'_hpca_'+ion_sp[s,0]+'_eflux_elev_0-360',data=d
+  endfor
+  if not undefined(zrange) and not undefined(flux) then zlim,prefix+'_hpca_*plus_flux_elev_0-360',zrange[0],zrange[1],1 else zlim,prefix+'_hpca_*plus_flux_elev_0-360',0.3d,3e6,1
+  ylim,prefix+'_hpca_*plus_eflux_elev_0-360',1e0,4e4,1
+  if not undefined(zrange) and undefined(flux) then zlim,prefix+'_hpca_*plus_eflux_elev_0-360',zrange[0],zrange[1],1 else zlim,prefix+'_hpca_*plus_eflux_elev_0-360',1e4,1e8,1
   if undefined(brst) then begin
     for s=0,n_elements(ion_sp[*,0])-1 do begin
-      get_data,prefix+'_hpca_'+ion_sp[s,0]+'_flux_elev_0-360',data=d
-      for i=0l,n_elements(d.x)-1 do begin
-        for j=0l,n_elements(d.v)-1 do d.y[i,j]=d.y[i,j]*d.v[j]
-      endfor
-      store_data,prefix+'_hpca_'+ion_sp[s,0]+'_eflux_elev_0-360',data=d
       options,prefix+'_hpca_'+ion_sp[s,0]+'_flux_elev_0-360',spec=1,datagap=600.d,ytitle='MMS'+probe+'!CHPCA L2!C'+ion_sp[s,1]+' srvy!CELEV!C0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='1/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
       options,prefix+'_hpca_'+ion_sp[s,0]+'_eflux_elev_0-360',spec=1,datagap=600.d,ytitle='MMS'+probe+'!CHPCA L2!C'+ion_sp[s,1]+' srvy!CELEV!C0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     endfor
-    if not undefined(zrange) and not undefined(flux) then zlim,prefix+'_hpca_*plus_flux_elev_0-360',zrange[0],zrange[1],1 else zlim,prefix+'_hpca_*plus_flux_elev_0-360',0.3d,3e6,1 
-    ylim,prefix+'_hpca_*plus_eflux_elev_0-360',1e0,4e4,1
-    if not undefined(zrange) and undefined(flux) then zlim,prefix+'_hpca_*plus_eflux_elev_0-360',zrange[0],zrange[1],1 else zlim,prefix+'_hpca_*plus_eflux_elev_0-360',1e4,1e8,1
     options,prefix+'_hpca_*plus_number_density',datagap=600.d
   endif else begin
-    for s=0,n_elements(ion_sp[*,0])-1 do options,[prefix+'_hpca_'+ion_sp[s,0]+'_flux_elev_0-360'],spec=1,datagap=0.75d,ytitle='MMS'+probe+'!CHPCA L2!C'+ion_sp[s,1]+' burst!CELEV 0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='1/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
-    zlim,[prefix+'_hpca_*plus_flux_elev_0-360'],1.d,1000.d,1
+    for s=0,n_elements(ion_sp[*,0])-1 do begin
+      options,prefix+'_hpca_'+ion_sp[s,0]+'_flux_elev_0-360',spec=1,datagap=0.75d,ytitle='MMS'+probe+'!CHPCA L2!C'+ion_sp[s,1]+' burst!CELEV 0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='1/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+      options,prefix+'_hpca_'+ion_sp[s,0]+'_eflux_elev_0-360',spec=1,datagap=0.75d,ytitle='MMS'+probe+'!CHPCA L2!C'+ion_sp[s,1]+' burst!CELEV 0-360',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    endfor
     options,prefix+'_hpca_*plus_number_density',datagap=25.d
   endelse
   
@@ -250,6 +254,6 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,brst=brst,no_load_fgm=no_l
     tplot_options,'charsize'
   endif
   
-  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,plotdir=esp_plotdir,no_short=no_short,/hpca,/gsm
+  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,plotdir=esp_plotdir,no_short=no_short,/gsm
   
 end
