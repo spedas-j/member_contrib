@@ -12,8 +12,10 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
   if not undefined(trange) then begin
     trange=time_double(trange)
     if undefined(l2pre) then begin
+      inst='FGM'
       for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='fgm',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2',/no_attitude_data
     endif else begin
+      inst='DFG'
       for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_dfg_'+fgm_data_rate+'_l2pre_'+coord+'_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='dfg',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2pre',/no_attitude_data
     endelse
     for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_mec_r_'+coord)) eq 0 then mms_load_mec,trange=[trange[0]-60.0,trange[1]+60.0],probes=strcompress(string(p),/remove_all)
@@ -148,11 +150,79 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
 
   if not undefined(lmn) then begin
     ji_lmn=dblarr(n_elements(time),3)
-    for i=0l,n_elements(time)-1 do begin
-      ji_lmn[i,0]=ji[i,0]*lmn[0,0]+ji[i,1]*lmn[1,0]+ji[i,2]*lmn[2,0]
-      ji_lmn[i,1]=ji[i,0]*lmn[0,1]+ji[i,1]*lmn[1,1]+ji[i,2]*lmn[2,1]
-      ji_lmn[i,2]=ji[i,0]*lmn[0,2]+ji[i,1]*lmn[1,2]+ji[i,2]*lmn[2,2]
-    endfor
+    b_lmn=dblarr(n_elements(time),3)
+    bt=dblarr(n_elements(time))
+    if n_elements(lmn) eq 9 then begin
+      for i=0l,n_elements(time)-1 do begin
+        ji_lmn[i,0]=ji[i,0]*lmn[0,0]+ji[i,1]*lmn[1,0]+ji[i,2]*lmn[2,0]
+        ji_lmn[i,1]=ji[i,0]*lmn[0,1]+ji[i,1]*lmn[1,1]+ji[i,2]*lmn[2,1]
+        ji_lmn[i,2]=ji[i,0]*lmn[0,2]+ji[i,1]*lmn[1,2]+ji[i,2]*lmn[2,2]
+      endfor
+      
+;      for p=1,4 do begin
+;        get_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer',data=b
+;        for i=0l,n_elements(time)-1 do begin
+;          b_lmn[i,0]=b.y[i,0]*lmn[0,0]+b.y[i,1]*lmn[1,0]+b.y[i,2]*lmn[2,0]
+;          b_lmn[i,1]=b.y[i,0]*lmn[0,1]+b.y[i,1]*lmn[1,1]+b.y[i,2]*lmn[2,1]
+;          b_lmn[i,2]=b.y[i,0]*lmn[0,2]+b.y[i,1]*lmn[1,2]+b.y[i,2]*lmn[2,2]
+;          bt[i]=norm(reform(b.y[i,*]),/double)
+;        endfor
+;        store_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_lmn',data={x:b.x,y:b_lmn}
+;        store_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_tlmn',data={x:b.x,y:[[bt],[b_lmn[*,0]],[b_lmn[*,1]],[b_lmn[*,2]]}
+;        options,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_lmn',constant=0.0,ytitle='MMS'+strcompress(string(p),/remove_all)+'!CFGM_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[2,4,6],labels=['B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+;        options,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_tlmn',constant=0.0,ytitle='MMS'+strcompress(string(p),/remove_all)+'!CFGM_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[0,2,4,6],labels=['|B|','B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+;      endfor
+
+      get_data,'mms'+ref_probe+'_b_for_curlometer',data=b
+      for i=0l,n_elements(time)-1 do begin
+        b_lmn[i,0]=b.y[i,0]*lmn[0,0]+b.y[i,1]*lmn[1,0]+b.y[i,2]*lmn[2,0]
+        b_lmn[i,1]=b.y[i,0]*lmn[0,1]+b.y[i,1]*lmn[1,1]+b.y[i,2]*lmn[2,1]
+        b_lmn[i,2]=b.y[i,0]*lmn[0,2]+b.y[i,1]*lmn[1,2]+b.y[i,2]*lmn[2,2]
+        bt[i]=norm(reform(b.y[i,*]),/double)
+      endfor
+      store_data,'mms'+ref_probe+'_b_for_curlometer_lmn',data={x:b.x,y:b_lmn}
+      store_data,'mms'+ref_probe+'_b_for_curlometer_tlmn',data={x:b.x,y:[[bt],[b_lmn[*,0]],[b_lmn[*,1]],[b_lmn[*,2]]]}
+      options,'mms'+ref_probe+'_b_for_curlometer_lmn',constant=0.0,ytitle='MMS'+ref_probe+'!C'+inst+'_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[2,4,6],labels=['B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+      options,'mms'+ref_probe+'_b_for_curlometer_tlmn',constant=0.0,ytitle='MMS'+ref_probe+'!C'+inst+'_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[0,2,4,6],labels=['|B|','B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+      undefine,b
+
+    endif else begin
+      calc,"'mms_avg_pos'=('mms1_pos_for_curlometer'+'mms2_pos_for_curlometer'+'mms3_pos_for_curlometer'+'mms4_pos_for_curlometer')/4.d"
+      if coord eq 'gse' then begin
+        cotrans,'mms_avg_pos','mms_avg_pos_gsm',/gse2gsm
+        cotrans,ji,ji_gsm,time,/gse2gsm
+;        for p=1,4 do cotrans,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer','mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_gsm',/gse2gsm
+        cotrans,'mms'+ref_probe+'_b_for_curlometer','mms'+ref_probe+'_b_for_curlometer_gsm',/gse2gsm
+      endif else begin
+;        for p=1,4 do copy_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer','mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_gsm'
+        copy_data,'mms'+ref_probe+'_b_for_curlometer','mms'+ref_probe+'_b_for_curlometer_gsm'
+        copy_data,'mms_avg_pos','mms_avg_pos_gsm'
+        ji_gsm=ji
+      endelse
+      store_data,'mms_avg_pos',/delete
+      get_data,'mms_avg_pos_gsm',data=pos
+      gsm2lmn,[[pos.x],[pos.y[*,0]],[pos.y[*,1]],[pos.y[*,2]]],ji_gsm,ji_lmn
+      
+;      for p=1,4 do begin
+;        get_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_gsm',data=b
+;        for i=0l,n_elements(time)-1 do bt[i]=norm(reform(b.y[i,*]),/double)
+;        gsm2lmn,[[pos.x],[pos.y[*,0]],[pos.y[*,1]],[pos.y[*,2]]],b.y,b_lmn
+;        store_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_lmn',data={x:b.x,y:b_lmn}
+;        store_data,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_tlmn',data={x:b.x,y:[[bt],[b_lmn[*,0]],[b_lmn[*,1]],[b_lmn[*,2]]]}
+;        options,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_lmn',constant=0.0,ytitle='MMS'+strcompress(string(p),/remove_all)+'!CFGM_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[2,4,6],labels=['B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+;        options,'mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer_tlmn',constant=0.0,ytitle='MMS'+strcompress(string(p),/remove_all)+'!CFGM_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[0,2,4,6],labels=['|B|','B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+;      endfor
+      
+      get_data,'mms'+ref_probe+'_b_for_curlometer_gsm',data=b
+      for i=0l,n_elements(time)-1 do bt[i]=norm(reform(b.y[i,*]),/double)
+      gsm2lmn,[[pos.x],[pos.y[*,0]],[pos.y[*,1]],[pos.y[*,2]]],b.y,b_lmn
+      store_data,'mms'+ref_probe+'_b_for_curlometer_lmn',data={x:b.x,y:b_lmn}
+      store_data,'mms'+ref_probe+'_b_for_curlometer_tlmn',data={x:b.x,y:[[bt],[b_lmn[*,0]],[b_lmn[*,1]],[b_lmn[*,2]]]}
+      options,'mms'+ref_probe+'_b_for_curlometer_lmn',constant=0.0,ytitle='MMS'+ref_probe+'!C'+inst+'_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[2,4,6],labels=['B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+      options,'mms'+ref_probe+'_b_for_curlometer_tlmn',constant=0.0,ytitle='MMS'+ref_probe+'!C'+inst+'_'+fgm_data_rate+'!CLMN',ysubtitle='[nT]',colors=[0,2,4,6],labels=['|B|','B!DL!N','B!DM!N','B!DN!N'],labflag=-1,datagap=0.13d
+      
+      undefine,pos,ji,ji_gsm,b
+    endelse
     store_data,'Current_lmn',data={x:time,y:ji_lmn}
     options,'Current_lmn',constant=0.0,ytitle='Current!CDensity!CLMN',ysubtitle='[nA/m!U2!N]',colors=[2,4,6],labels=['J!DL!N','J!DM!N','J!DN!N'],labflag=-1,datagap=0.13d
   endif
@@ -166,7 +236,11 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
     tplot_options,var_label=['mms'+ref_probe+'_mec_r_'+coord+'_re_z','mms'+ref_probe+'_mec_r_'+coord+'_re_y','mms'+ref_probe+'_mec_r_'+coord+'_re_x']
     tplot_options,'xmargin',[15,10]
     options,'mms'+ref_probe+'_b_for_curlometer',labflag=-1
-    tplot,['mms'+ref_probe+'_b_for_curlometer','Current_'+coord,'Current_magnitude','divB_over_rotB']
+    if undefined(lmn) then begin
+      tplot,['mms'+ref_probe+'_b_for_curlometer','Current_'+coord,'Current_magnitude','divB_over_rotB']
+    endif else begin
+      tplot,['mms'+ref_probe+'_b_for_curlometer_tlmn','Current_lmn','Current_magnitude','divB_over_rotB']
+    endelse
   endif
   
 end
