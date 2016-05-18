@@ -52,7 +52,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
       copy_data,'mms'+probe+'_dis_numberdensity_dbcs_brst','mms'+probe+'_dis_numberDensity'
     endif
     if strlen(tnames('mms'+probe+'_dis_numberdensity_dbcs_brst')) eq 0 or strlen(tnames('mms'+probe+'_des_numberdensity_dbcs_brst')) eq 0 then begin
-      mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement,time_clip=time_clip
+      mms_load_fpi,trange=trange,probes=probe,level='l1b',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,time_clip=time_clip
       join_vec,'mms'+probe+'_dis_bulk'+['X','Y','Z'],'mms'+probe+'_dis_bulkV_DSC'
       join_vec,'mms'+probe+'_des_bulk'+['X','Y','Z'],'mms'+probe+'_des_bulkV_DSC'
     endif else begin
@@ -63,6 +63,27 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   probe=strcompress(string(probe),/remove_all)
   if undefined(trange) then trange=timerange()
   timespan,trange[0],trange[1]-trange[0],/seconds
+  
+  if strlen(tnames('mms'+probe+'_dis_energyspectr_omni_avg')) gt 0 and strlen(tnames('mms'+probe+'_fpi_iEnergySpectr_omni')) gt 0 then begin
+    store_data,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',data=['mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_dis_energyspectr_omni_avg']
+    options,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CIon!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    options,'mms'+probe+'_dis_energyspectr_omni_avg',datagap=0.16d
+    ylim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',10.d,30000.d,1
+    zlim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',3e4,3e8,1
+    ispec_name='mms'+probe+'_fpi_iEnergySpectr_omni_mix'
+  endif else begin
+    ispec_name='mms'+probe+'_fpi_iEnergySpectr_omni'
+  endelse
+  if strlen(tnames('mms'+probe+'_des_energyspectr_omni_avg')) gt 0 and strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_omni')) gt 0 then begin
+    store_data,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',data=['mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_des_energyspectr_omni_avg']
+    options,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    options,'mms'+probe+'_des_energyspectr_omni_avg',datagap=0.04d
+    ylim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',10.d,30000.d,1
+    zlim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',3e5,3e9,1
+    espec_name='mms'+probe+'_fpi_eEnergySpectr_omni_mix'
+  endif else begin
+    espec_name='mms'+probe+'_fpi_eEnergySpectr_omni'
+  endelse
   
   store_data,'mms'+probe+'_fpi_dis_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberDensity']
   
@@ -154,15 +175,15 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     endelse
 
     if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+strlowcase(ncoord))) eq 0 then ncoord='DSC' else ncoord=strlowcase(ncoord)
-    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,fgm_name+'_bvec',fgm_name+'_btot']
+    tplot,['mms_bss',espec_name,ispec_name,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,fgm_name+'_bvec',fgm_name+'_btot']
   
   endif else begin
     if not undefined(no_plot) then begin
       if undefined(gsm) then ncoord='gse' else ncoord='gsm'
       if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+ncoord)) eq 0 then ncoord='DSC'
       tplot_options,'xmargin',[20,10]
-;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_fpi_bentPipeB_DSC']
-      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fpi_bentPipeB_DSC']
+;      tplot,['mms_bss',espec_name,ispec_name,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_des_bulkV','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dis_bulkV','mms'+probe+'_fpi_bentPipeB_DSC']
+      tplot,['mms_bss',espec_name,ispec_name,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fpi_bentPipeB_DSC']
     endif
   endelse
 

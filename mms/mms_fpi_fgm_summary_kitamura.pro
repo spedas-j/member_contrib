@@ -170,7 +170,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     set_plot,thisDevice
     !p.background=255
     !p.color=0
-    options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.5
+    options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
     window,xsize=1600,ysize=900
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
@@ -191,7 +191,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
         set_plot,thisDevice
         !p.background=255
         !p.color=0
-        options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.5
+        options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
         window,xsize=1600,ysize=900
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+2.d*3600.d]
@@ -210,16 +210,20 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
 
     if undefined(roi) then roi=trange
 
-    mms_curlometer,trange=[roi[0]-3600.d,roi[1]+3600.d],ref_probe=probe,data_rate='srvy',/gsm
-    if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
-      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod','Current_gsm','Current_magnitude','divB_over_rotB']
+    mms_curlometer,trange=[roi[0]-3600.d,roi[1]+3600.d],ref_probe=probe,data_rate='srvy',/gsm,/lmn
+    tinterpol_mxn,'mms_avg_pos_gsm','mms'+probe+'_fpi_iBulkV_gsm',newname='mms_avg_pos_gsm_ion'
+    get_data,'mms_avg_pos_gsm_ion',data=pos
+    get_data,'mms'+probe+'_fpi_iBulkV_gsm',data=vi_gsm
+    gsm2lmn,[[pos.x],[pos.y[*,0]],[pos.y[*,1]],[pos.y[*,2]]],vi_gsm.y,vi_lmn
+    store_data,'mms'+probe+'_fpi_iBulkV_lmn',data={x:vi_gsm.x,y:vi_lmn}
+    if not undefined(fpi_sitl) then begin
+      dis_level='SITL'
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gsm')) gt 0 then begin
-        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_l2pre_gsm_mod','Current_gsm','Current_magnitude','divB_over_rotB']
-      endif else begin
-        tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_gsm_dmpa_mod','Current_gsm','Current_magnitude','divB_over_rotB']
-      endelse
-    endelse    
+      if strlen(tnames('mms'+probe+'_dis_errorflags_fast')) gt 0 then dis_level='L2' else dis_level='QL'
+    endelse
+    options,'mms'+probe+'_fpi_iBulkV_lmn',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_LMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=4.6d
+    undefine,pos,vi_gsm,vi_lmn
+    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_lmn','mms'+probe+'_b_for_curlometer_tlmn','Current_lmn','Current_magnitude','divB_over_rotB']
 
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
     dn=plotcdir+'\'+ts[0]+'\'+ts[1]
@@ -230,17 +234,17 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     tplot_options,'tickinterval',300
     while start_time lt roi[1] do begin
       set_plot,'ps'
-      device,filename=dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
+      device,filename=dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hour.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
       tplot,trange=[start_time,start_time+1.d*3600.d]
       device,/close
       set_plot,thisDevice
       !p.background=255
       !p.color=0
-      options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.4
+      options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
       window,xsize=1600,ysize=900
       tplot_options,'ymargin',[2.5,0.2]
       tplot,trange=[start_time,start_time+1.d*3600.d]
-      makepng,dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hours'
+      makepng,dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hour'
       options,'mms_bss',thick=10.0,panel_size=0.5
       options,'mms_bss','labsize'
       tplot_options,'ymargin'
