@@ -145,20 +145,27 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     zlim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,1e3,1e7,1
   endif
   
-  if undefined(no_bss) and public eq 0 then begin
+  if undefined(no_bss) then begin
     time_stamp,/on
-    spd_mms_load_bss,datatype=['fast','status']
-    split_vec,'mms_bss_status'
-    calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
-    calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'
-    calc,'"mms_bss_pending"="mms_bss_status_3"-0.3d'
-    del_data,'mms_bss_status_?'
-    store_data,'mms_bss',data=['mms_bss_fast','mms_bss_complete','mms_bss_incomplete','mms_bss_pending']
-    options,'mms_bss',colors=[6,2,3,4],panel_size=0.5,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.325d,0.025d],ylabel='',labels=['ROI','Complete','Incomplete','Pending'],labflag=-1
+    if public eq 0 then begin
+      spd_mms_load_bss,trange=trange,datatype=['fast','status']
+      split_vec,'mms_bss_status'
+      calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
+      calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'
+      calc,'"mms_bss_pending"="mms_bss_status_3"-0.3d'
+      store_data,'mms_bss_status_?',/delete
+      store_data,'mms_bss',data=['mms_bss_fast','mms_bss_complete','mms_bss_incomplete','mms_bss_pending']
+      options,'mms_bss',colors=[6,2,3,4],panel_size=0.5,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.325d,0.025d],ylabel='',labels=['ROI','Complete','Incomplete','Pending'],labflag=-1
+    endif else begin
+      spd_mms_load_bss,trange=trange,datatype=['fast','burst']
+      calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
+      store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
+      options,'mms_bss',colors=[6,2],panel_size=0.3,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+    endelse
   endif else begin
     time_stamp,/off
   endelse
-
+  
   tkm2re,'mms'+probe+'_mec_r_'+coord
   split_vec,'mms'+probe+'_mec_r_'+coord+'_re'
   options,'mms'+probe+'_mec_r_'+coord+'_re_x',ytitle=strupcase(coord)+'X [R!DE!N]',format='(f8.4)'

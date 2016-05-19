@@ -129,17 +129,24 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     options,'mms'+probe+'_des_bulkV_gsm',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
   endif
 
-  if undefined(no_bss) and public eq 0 then begin
-    spd_mms_load_bss,datatype=['fast','status']
-    split_vec,'mms_bss_status'
-    calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
-    calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'
-    calc,'"mms_bss_pending"="mms_bss_status_3"-0.3d'
-    del_data,'mms_bss_status_?'
-    store_data,'mms_bss',data=['mms_bss_fast','mms_bss_complete','mms_bss_incomplete','mms_bss_pending']
-    options,'mms_bss',colors=[6,2,3,4],panel_size=0.55,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.325d,0.025d],ylabel='',labels=['ROI','Complete','Incomplete','Pending'],labflag=-1    
+  if undefined(no_bss) then begin
+    if public eq 0 then begin
+      spd_mms_load_bss,trange=trange,datatype=['fast','status']
+      split_vec,'mms_bss_status'
+      calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
+      calc,'"mms_bss_incomplete"="mms_bss_status_1"-0.2d'
+      calc,'"mms_bss_pending"="mms_bss_status_3"-0.3d'
+      store_data,'mms_bss_status_?',/delete
+      store_data,'mms_bss',data=['mms_bss_fast','mms_bss_complete','mms_bss_incomplete','mms_bss_pending']
+      options,'mms_bss',colors=[6,2,3,4],panel_size=0.5,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.325d,0.025d],ylabel='',labels=['ROI','Complete','Incomplete','Pending'],labflag=-1
+    endif else begin
+      spd_mms_load_bss,trange=trange,datatype=['fast','burst']
+      calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
+      store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
+      options,'mms_bss',colors=[6,2],panel_size=0.3,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+    endelse
   endif
-
+  
   if not undefined(magplot) then begin
     mms_fgm_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,/no_avg,/no_plot
     tplot_options,'xmargin',[20,10]
