@@ -17,6 +17,8 @@
 ;                       is used, if available (use with magplot flag)
 ;         no_update:    set this flag to preserve the original fpi data. if not set and
 ;                       newer data is found the existing data will be overwritten
+;         no_bss:       set this flag to skip loading bss data
+;         full_bss:     set this flag to load detailed bss data
 ;         no_load_mec:  set this flag to skip loading mec data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
 ;         time_clip:    set this flag to time clip the fpi data
@@ -34,7 +36,7 @@
 
 
 pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,$
-                               no_bss=no_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b,time_clip=time_clip
+                               no_bss=no_bss,full_bss=full_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b,time_clip=time_clip
 
   loadct2,43
   time_stamp,/off
@@ -130,7 +132,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   endif
 
   if undefined(no_bss) then begin
-    if public eq 0 then begin
+    if public eq 0 and not undefined(full_bss) then begin
       spd_mms_load_bss,trange=trange,datatype=['fast','status']
       split_vec,'mms_bss_status'
       calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
@@ -143,7 +145,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
       spd_mms_load_bss,trange=trange,datatype=['fast','burst']
       calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
       store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
-      options,'mms_bss',colors=[6,2],panel_size=0.3,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+      options,'mms_bss',colors=[6,2],panel_size=0.2,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
     endelse
   endif
   

@@ -18,6 +18,7 @@
 ;         no_update_fgm:set this flag to preserve the original fgm data. if not set and
 ;                       newer data are found the existing data will be overwritten
 ;         no_bss:       set this flag to skip loading bss data
+;         full_bss:     set this flag to load detailed bss data
 ;         no_load:      set this flag to skip loading data
 ;         delete:       set this flag to delete all tplot variables at the beginning
 ;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
@@ -37,7 +38,7 @@
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
 ;-
 
-pro mms_fpi_brst_fgm_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,no_bss=no_bss,$
+pro mms_fpi_brst_fgm_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,no_bss=no_bss,full_bss=full_bss,$
                               no_load=no_load,delete=delete,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,time_clip=time_clip
 
   mms_init
@@ -103,6 +104,6 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,no_update_fpi=no_update_fpi,no_update
   endif
   
   mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,time_clip=time_clip,/load_fpi,/no_plot,/no_avg,/gsm
-  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,time_clip=time_clip,/magplot,/no_load_mec,/gsm
+  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,full_bss=full_bss,time_clip=time_clip,/magplot,/no_load_mec,/gsm
 
 end

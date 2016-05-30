@@ -1,7 +1,7 @@
 ; MMS> mms_plot_hfesp_l2_kitamura,['2015-10-10/07:13:00','2015-10-10/07:20:00'],probe='1',/delete,/fpi_brst,/load_fgm,/load_fpi,/lowi_brst_pa,/lowi_brst_theta,/gsm
 
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
-                               no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,plotdir=plotdir,$
+                               no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
                                lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
 
   if not undefined(delete) then store_data,'*',/delete
@@ -127,7 +127,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     get_data,prefix+'_hpca_oplus_number_density',data=no
     store_data,prefix+'_hpca_total_number_density',data={x:nh.x,y:nh.y+nhe.y+na.y+no.y}
     store_data,prefix+'_hpca_fp',data={x:nh.x,y:8979.d*sqrt(nh.y+nhe.y+na.y+no.y)}
-    options,prefix+'_hpca_fp',colors=5,thick=1,datagap=600.d
+    if undefined(hpca_brst) then options,prefix+'_hpca_fp',colors=5,thick=1,datagap=600.d else options,prefix+'_hpca_fp',colors=5,thick=1,datagap=25.d
     undefine,nh,nhe,na,no
   endif else begin
     options,prefix+'_des_numberdensity_dbcs_fast',datagap=4.6d
@@ -143,15 +143,15 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   options,prefix+'_fpi_fp',colors=255,thick=1.25,datagap=4.6d
   undefine,ni
 
-  mms_load_edp,trange=trange,probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
+  mms_load_edp,trange=[trange[0]-60.d,trange[1]+60.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/time_clip
   ylim,prefix+'_edp_hfesp_srvy_l2',0.d,6.e4,0
   zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1
+  options,prefix+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
   store_data,prefix+'_fp_fc_hfesp',data=[prefix+'_edp_hfesp_srvy_l2',prefix+'_fgm_fce',prefix+'_hpca_fp',prefix+'_fpi_fp']
   ylim,prefix+'_fp_fc_hfesp',0.d,6.e4,0
   options,prefix+'_fp_fc_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_HPCA(Yellow)!CFce_FGM(Black)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2'
-  options,prefix+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
 
-  if undefined(no_bss) then begin
+  if undefined(no_bss) and not undefined(full_bss) then begin
     time_stamp,/on
     if public eq 0 then begin
       spd_mms_load_bss,trange=trange,datatype=['fast','status']
@@ -166,7 +166,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
       spd_mms_load_bss,trange=trange,datatype=['fast','burst']
       calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
       store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
-      options,'mms_bss',colors=[6,2],panel_size=0.3,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+      options,'mms_bss',colors=[6,2],panel_size=0.2,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
     endelse
   endif else begin
     time_stamp,/off
@@ -205,13 +205,13 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     set_plot,thisDevice
     !p.background=255
     !p.color=0
-    options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+    if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
     window,xsize=1920,ysize=1080
     tplot_options,'xmargin',[17,13]
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
     makepng,dn+'\mms'+probe+'_'+inst_name+'_ROI_'+time_string(roi[0],format=2,precision=0)
-    options,'mms_bss',thick=10.0,panel_size=0.5
+    if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
     options,'mms_bss','labsize'
     tplot_options,'tickinterval'
     tplot_options,'ymargin'
@@ -229,13 +229,13 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
         set_plot,thisDevice
         !p.background=255
         !p.color=0
-        options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+        if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8 
         window,xsize=1920,ysize=1080
         tplot_options,'xmargin',[17,13]
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+1.d*3600.d]
         makepng,dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour'
-        options,'mms_bss',thick=10.0,panel_size=0.5
+        if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
         start_time=start_time+1.d*3600.d

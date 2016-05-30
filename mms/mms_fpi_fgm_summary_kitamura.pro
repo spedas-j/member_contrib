@@ -19,8 +19,10 @@
 ;         no_update_fgm:set this flag to preserve the original fgm data. if not set and
 ;                       newer data is found the existing data will be overwritten
 ;         add_scpot:    set this flag to additionally plot scpot data
+;         no_bss:       set this flag to skip loading bss data
+;         full_bss:     set this flag to load detailed bss data
 ;         no_load:      set this flag to skip loading data
-;         no_delete:    set this flag not to delete all tplot variables at the beginning
+;         delete:       set this flag to delete all tplot variables at the beginning
 ;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
 ;                       are used, if available
 ;         no_output:    set this flag to skip making png and ps files
@@ -42,8 +44,8 @@
 ;-
 
 pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
-                                 no_bss=no_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,no_output=no_output,$
-                                 add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,$
+                                 no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,$
+                                 no_output=no_output,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,$
                                  fpi_sitl=fpi_sitl,plotdir=plotdir,plotcdir=plotcdir
 
   probe=strcompress(string(probe),/remove_all)
@@ -121,7 +123,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
   
   if undefined(no_bss) then begin
     time_stamp,/on
-    if public eq 0 then begin
+    if public eq 0 and not undefined(full_bss) then begin
       spd_mms_load_bss,trange=trange,datatype=['fast','status']
       split_vec,'mms_bss_status'
       calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
@@ -134,7 +136,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
       spd_mms_load_bss,trange=trange,datatype=['fast','burst']
       calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
       store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
-      options,'mms_bss',colors=[6,2],panel_size=0.3,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+      options,'mms_bss',colors=[6,2],panel_size=0.2,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
     endelse
   endif else begin
     time_stamp,/off
@@ -177,12 +179,12 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
     set_plot,thisDevice
     !p.background=255
     !p.color=0
-    options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+    if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
     window,xsize=1600,ysize=900
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
     makepng,dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver
-    options,'mms_bss',thick=10.0,panel_size=0.5
+    if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
     options,'mms_bss','labsize'
     tplot_options,'tickinterval'
     tplot_options,'ymargin'
@@ -198,12 +200,12 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
         set_plot,thisDevice
         !p.background=255
         !p.color=0
-        options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+        if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
         window,xsize=1600,ysize=900
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+2.d*3600.d]
         makepng,dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours'
-        options,'mms_bss',thick=10.0,panel_size=0.5
+        if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
         start_time=start_time+2.d*3600.d
@@ -247,12 +249,12 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
       set_plot,thisDevice
       !p.background=255
       !p.color=0
-      options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+      if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
       window,xsize=1600,ysize=900
       tplot_options,'ymargin',[2.5,0.2]
       tplot,trange=[start_time,start_time+1.d*3600.d]
       makepng,dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hour'
-      options,'mms_bss',thick=10.0,panel_size=0.5
+      if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
       options,'mms_bss','labsize'
       tplot_options,'ymargin'
       start_time=start_time+1.d*3600.d

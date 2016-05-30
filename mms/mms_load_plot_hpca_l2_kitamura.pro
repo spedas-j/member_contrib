@@ -1,13 +1,13 @@
 ;EXAMPLE:
 ;MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-01/08:00:00',probe='1',/delete,/gsm,/lowi_pa,/lowh_pa
-;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='1',/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/no_bss,/gsm
+;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='1',/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/gsm
 ;MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-01/08:00:00',probe='1',/brst,/delete,/gsm
-;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],probe='1',/brst,/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/no_bss,/gsm
+;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],probe='1',/brst,/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/gsm
 
 pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,$
                                    no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
-                                   no_bss=no_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,pa_erange=pa_erange,$
-                                   zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short
+                                   no_bss=no_bss,full_bss=full_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,$
+                                   pa_erange=pa_erange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -20,8 +20,13 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     if public eq 0 then begin
       roi=mms_get_roi(trange,/next)
       trange=dblarr(2)
-      trange[0]=roi[0]-60.d*210.d
-      trange[1]=roi[1]+60.d*210.d
+      if undefined(brst) then begin
+        trange[0]=roi[0]-60.d*210.d
+        trange[1]=roi[1]+60.d*210.d
+      endif else begin
+        trange[0]=roi[0]-60.d*30.d
+        trange[1]=roi[1]+60.d*30.d
+      endelse
     endif else begin
       print
       print,'Please input start and end time to use public data'
@@ -38,7 +43,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
   timespan,trange[0],dt,/seconds
   
   prefix='mms'+probe
-  if keyword_set(brst) then data_rate='brst' else data_rate='srvy'
+  if not undefined(brst) then data_rate='brst' else data_rate='srvy'
+  if undefined(brst) then gap_hpca=600.d else gap_hpca=25.d
   
   mms_init
   loadct2,43
@@ -54,7 +60,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
   endelse
  
   if not undefined(lowi_pa) then begin
-    mms_load_fpi,probe=probe,trange=trange,data_rate='fast',level='l2',datatype='dis-dist',no_update=no_update_fpi,/center_measurement,/time_clip
+    mms_load_fpi,probe=probe,trange=trange,data_rate='fast',level='l2',datatype='dis-dist',no_update=no_update_fpi,/center_measurement;,/time_clip
     if strlen(tnames(prefix+'_dis_dist_fast')) gt 0 then begin
       mms_part_products,prefix+'_dis_dist_fast',trange=trange,outputs='energy',suffix='_omni'
       mms_part_products,prefix+'_dis_dist_fast',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
@@ -126,28 +132,29 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     tname_density=prefix+'_hpca_numberDensity'
   endelse
 
+
   if not undefined(lowh_pa) then begin
     mms_part_products,prefix+'_hpca_hplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
     ylim,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,0.d,180.d,0
-    options,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA H+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=600.d,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    options,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA H+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     zlim,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,1e3,1e7,1
   endif
   if not undefined(lowhe_pa) then begin
     mms_part_products,prefix+'_hpca_heplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
     ylim,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,0.d,180.d,0
-    options,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA He+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=600.d,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    options,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA He+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     zlim,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,1e3,1e7,1
   endif
   if not undefined(lowo_pa) then begin
     mms_part_products,prefix+'_hpca_oplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
     ylim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,0.d,180.d,0
-    options,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA O+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=600.d,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    options,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA O+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     zlim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,1e3,1e7,1
   endif
   
   if undefined(no_bss) then begin
     time_stamp,/on
-    if public eq 0 then begin
+    if public eq 0 and not undefined(full_bss) then begin
       spd_mms_load_bss,trange=trange,datatype=['fast','status']
       split_vec,'mms_bss_status'
       calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'
@@ -160,7 +167,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
       spd_mms_load_bss,trange=trange,datatype=['fast','burst']
       calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
       store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
-      options,'mms_bss',colors=[6,2],panel_size=0.3,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+      options,'mms_bss',colors=[6,2],panel_size=0.2,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
     endelse
   endif else begin
     time_stamp,/off
@@ -220,13 +227,13 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     set_plot,thisDevice
     !p.background=255
     !p.color=0
-    options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+    if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
     window,xsize=1920,ysize=1080
     tplot_options,'xmargin',[17,13]
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
     makepng,dn+'\mms'+probe+'_'+inst_name+'_ROI_'+time_string(roi[0],format=2,precision=0)
-    options,'mms_bss',thick=10.0,panel_size=0.5
+    if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
     options,'mms_bss','labsize'
     tplot_options,'tickinterval'
     tplot_options,'ymargin'
@@ -244,13 +251,13 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
         set_plot,thisDevice
         !p.background=255
         !p.color=0
-        options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8
+        if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
         window,xsize=1920,ysize=1080
         tplot_options,'xmargin',[17,13]
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+1.d*3600.d]
         makepng,dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour'
-        options,'mms_bss',thick=10.0,panel_size=0.5
+        if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
         start_time=start_time+1.d*3600.d
@@ -261,6 +268,6 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     tplot_options,'charsize'
   endif
   
-  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,plotdir=esp_plotdir,no_short=no_short,/gsm
+  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,/gsm
   
 end
