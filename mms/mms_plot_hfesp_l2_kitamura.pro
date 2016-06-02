@@ -2,7 +2,7 @@
 
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
                                no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
-                               lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
+                               lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm,freq_log=freq_log
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -15,8 +15,13 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     if public eq 0 then begin
       roi=mms_get_roi(trange,/next)
       trange=dblarr(2)
-      trange[0]=roi[0]-60.d*210.d
-      trange[1]=roi[1]+60.d*210.d
+      if undefined(hpca_brst) then begin
+        trange[0]=roi[0]-60.d*210.d
+        trange[1]=roi[1]+60.d*210.d
+      endif else begin
+        trange[0]=roi[0]-60.d*30.d
+        trange[1]=roi[1]+60.d*30.d
+      endelse
     endif else begin
       print
       print,'Please input start and end time to use public data'
@@ -143,17 +148,18 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   options,prefix+'_fpi_fp',colors=255,thick=1.25,datagap=4.6d
   undefine,ni
 
-  mms_load_edp,trange=[trange[0]-60.d,trange[1]+60.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/time_clip
+  mms_load_edp,trange=[trange[0]-60.d*240.d,trange[1]+60.d*240.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/time_clip
   ylim,prefix+'_edp_hfesp_srvy_l2',0.d,6.e4,0
   zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1
   options,prefix+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
   store_data,prefix+'_fp_fc_hfesp',data=[prefix+'_edp_hfesp_srvy_l2',prefix+'_fgm_fce',prefix+'_hpca_fp',prefix+'_fpi_fp']
-  ylim,prefix+'_fp_fc_hfesp',0.d,6.e4,0
+  if undefined(freq_log) then ylim,prefix+'_fp_fc_hfesp',0.d,6.e4,0 else ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1
   options,prefix+'_fp_fc_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_HPCA(Yellow)!CFce_FGM(Black)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2'
+  if not undefined(freq_log) then options,prefix+'_fp_fc_hfesp',ytickformat='mms_exponent2'
 
-  if undefined(no_bss) and not undefined(full_bss) then begin
+  if undefined(no_bss) then begin
     time_stamp,/on
-    if public eq 0 then begin
+    if public eq 0 and not undefined(full_bss) then begin
       spd_mms_load_bss,trange=trange,datatype=['fast','status']
       split_vec,'mms_bss_status'
       calc,'"mms_bss_complete"="mms_bss_status_0"-0.1d'

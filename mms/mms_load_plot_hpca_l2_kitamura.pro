@@ -7,7 +7,8 @@
 pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,$
                                    no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
                                    no_bss=no_bss,full_bss=full_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,$
-                                   pa_erange=pa_erange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short
+                                   pa_erange=pa_erange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,$
+                                   no_short=no_short,freq_log=freq_log
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -268,6 +269,6 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     tplot_options,'charsize'
   endif
   
-  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,/gsm
+  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange,probe=probe,erangename=erangename,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,freq_log=freq_log,/gsm
   
 end

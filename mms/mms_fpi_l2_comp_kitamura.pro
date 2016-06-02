@@ -1,5 +1,5 @@
 PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,gse=gse,no_load_mec=no_load_mec,$
-                               no_load_fpi=no_load_fpi,no_load_dfg=no_load_dfg,no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast
+                               no_load_fpi=no_load_fpi,no_load_fgm=no_load_fgm,no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast
 
 ; MMS> mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
 
@@ -17,15 +17,14 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
   
   if undefined(probe) then probe=['1','2','3','4'] else if probe[0] eq '*' then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
 
-  if undefined(no_load_dfg) then begin
-
+  if undefined(no_load_fgm) then begin
     for i=0,n_elements(probe)-1 do begin
       if undefined(fast) then mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='brst',level='l2',no_update=no_update,/no_attitude_data
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
     endfor
   endif
 
-  if undefined(no_load_state) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
+  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
 
   if undefined(fast) then fpi_data_rate='brst' else fpi_data_rate='fast'
 

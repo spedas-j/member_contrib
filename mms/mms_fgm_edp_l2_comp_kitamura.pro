@@ -1,4 +1,6 @@
-PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst=edp_brst,fgm_brst=fgm_brst,lmn=lmn,na=na,almn=almn,vn=vn,gsm=gsm,no_update=no_update,label_gsm=label_gsm,ion_plot=ion_plot,delete=delete
+PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst=edp_brst,fgm_brst=fgm_brst,$
+                                 lmn=lmn,na=na,almn=almn,out_lmn=out_lmn,vn=vn,gsm=gsm,no_update=no_update,$
+                                 label_gsm=label_gsm,ion_plot=ion_plot,delete=delete,no_load=no_load
 
 ; MMS> mms_fgm_edp_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/gsm,/fgm_brst
 
@@ -16,14 +18,14 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst
   if undefined(probe) then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
   
   if undefined(fgm_brst) then fgm_data_rate='srvy' else fgm_data_rate='brst'
-  if undefined(no_B) then begin
+  if undefined(no_B) and undefined(no_load) then begin
     for i=0,n_elements(probe)-1 do begin
       if strlen(tnames('mms'+probe[i]+'_fgm_r_gse_srvy_l2')) eq 0 and fgm_data_rate eq 'brst' then mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='srvy',level='l2',no_update=no_update,/time_clip,/no_attitude_data
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate=fgm_data_rate,level='l2',no_update=no_update,/time_clip,/no_attitude_data
     endfor  
   endif
   
-  mms_load_mec,trange=trange,probes=probe,no_update=no_update
+  if undefined(no_load) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
   
   if n_elements(probe) eq 4 then begin
     for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_fgm_b_gse_'+fgm_data_rate+'_l2_bvec'
@@ -97,7 +99,7 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst
    
   if undefined(edp_brst) then edp_data_rate='fast' else edp_data_rate='brst'
   if undefined(no_E) then begin
-    mms_load_edp,trange=trange,probes=probes,data_rate=edp_data_rate,level='l2',datatype=efield_datatype,no_update=no_update,/time_clip
+    if undefined(no_load) then mms_load_edp,trange=trange,probes=probes,data_rate=edp_data_rate,level='l2',datatype=efield_datatype,no_update=no_update,/time_clip
     if coord eq 'gsm' then for i=0,n_elements(probe)-1 do mms_cotrans,'mms'+probe[i]+'_edp_dce_gse_'+edp_data_rate+'_l2','mms'+probe[i]+'_edp_dce_gsm_'+edp_data_rate+'_l2',in_coord='gse',out_coord='gsm'
     
     if n_elements(probe) eq 4 then begin
@@ -151,11 +153,12 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst
     tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms_edp_dce_'+edp_data_rate+'_l2_lmn_?']
   endif else begin
     if undefined(gsm) then gse=1
-    mms_fpi_l2_comp_kitamura,trange,probe=probe,/no_ele,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse
+    mms_fpi_l2_comp_kitamura,trange,probe=probe,/no_ele,/no_load_mec,/no_load_fgm,no_load_fpi=no_load,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse
     tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_dis_bulkVpara','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
 ;    tplot,['mms1_des_brst_energySpectr_omni','mms1_dis_brst_energySpectr_omni','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_dis_bulkVpara','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
   endelse
   if not undefined(lmn_orig) then print,'lmn_orig=[['+strcompress(lmn_orig[0,0])+','+strcompress(lmn_orig[1,0])+','+strcompress(lmn_orig[2,0])+'],['+strcompress(lmn_orig[0,1])+','+strcompress(lmn_orig[1,1])+','+strcompress(lmn_orig[2,1])+'],['+strcompress(lmn_orig[0,2])+','+strcompress(lmn_orig[1,2])+','+strcompress(lmn_orig[2,2])+']]'
   if not undefined(almn) then print,'almn=[['+strcompress(lmn[0,0])+','+strcompress(lmn[1,0])+','+strcompress(lmn[2,0])+'],['+strcompress(lmn[0,1])+','+strcompress(lmn[1,1])+','+strcompress(lmn[2,1])+'],['+strcompress(lmn[0,2])+','+strcompress(lmn[1,2])+','+strcompress(lmn[2,2])+']]'
+  if not undefined(lmn) then out_lmn=lmn
 
 END
