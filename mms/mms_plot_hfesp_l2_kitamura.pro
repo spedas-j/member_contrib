@@ -2,7 +2,7 @@
 
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
                                no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
-                               lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm,freq_log=freq_log
+                               lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -38,7 +38,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   timespan,trange[0],dt,/seconds
   
   prefix='mms'+probe
-  if not undefined(brst_hpca) then hpca_data_rate='brst' else hpca_data_rate='srvy'
+  if not undefined(hpca_brst) then hpca_data_rate='brst' else hpca_data_rate='srvy'
   
   mms_init
   loadct2,43
@@ -132,7 +132,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     get_data,prefix+'_hpca_oplus_number_density',data=no
     store_data,prefix+'_hpca_total_number_density',data={x:nh.x,y:nh.y+nhe.y+na.y+no.y}
     store_data,prefix+'_hpca_fp',data={x:nh.x,y:8979.d*sqrt(nh.y+nhe.y+na.y+no.y)}
-    if undefined(hpca_brst) then options,prefix+'_hpca_fp',colors=5,thick=1,datagap=600.d else options,prefix+'_hpca_fp',colors=5,thick=1,datagap=25.d
+    if undefined(hpca_brst) then options,prefix+'_hpca_fp',colors=1,thick=1,datagap=600.d else options,prefix+'_hpca_fp',colors=1,thick=1,datagap=25.d
     undefine,nh,nhe,na,no
   endif else begin
     options,prefix+'_des_numberdensity_dbcs_fast',datagap=4.6d
@@ -148,14 +148,18 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   options,prefix+'_fpi_fp',colors=255,thick=1.25,datagap=4.6d
   undefine,ni
 
-  mms_load_edp,trange=[trange[0]-60.d*240.d,trange[1]+60.d*240.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/time_clip
+  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/no_update
+  
+  tplot_force_monotonic,prefix+'_edp_hfesp_srvy_l2',/forward
+  get_data,prefix+'_edp_hfesp_srvy_l2',data=hfesp,lim=l,dlim=dl
+  store_data,prefix+'_edp_hfesp_srvy_l2',data={x:hfesp.x,y:hfesp.y,v:hfesp.v[0:321]},lim=l,dlim=dl
+  
   ylim,prefix+'_edp_hfesp_srvy_l2',0.d,6.e4,0
   zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1
   options,prefix+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
   store_data,prefix+'_fp_fc_hfesp',data=[prefix+'_edp_hfesp_srvy_l2',prefix+'_fgm_fce',prefix+'_hpca_fp',prefix+'_fpi_fp']
-  if undefined(freq_log) then ylim,prefix+'_fp_fc_hfesp',0.d,6.e4,0 else ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1
-  options,prefix+'_fp_fc_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_HPCA(Yellow)!CFce_FGM(Black)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2'
-  if not undefined(freq_log) then options,prefix+'_fp_fc_hfesp',ytickformat='mms_exponent2'
+  ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1
+  options,prefix+'_fp_fc_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_HPCA(Magenta)!CFce_FGM(Black)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',ytickformat='mms_exponent2'
 
   if undefined(no_bss) then begin
     time_stamp,/on

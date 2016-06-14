@@ -24,7 +24,7 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
     endfor
   endif
 
-  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
+  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update,varformat=['mms?_mec_r_*','mms?_mec_L_vec*']
 
   if undefined(fast) then fpi_data_rate='brst' else fpi_data_rate='fast'
 

@@ -18,14 +18,14 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst
   if undefined(probe) then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
   
   if undefined(fgm_brst) then fgm_data_rate='srvy' else fgm_data_rate='brst'
-  if undefined(no_B) and undefined(no_load) then begin
+  if undefined(no_B) or undefined(no_load) then begin
     for i=0,n_elements(probe)-1 do begin
       if strlen(tnames('mms'+probe[i]+'_fgm_r_gse_srvy_l2')) eq 0 and fgm_data_rate eq 'brst' then mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='srvy',level='l2',no_update=no_update,/time_clip,/no_attitude_data
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate=fgm_data_rate,level='l2',no_update=no_update,/time_clip,/no_attitude_data
     endfor  
   endif
   
-  if undefined(no_load) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+  if undefined(no_load) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms?_mec_r_*','mms?_mec_L_vec*']
   
   if n_elements(probe) eq 4 then begin
     for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_fgm_b_gse_'+fgm_data_rate+'_l2_bvec'

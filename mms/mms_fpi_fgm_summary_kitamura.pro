@@ -13,28 +13,31 @@
 ;                       the time range is set as from 30 minutes before the beginning of the
 ;                       ROI just after the specified time to 30 minutes after the end of the ROI.
 ;         probe:        a probe - value for MMS SC #
+;         delete:       set this flag to delete all tplot variables at the beginning
 ;         no_short:     set this flag to skip short plots (2 hours)
 ;         no_update_fpi:set this flag to preserve the original fpi data. if not set and
 ;                       newer data is found the existing data will be overwritten 
 ;         no_update_fgm:set this flag to preserve the original fgm data. if not set and
 ;                       newer data is found the existing data will be overwritten
-;         add_scpot:    set this flag to additionally plot scpot data
+;         add_scpot:    set this flag to additionally plot scpot data with number densities
 ;         no_bss:       set this flag to skip loading bss data
-;         full_bss:     set this flag to load detailed bss data
+;         full_bss:     set this flag to load detailed bss data (team member only)
 ;         no_load:      set this flag to skip loading data
-;         delete:       set this flag to delete all tplot variables at the beginning
 ;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       are used, if available
+;                       are used, if available (team member only)
 ;         no_output:    set this flag to skip making png and ps files
 ;         fpi_sitl:     set this flag to use fpi fast sitl data forcibly. if not set, fast ql data
-;                       are used, if available
+;                       are used, if available (team member only)
 ;         plotdir:      set this flag to assine a directory for plots
+;         plotcdir:     set this flag to assine a directory for plots with currents in the LMN coordinate
 ;
 ; EXAMPLE:
 ;
-;     To make summary plots of digital fluxgate magnetometer (FGM (or DFG)) and fast plasma investigation (FPI) data
+;     To make summary plots of fluxgate magnetometers (FGM (or DFG)) and fast plasma investigation (FPI) data
+;     team members
 ;     MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output
-;     MMS>  mms_fpi_fgm_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/no_update_fpi,/no_update_fgm,/add_scpot,/no_update_edp,/no_bss
+;     public users
+;     MMS>  mms_fpi_fgm_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/add_scpot
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
@@ -43,13 +46,12 @@
 ;        if multiple cdf files are loaded for FGM(DFG) or FPI
 ;-
 
-pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
-                                 no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,delete=delete,$
-                                 no_output=no_output,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,$
-                                 fpi_sitl=fpi_sitl,plotdir=plotdir,plotcdir=plotcdir
+pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
+                                 no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,no_output=no_output,$
+                                 add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_sitl=fpi_sitl,$
+                                 plotdir=plotdir,plotcdir=plotcdir
 
   probe=strcompress(string(probe),/remove_all)
-;  if undefined(plotdir) then plotdir='./mms'+probe
 
   mms_init
   loadct2,43
@@ -66,11 +68,9 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,no_short=no_short,no_update_fpi=no
       trange[0]=roi[0]-60.d*30.d
       trange[1]=roi[1]+60.d*30.d
     endif else begin
-      print,''
-      print,status
-      print,username
+      print
       print,'Please input start and end time to use public data'
-      print,''
+      print
       return
     endelse
   endif else begin

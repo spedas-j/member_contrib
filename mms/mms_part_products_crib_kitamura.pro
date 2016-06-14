@@ -1,7 +1,6 @@
-
 ;+
 ;Procedure:
-;  mms_part_products_crib
+;  mms_part_products_crib_kitamura
 ;
 ;Purpose:
 ;  Basic example on how to use mms_part_products to generate pitch angle and gyrophase distributions
@@ -32,7 +31,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
     if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 and undefined(dfg_ql) then begin
       get_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data=d
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d else get_data,'mms'+probe+'_dfg_srvy_dmpa',data=d
+      if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then get_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre',data=d else get_data,'mms'+probe+'_dfg_srvy_dmpa',data=d
     endelse
     if n_elements(d.x) gt 0 then begin
       start_time=d.x[0]
@@ -71,14 +70,14 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
         endif
       endelse
     endif
-    if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
+    if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) eq 0 and strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 then begin
       if undefined(dfg_ql) then mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
+      if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 then begin
         mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
       endif else begin
-        get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d
+        get_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre',data=d
         if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
-          store_data,'mms'+probe+'_dfg_srvy_l2pre*',/delete
+          store_data,'mms'+probe+'_dfg_b_*_srvy_l2pre*',/delete
           store_data,'mms'+probe+'_pos*',/delete
           mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
         endif
@@ -114,12 +113,12 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
     if strlen(tnames('mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec')) gt 0 then begin
       bname='mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec'
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec')) eq 0 then begin
+      if strlen(tnames('mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec')) eq 0 then begin
         ;Until coordinate systems are properly labeled in mms metadata, this variable must be dmpa
         bname='mms'+probe+'_dfg_srvy_dmpa_bvec'
       endif else begin
         ;Until coordinate systems are properly labeled in mms metadata, this variable must be dmpa
-        bname='mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec'
+        bname='mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec'
       endelse
     endelse
   endif

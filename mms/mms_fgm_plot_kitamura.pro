@@ -49,7 +49,7 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
     if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) gt 0 and undefined(dfg_ql) then begin
       get_data,'mms'+probe+'_fgm_b_gse_srvy_l2',data=d
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d else get_data,'mms'+probe+'_dfg_srvy_dmpa',data=d
+      if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then get_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre',data=d else get_data,'mms'+probe+'_dfg_srvy_dmpa',data=d
     endelse
     if n_elements(d.x) gt 0 then begin
       start_time=d.x[0]
@@ -85,36 +85,38 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
     if undefined(dfg_ql) then begin
       if undefined(gsm) then coord='gse' else coord='gsm' 
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
-      if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 then begin
+      if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 and public eq 0 then begin
         mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
       endif else begin
-        get_data,'mms'+probe+'_fgm_b_gse_srvy_l2_bvec',data=d
-        if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
-          store_data,'mms'+probe+'_fgm_*',/delete 
-          mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
+        if public eq 0 then begin
+          get_data,'mms'+probe+'_fgm_b_gse_srvy_l2_bvec',data=d
+          if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+            store_data,'mms'+probe+'_fgm_*',/delete
+            mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
+          endif
         endif
       endelse
     endif
-    if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) eq 0 then begin
+    if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 and strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and public eq 0 then begin
       mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
       get_data,'mms'+probe+'_dfg_srvy_gsm_dmpa',data=fgm_data,dlimits=fgm_dlimits
       store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',data={x:fgm_data.X,y:[[fgm_data.Y[*,0]],[fgm_data.Y[*,1]],[fgm_data.Y[*,2]]]},dlimits=fgm_dlimits
       store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',data={x:fgm_data.X,y:fgm_data.Y[*, 3]},dlimits=fgm_dlimits
       options,'mms'+probe+'_dfg_srvy*dmpa_btot',colors=1
-            undefine,fgm_data,fgm_dlimits
+      undefine,fgm_data,fgm_dlimits
       if undefined(gsm) then coord='dmpa' else coord='gsm_dmpa'
     endif else begin
-      if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 then begin
-        get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=d
+      if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 and public eq 0 then begin
+        get_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre',data=d
         if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
-          store_data,'mms'+probe+'_dfg_srvy_l2pre*',/delete
+          store_data,'mms'+probe+'_dfg_b_*_srvy_l2pre*',/delete
           store_data,'mms'+probe+'_pos*',/delete
           mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update,/no_attitude_data
           get_data,'mms'+probe+'_dfg_srvy_gsm_dmpa',data=fgm_data,dlimits=fgm_dlimits
           store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',data={x:fgm_data.X,y:[[fgm_data.Y[*,0]],[fgm_data.Y[*,1]],[fgm_data.Y[*,2]]]},dlimits=fgm_dlimits
           store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',data={x:fgm_data.X,y:fgm_data.Y[*, 3]},dlimits=fgm_dlimits
           options,'mms'+probe+'_dfg_srvy*dmpa_btot',colors=1
-                undefine,fgm_data,fgm_dlimits
+          undefine,fgm_data,fgm_dlimits
           if undefined(gsm) then coord='dmpa' else coord='gsm_dmpa'
         endif
       endif
@@ -123,7 +125,7 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
     if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) gt 0 and undefined(dfg_ql) then begin
       if undefined(gsm) then coord='gse' else coord='gsm'
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then begin
+      if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then begin
         if undefined(gsm) then coord='gse' else coord='gsm'
       endif else begin
         if undefined(gsm) then coord='dmpa' else coord='gsm_dmpa'
@@ -135,9 +137,9 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
   if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) gt 0 and undefined(dfg_ql) then begin
     get_data,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec',dlim=dl
   endif else begin
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then begin
-      get_data,'mms'+probe+'_dfg_srvy_l2pre_'+coord,dlim=dl
-      level_name='srvy_l2pre_'+coord
+    if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then begin
+      get_data,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre',dlim=dl
+      level_name='b_'+coord+'_srvy_l2pre'
     endif else begin
       get_data,'mms'+probe+'_dfg_srvy_'+coord,dlim=dl
       level_name='srvy_'+coord
@@ -153,10 +155,10 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
         ncoord=strupcase(coord)
         options,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_FGM!CL2_'+ncoord+'!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
       endif else begin
-        avg_data,'mms'+probe+'_dfg_'+level_name+'_bvec',2.5d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
-        if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+coord)) gt 0 and undefined(dfg_ql) then begin
+        avg_data,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec',2.5d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
+        if strlen(tnames('mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre')) gt 0 and undefined(dfg_ql) then begin
           ncoord=strupcase(coord)
-          options,'mms'+probe+'_dfg_srvy_l2pre_'+coord+'_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_'+ncoord+'!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
+          options,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_'+ncoord+'!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
         endif else begin
           if coord eq 'dmpa' then ncoord='GSE' else ncoord='GSM'
           options,'mms'+probe+'_dfg_srvy_'+coord+'_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!C'+strupcase(coord)+'!C(near '+ncoord+')!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
@@ -217,25 +219,25 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
       endif
 
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then begin
-        options,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_gse_btot',ytitle='MMS'+probe+'_DFG!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+fgm_dv,labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_gse',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'_DFG!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        get_data,'mms'+probe+'_dfg_srvy_l2pre_gse',data=b
-        store_data,'mms'+probe+'_dfg_srvy_l2pre_gse_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
-        options,'mms'+probe+'_dfg_srvy_l2pre_gse_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_gsm_btot',ytitle='MMS'+probe+'_DFG!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+fgm_dv,labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_gsm',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'_DFG!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        get_data,'mms'+probe+'_dfg_srvy_l2pre_gsm',data=b
-        store_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
-        options,'mms'+probe+'_dfg_srvy_l2pre_gsm_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_dmpa_btot',ytitle='MMS'+probe+'_DFG!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+fgm_dv,labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_dfg_srvy_l2pre_dmpa',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'_DFG!CL2pre_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        get_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa',data=b
-        store_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
-        options,'mms'+probe+'_dfg_srvy_l2pre_dmpa_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_DMPA',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+      if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then begin
+        options,'mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_gse_srvy_l2pre_btot',ytitle='MMS'+probe+'_DFG!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_gse_srvy_l2pre',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'_DFG!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        get_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre',data=b
+        store_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+        options,'mms'+probe+'_dfg_b_gse_srvy_l2pre_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_btot',ytitle='MMS'+probe+'_DFG!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_gsm_srvy_l2pre',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'_DFG!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        get_data,'mms'+probe+'_dfg_b_gsm_srvy_l2pre',data=b
+        store_data,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+        options,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_GSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_dmpa_srvy_l2pre_btot',ytitle='MMS'+probe+'_DFG!CBtotal',ysubtitle='[nT]',labels='L2pre!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+        options,'mms'+probe+'_dfg_b_dmpa_srvy_l2pre',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'_DFG!CL2pre_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+        get_data,'mms'+probe+'_dfg_b_dmpa_srvy_l2pre',data=b
+        store_data,'mms'+probe+'_dfg_b_dmpa_srvy_l2pre_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+        options,'mms'+probe+'_dfg_b_dmpa_srvy_l2pre_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_DMPA',ysubtitle='[nT]',labflag=-1,datagap=0.26d
         undefine,b
       endif else begin
         options,'mms'+probe+'_dfg_srvy_dmpa_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CQL_DMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
@@ -253,7 +255,7 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
         undefine,b
       endelse
   
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 and undefined(dfg_ql) then ql_name='' else ql_name='_ql' 
+      if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then ql_name='' else ql_name='_ql' 
 
       if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update
 
