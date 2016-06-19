@@ -1,10 +1,54 @@
+;+
+; PROCEDURE:
+;         mms_fgm_edp_l2_comp_kitamura
+;
+; PURPOSE:
+;         Plot magnetic and electric field data obtained by FGM and EDP
+;
+; KEYWORDS:
+;         trange:       time range of interest [starttime, endtime] with the format
+;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
+;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
+;         probe:        probes - value for MMS SC # (default value is ['1','2','3','4'])
+;         no_E:         set this flag to skip the use of EDP data
+;         no_B:         set this flag to skip the use of FGM data
+;         edp_brst:     set this flag to load EDP burst data. if not set, EDP fast survey
+;                       data are used
+;         fgm_brst:     set this flag to load FGM burst data. if not set, FGM survey data
+;                       are used
+;         lmn:          input 3 x 3 matrix for coordnate transformation to plot data in the
+;                       lmn coordinate. the original coordinate system is the GSE or GSM
+;                       coodinate depending on the gsm flag.
+;         na:           input normal vector for a new lmn coodinate
+;         almn:         set this flag to rotate the lmn coodinate using na as n component
+;         out_lmn:      to output new lmn coodinate
+;         vn:           n component of the velocity of the coodinate system (use with ion_plot)
+;         gsm:          set this flag to plot data in the GSM coordinate
+;         no_update:    set this flag to preserve the original FGM and EDP data. if not set and
+;                       newer data is found the existing data will be overwritten
+;         label_gsm:    set this flag to use the GSM coordinate as the labels
+;         ion_plot:     set this flag to plot with FPI-DIS data
+;         delete:       set this flag to delete all tplot variables at the beginning
+;         no_load:      set this flag to skip loading FGM and EDP data
+;
+; EXAMPLE:
+;
+;     To plot data from fluxgate magnetometers (FGM) and axial and spin-plain double probes (EDP)
+;     MMS>  mms_fgm_edp_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/delete,/gsm,/fgm_brst
+;     MMS>  mms_fgm_edp_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probe='1',/delete,/gsm
+;     MMS>  mms_fgm_edp_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probe='3',lmn=[[0.2272,0.1985,0.9534],[-0.0503,-0.9753,0.2150],[0.9725,-0.0968,-0.2116]],na=[0.9733,-0.1570,-0.1673],vn=-17.7d,out_lmn=out_lmn,/no_E,/gsm,/fgm_brst,/almn,/ion_plot
+;     
+; NOTES:
+;     See the notes in mms_load_data for rules on the use of MMS data
+;-
+
+
+
 PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst=edp_brst,fgm_brst=fgm_brst,$
                                  lmn=lmn,na=na,almn=almn,out_lmn=out_lmn,vn=vn,gsm=gsm,no_update=no_update,$
                                  label_gsm=label_gsm,ion_plot=ion_plot,delete=delete,no_load=no_load
 
-; MMS> mms_fgm_edp_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/gsm,/fgm_brst
-
-  if not undefined(delete) then store_data, '*', /delete
+  if not undefined(delete) then store_data,'*', /delete
 
   trange=time_double(trange)
   
@@ -25,7 +69,7 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst
     endfor  
   endif
   
-  if undefined(no_load) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms?_mec_r_*','mms?_mec_L_vec*']
+  if undefined(no_load) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
   
   if n_elements(probe) eq 4 then begin
     for p=1,4 do split_vec,'mms'+strcompress(string(p),/remove_all)+'_fgm_b_gse_'+fgm_data_rate+'_l2_bvec'
@@ -150,12 +194,19 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probe=probe,no_E=no_E,no_B=no_B,edp_brst
   tplot_options,'xmargin',[20,10]
 
   if undefined(ion_plot) then begin
-    tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms_edp_dce_'+edp_data_rate+'_l2_lmn_?']
+    if n_elements(probe) eq 4 then begin
+      tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms_edp_dce_'+edp_data_rate+'_l2_lmn_?']
+    endif else begin
+      tplot,['mms'+probe+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms'+probe+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms'+probe+'_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms'+probe+'_fgm_b_'+fgm_data_rate+'_l2_arb','mms'+probe+'_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms'+probe+'_edp_dce_'+edp_data_rate+'_l2_lmn_?']
+    endelse
   endif else begin
     if undefined(gsm) then gse=1
     mms_fpi_l2_comp_kitamura,trange,probe=probe,/no_ele,/no_load_mec,/no_load_fgm,no_load_fpi=no_load,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse
-    tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_dis_bulkVpara','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
-;    tplot,['mms1_des_brst_energySpectr_omni','mms1_dis_brst_energySpectr_omni','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_dis_bulkVpara','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
+    if n_elements(probe) eq 4 then begin
+      tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_dis_bulkVpara','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_l','mms_dis_bulkVperpl','mms_dis_bulkl','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_m','mms_dis_bulkVperpm','mms_dis_bulkm','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_n','mms_dis_bulkVperpn','mms_dis_bulkn']
+    endif else begin
+      tplot,['mms'+probe+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms'+probe+'_dis_bulkVpara','mms'+probe+'_fgm_b_'+fgm_data_rate+'_l2_lmn','mms'+probe+'_dis_bulkVperp','mms'+probe+'_dis_bulk']
+    endelse
   endelse
   if not undefined(lmn_orig) then print,'lmn_orig=[['+strcompress(lmn_orig[0,0])+','+strcompress(lmn_orig[1,0])+','+strcompress(lmn_orig[2,0])+'],['+strcompress(lmn_orig[0,1])+','+strcompress(lmn_orig[1,1])+','+strcompress(lmn_orig[2,1])+'],['+strcompress(lmn_orig[0,2])+','+strcompress(lmn_orig[1,2])+','+strcompress(lmn_orig[2,2])+']]'
   if not undefined(almn) then print,'almn=[['+strcompress(lmn[0,0])+','+strcompress(lmn[1,0])+','+strcompress(lmn[2,0])+'],['+strcompress(lmn[0,1])+','+strcompress(lmn[1,1])+','+strcompress(lmn[2,1])+'],['+strcompress(lmn[0,2])+','+strcompress(lmn[1,2])+','+strcompress(lmn[2,2])+']]'

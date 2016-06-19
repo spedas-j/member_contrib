@@ -3,26 +3,26 @@
 ;         mms_fpi_specplot_kitamura
 ;
 ; PURPOSE:
-;         Plot magnetic field (DFG) and FPI data obtained by MMS
+;         Plot magnetic field (FGM (or DFG)) and FPI data obtained by MMS
 ;
 ; KEYWORDS:
 ;         trange:       time range of interest [starttime, endtime] with the format
 ;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
 ;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
-;         probe:        a probe - value for MMS SC # (default value is '3')
+;         probe:        a probe - value for MMS SC # (default value is '1')
 ;         no_plot:      set this flag to skip plotting
 ;         magplot:      set this flag to plot with dfg data
 ;         no_load:      set this flag to skip loading data
-;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       is used, if available (use with magplot flag)
-;         fast:         set this flag to use fpi fast data. if not set, burst data
+;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
+;                       is used, if available (use with magplot flag) (team member only)
+;         fast:         set this flag to use FPI fast survey data. if not set, FPI burst data
 ;                       is used, if available
-;         no_update:    set this flag to preserve the original fpi data. if not set and
+;         no_update:    set this flag to preserve the original data. if not set and
 ;                       newer data is found the existing data will be overwritten
-;         direc_prot:   set this flag to plot fpi burst E-t spectrogram (+/- X, Y, and Z
-;                       directions) and velocities, and dfg data
-;         no_ele:       set this flag to skip load and plot electron data
-;         no_ion:       set this flag to skip load and plot ion data
+;         direc_prot:   set this flag to plot FPI burst E-t spectrogram (+/- X, Y, and Z
+;                       directions) and velocities, and FGM(DFG) data
+;         no_ele:       set this flag to skip load and plot electron data (FPI-DES)
+;         no_ion:       set this flag to skip load and plot ion data (FPI-DIS)
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
 ;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
 ;         suffix:       appends a suffix to the end of the tplot variable name. this is useful for
@@ -36,13 +36,18 @@
 ;
 ; EXAMPLE:
 ;
-;     To plot fast plasma investigation (FPI) burst E-t spectrogram (averaged) and moments, and dfg data
+;     To plot fast plasma investigation (FPI) burst E-t spectrogram (averaged) and moments, and FGM(DFG) data
 ;     MMS>  mms_fpi_specplot_kitamura,trange=['2015-09-02/15:25:00','2015-09-02/15:30:00'],probe='3',/magplot
-;     MMS>  mms_fpi_specplot_kitamura,trange=['2015-09-02/15:25:00','2015-09-02/15:30:00'],probe='3',/magplot,/no_update
 ;
-;     To plot fast plasma investigation (FPI) burst E-t spectrogram (+/- X, Y, and Z directions) and velocities, and dfg data
+;     To plot fast plasma investigation (FPI) fast survey E-t spectrogram (averaged) and moments, and FGM(DFG) data
+;     MMS>  mms_fpi_specplot_kitamura,trange=['2015-09-02/15:25:00','2015-09-02/15:30:00'],probe='3',/fast,/magplot
+;
+;     To plot fast plasma investigation (FPI) burst E-t spectrogram (+/- X, Y, and Z directions) and velocities
 ;     MMS>  mms_fpi_specplot_kitamura,trange=['2015-09-02/15:25:00','2015-09-02/15:30:00'],probe='3',/direc_plot
-;     MMS>  mms_fpi_specplot_kitamura,trange=['2015-09-02/15:25:00','2015-09-02/15:30:00'],probe='3',/direc_plot,/no_update
+;
+;     To plot fast plasma investigation (FPI) fast survey E-t spectrogram (+/- X, Y, and Z directions) and velocities
+;     MMS>  mms_fpi_specplot_kitamura,trange=['2015-09-02/15:25:00','2015-09-02/15:30:00'],probe='3',/fast,/direc_plot
+;
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
@@ -81,7 +86,7 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
     store_data,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_??'+suffix,/delete
   endif
 
-  if undefined(probe) then probe=['3']
+  if undefined(probe) then probe='1'
   probe=string(probe,format='(i0)')
   if undefined(trange) then begin
     get_data,'mms'+probe+'_des_numberDensity'+suffix,data=d
@@ -256,10 +261,10 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
     if strlen(tnames('mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2_bvec')) gt 0 then begin
       mag_name='mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2_bvec'
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord+'_bvec')) eq 0 then begin
+      if strlen(tnames('mms'+probe+'_dfg_b_'+fgm_coord+'_srvy_l2pre_bvec')) eq 0 then begin
         mag_name='mms'+probe+'_dfg_srvy_'+fgm_coord+'_bvec'
       endif else begin
-        mag_name='mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord+'_bvec'
+        mag_name='mms'+probe+'_dfg_b_'+fgm_coord+'_srvy_l2pre_bvec'
       endelse
     endelse
     tplot,['mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_des_bulkV_'+fpi_coord,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pX'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pY'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_pZ'+suffix,'mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_mZ'+suffix,'mms'+probe+'_dis_bulkV_'+fpi_coord,mag_name]    
@@ -270,10 +275,10 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
       if strlen(tnames('mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2')) gt 0 then begin
         mag_name='mms'+probe+'_fgm_b_'+fgm_coord+'_srvy_l2'
       endif else begin
-        if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord)) eq 0 then begin
+        if strlen(tnames('mms'+probe+'_dfg_b_'+fgm_coord+'_srvy_l2pre')) eq 0 then begin
           mag_name='mms'+probe+'_dfg_srvy_'+fgm_coord
         endif else begin
-          mag_name='mms'+probe+'_dfg_srvy_l2pre_'+fgm_coord
+          mag_name='mms'+probe+'_dfg_b_'+fgm_coord+'_srvy_l2pre'
         endelse
       endelse
       if fpi_data_rate eq 'brst' then begin

@@ -9,25 +9,25 @@
 ;         trange:       time range of interest [starttime, endtime] with the format
 ;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
 ;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
-;         probe:        a probe - value for MMS SC # (default value is '3')
+;         probe:        a probe - value for MMS SC # (default value is '1')
 ;         no_plot:      set this flag to skip plotting
-;         magplot:      set this flag to plot with fgm(dfg) data
+;         magplot:      set this flag to plot with FGM(DFG) data
 ;         no_load:      set this flag to skip loading data
-;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       is used, if available (use with magplot flag)
+;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
+;                       is used, if available (use with magplot flag) (team member only)
 ;         no_update:    set this flag to preserve the original fpi data. if not set and
 ;                       newer data is found the existing data will be overwritten
 ;         no_bss:       set this flag to skip loading bss data
 ;         full_bss:     set this flag to load detailed bss data
-;         no_load_mec:  set this flag to skip loading mec data
+;         no_load_mec:  set this flag to skip loading MEC data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
-;         time_clip:    set this flag to time clip the fpi data
+;         time_clip:    set this flag to time clip the FPI data
 ;
 ; EXAMPLE:
 ;
-;     To plot fast plasma investigation (FPI) burst moments with fast survey (or SITL) data
+;     To plot fast plasma investigation (FPI) burst data with fast survey (or SITL) data
 ;     MMS>  mms_fpi_brst_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='3',/magplot
-;     MMS>  mms_fpi_brst_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='3',/magplot,/no_update,/no_bss
+;     MMS>  mms_fpi_brst_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='3',/magplot,/no_bss
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
@@ -47,7 +47,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   if undefined(no_load) then begin
     if undefined(l1b) then begin
-      mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,/center_measurement,time_clip=time_clip
+      mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='brst',datatype=['des-moms','dis-moms'],no_update=no_update,time_clip=time_clip,/center_measurement
       join_vec,'mms'+probe+'_des_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_des_bulkV_DSC'
       copy_data,'mms'+probe+'_des_numberdensity_dbcs_brst','mms'+probe+'_des_numberDensity'
       join_vec,'mms'+probe+'_dis_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
@@ -61,7 +61,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
       
     endelse
   endif
-  if undefined(probe) then probe=['3']
+  if undefined(probe) then probe='1'
   probe=strcompress(string(probe),/remove_all)
   if undefined(trange) then trange=timerange()
   timespan,trange[0],trange[1]-trange[0],/seconds
@@ -104,14 +104,10 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   
   options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   
-  if undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+  if undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
 
   if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
   if undefined(skip_cotrans) then begin
-    ;This part should be improved in future.
-    get_data,'mms'+probe+'_dis_bulkV_DSC',data=d,lim=l,dlim=dl
-    dl.data_att.coord_sys='DMPA'
-    store_data,'mms'+probe+'_dis_bulkV_DSC',data=d,lim=l,dlim=dl
     mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
     options,'mms'+probe+'_dis_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -121,10 +117,6 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   options,'mms'+probe+'_des_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
 
   if undefined(skip_cotrans) then begin
-    ;This part should be improved in future.
-    get_data,'mms'+probe+'_des_bulkV_DSC',data=d,lim=l,dlim=dl
-    dl.data_att.coord_sys='DMPA'
-    store_data,'mms'+probe+'_des_bulkV_DSC',data=d,lim=l,dlim=dl
     mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
     options,'mms'+probe+'_des_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
     mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -158,8 +150,8 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     if strlen(tnames('mms'+probe+'_fgm_b_'+strlowcase(ncoord)+'_srvy_l2_bvec')) gt 0 then begin
       fgm_name='mms'+probe+'_fgm_b_'+strlowcase(ncoord)+'_srvy_l2'
     endif else begin
-      if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_'+strlowcase(ncoord))) gt 0 then begin
-        fgm_name='mms'+probe+'_dfg_srvy_l2pre_'+strlowcase(ncoord)
+      if strlen(tnames('mms'+probe+'_dfg_b_'+strlowcase(ncoord)+'_srvy_l2pre')) gt 0 then begin
+        fgm_name='mms'+probe+'_dfg_b_'+strlowcase(ncoord)+'_srvy_l2pre'
       endif else begin
         if undefined(gsm) then fgm_name='mms'+probe+'_dfg_srvy_dmpa' else fgm_name='mms'+probe+'_dfg_srvy_gsm_dmpa'
       endelse

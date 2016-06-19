@@ -12,31 +12,32 @@
 ;                       if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
 ;                       the time range is set as from 30 minutes before the beginning of the
 ;                       ROI just after the specified time to 30 minutes after the end of the ROI.
-;         probe:        number of probe to plot dfg data (default value is '3')
+;         probe:        number of probe to plot data (default value is '1')
 ;         no_plot:      set this flag to skip plotting
-;         magplot:      set this flag to plot with fgm data
-;         load_fgm:     set this flag to load fgm data
-;         no_update_fgm:set this flag to preserve the original fgm data. if not set and
+;         magplot:      set this flag to plot with FGM(DFG) data
+;         load_fgm:     set this flag to load FGM(DFG) data
+;         no_avg:       set this flag to skip making 2.5 sec averaged FGM(DFG) data
+;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
+;                       is used, if available (team member only)
+;         no_update_fgm:set this flag to preserve the original FGM(DFG) data. if not set and
 ;                       newer data is found the existing data will be overwritten
-;         load_fpi:     set this flag to load fpi data
-;         no_update_fpi:set this flag to preserve the original fpi data. if not set and
-;                       newer data is found the existing data will be overwritten         
-;         no_avg:       set this flag to skip making 2.5 sec averaged fgm data
-;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       is used, if available
-;         fpi_sitl:     set this flag to use fpi sitl data forcibly. if not set, ql data
-;                       is used, if available
-;         fpi_l1b:      set this flag to use fpi level-1b data if available
-;         no_update_edp:set this flag to preserve the original edp data. if not set and
+;         load_fpi:     set this flag to load FPI data
+;         no_update_fpi:set this flag to preserve the original FPI data. if not set and
 ;                       newer data is found the existing data will be overwritten
-;         skip_cotrans: set this flag to skip coordinate transformation
-;         no_load_mec:  set this flag to skip loading mec data
+;         fpi_sitl:     set this flag to use FPI sitl data forcibly. if not set, FPI ql data
+;                       is used, if available (team member only)
+;         fpi_l1b:      set this flag to use FPI level-1b data if available (team member only)
+;         add_scpot:    set this flag to add spacecraft potential data to plot of number densities 
+;         edp_comm:     set this flag to use EDP comm data (team member only)
+;         no_update_edp:set this flag to preserve the original EDP data. if not set and
+;                       newer data is found the existing data will be overwritten
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
+;         no_load_mec:  set this flag to skip loading MEC data
 ;         time_clip:    set this flag to time clip the data
 ;
 ; EXAMPLE:
 ;
-;     To plot fast plasma investigation (FPI) fast_sitl data
+;     To plot fast plasma investigation (FPI) fast survey data
 ;     MMS>  mms_fpi_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe='1',/no_avg
 ;
 ; NOTES:
@@ -45,8 +46,8 @@
 ;        if multiple cdf files are loaded for FGM(DFG) or FPI
 ;-
 
-pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_avg=no_avg,dfg_ql=dfg_ql,$
-                          load_fgm=load_fgm,no_update_fgm=no_update_fgm,load_fpi=load_fpi,no_update_fpi=no_update_fpi,$
+pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_avg=no_avg,load_fgm=load_fgm,$
+                          dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,load_fpi=load_fpi,no_update_fpi=no_update_fpi,$
                           fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,add_scpot=add_scpot,edp_comm=edp_comm,no_update_edp=no_update_edp,$
                           gsm=gsm,no_load_mec=no_load_mec,time_clip=time_clip
 
@@ -70,13 +71,11 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     endelse
   endif
   trange=time_double(trange)
-  if undefined(probe) then probe=['3']
+  if undefined(probe) then probe='1'
   probe=string(probe,format='(i0)')
 
   dt=trange[1]-trange[0]
   timespan,trange[0],dt,/seconds
-
-  if not undefined(no_load_fgm) then skip_cotrans=1
 
   if not undefined(load_fpi) then begin
     if undefined(fpi_sitl) then begin

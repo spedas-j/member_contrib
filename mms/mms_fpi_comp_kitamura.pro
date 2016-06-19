@@ -1,8 +1,46 @@
+;+
+; PROCEDURE:
+;         mms_fpi_comp_kitamura
+;
+; PURPOSE:
+;         Plot fpi data
+;
+; KEYWORDS:
+;         trange:       time range of interest [starttime, endtime] with the format
+;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
+;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
+;         probe:        probes - value for MMS SC # (default value is ['1','2','3','4'])
+;         no_ele:       set this flag to skip the use of electron data (FPI-DES)
+;         no_ion:       set this flag to skip the use of ion data (FPI-DES)
+;         lmn:          input 3 x 3 matrix for coordnate transformation to plot data in the
+;                       lmn coordinate. the original coordinate system is the GSE, GSM, or
+;                       DSC(dbcs) coodinate depending on the gse or gsm flag.
+;         va:           vector of arbitrary direction
+;         vn:           n component of the velocity of the coodinate system
+;         gsm:          set this flag to plot data in the GSM coordinate
+;         gse:          set this flag to plot data in the GSE coordinate
+;         no_update:    set this flag to preserve the original data. if not set and
+;                       newer data is found, the existing data will be overwritten
+;         label_gsm:    set this flag to use the GSM coordinate as the labels
+;         delete:       set this flag to delete all tplot variables at the beginning
+;         fast:         set this flag to use FPI fast survey data. if not set, FPI burst
+;                       data is used, if available
+;         no_load_mec:  set this flag to skip loading MEC data
+;
+; EXAMPLE:
+;
+;     To plot fpi data
+;     MMS>  mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
+;     MMS>  mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probe='1',/label_gsm
+;     MMS>  mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probe='3',lmn=[[0.197390,0.201321,0.959430],[-0.116952,-0.966861,0.226942],[0.973324,-0.157004,-0.167304]],na=[0.9733,-0.1570,-0.1673],vn=-17.7d,/gsm,/no_ele
+;
+; NOTES:
+;     See the notes in mms_load_data for rules on the use of MMS data
+;-
+
 PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,$
                           gse=gse,no_load_mec=no_load_mec,no_load_fpi=no_load_fpi,no_load_dfg=no_load_dfg,$
                           no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast,time_clip=time_clip
-
-; MMS> mms_fpi_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
 
   if not undefined(delete) then store_data,'*',/delete
 
@@ -26,7 +64,7 @@ PRO mms_fpi_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn
     endfor
   endif
 
-  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update
+  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
 
   if undefined(fast) then fpi_data_rate='brst' else fpi_data_rate='fast'
 

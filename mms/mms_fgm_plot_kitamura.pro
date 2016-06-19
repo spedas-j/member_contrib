@@ -12,19 +12,19 @@
 ;                       if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
 ;                       the time range is set as from 30 minutes before the beginning of the
 ;                       ROI just after the specified time to 30 minutes after the end of the ROI.
-;         probe:        a probe - value for MMS SC # (default value is '3')
-;         load_fgm:     set this flag to load fgm data
-;         no_update:    set this flag to preserve the original fgm data. if not set and
+;         probe:        a probe - value for MMS SC # (default value is '1')
+;         load_fgm:     set this flag to load FGM data
+;         no_update:    set this flag to preserve the original FGM data. if not set and
 ;                       newer data is found the existing data will be overwritten
 ;         no_plot:      set this flag to skip plotting
-;         no_avg:       set this flag to skip making 2.5 sec averaged fgm data
-;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
-;                       is used, if available
+;         no_avg:       set this flag to skip making 2.5 sec averaged FGM data
+;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
+;                       is used, if available (team member only)
 ;         gsm:          set this flag to plot FGM(DFG) data in the GSM (or DMPA_GSM) coordinate
 ;
 ; EXAMPLE:
 ;
-;     To plot fluxgate magnetometer (fgm) data
+;     To plot data from fluxgate magnetometers (FGM)
 ;     MMS>  mms_fgm_plot_kitamura,trange=['2015-09-02/00:00:00','2015-09-03/00:00:00'],probe='1',/no_avg
 ;     MMS>  mms_fgm_plot_kitamura,trange=['2015-09-02/00:00:00','2015-09-03/00:00:00'],probe='1',/no_avg,/load_fgm,/no_update
 ;
@@ -43,7 +43,7 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
 
-  if undefined(probe) then probe=['3']
+  if undefined(probe) then probe='1'
   probe=strcompress(string(probe),/remove_all)
   if undefined(trange) then begin
     if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) gt 0 and undefined(dfg_ql) then begin
@@ -193,7 +193,7 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
       options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA',ysubtitle='[nT]',labflag=-1,datagap=0.26d
       undefine,b
 
-      if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+      if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
 
       if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) gt 0 then begin
         tkm2re,'mms'+probe+'_mec_r_'+strlowcase(ncoord)
@@ -257,7 +257,7 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
   
       if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then ql_name='' else ql_name='_ql' 
 
-      if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+      if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
 
       if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) gt 0 then begin
         tkm2re,'mms'+probe+'_mec_r_'+strlowcase(ncoord)

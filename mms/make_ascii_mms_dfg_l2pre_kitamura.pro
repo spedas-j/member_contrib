@@ -26,16 +26,15 @@ pro make_ascii_mms_dfg_l2pre_kitamura,trange,probes=probes,brst=brst,no_load_dfg
   for i=0,n_elements(probes)-1 do begin
     
     if undefined(no_load_dfg) then mms_load_fgm,trange=trange,instrument='dfg',probes=probes[i],data_rate=data_rate,level='l2pre',no_update=no_update
-    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update
-    endif
+    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
 
-    get_data,'mms'+probes[i]+'_dfg_'+data_rate+'_l2pre_gse_btot',data=Btot,dlimit=dl
-    get_data,'mms'+probes[i]+'_dfg_'+data_rate+'_l2pre_gse_bvec',data=Bvec_gse
-    get_data,'mms'+probes[i]+'_dfg_'+data_rate+'_l2pre_gsm_bvec',data=Bvec_gsm
-    tinterpol_mxn,'mms'+probe[i]+'_mec_r_gse','mms'+probes[i]+'_dfg_'+data_rate+'_l2pre_gse_btot',newname='mms'+probe[i]+'_mec_r_gse_intpl'
+    get_data,'mms'+probes[i]+'_dfg_b_gse_'+data_rate+'_l2pre_btot',data=Btot,dlimit=dl
+    get_data,'mms'+probes[i]+'_dfg_b_gse_'+data_rate+'_l2pre_bvec',data=Bvec_gse
+    get_data,'mms'+probes[i]+'_dfg_b_gsm_'+data_rate+'_l2pre_bvec',data=Bvec_gsm
+    tinterpol_mxn,'mms'+probe[i]+'_mec_r_gse','mms'+probes[i]+'_dfg_b_gse_'+data_rate+'_l2pre_btot',newname='mms'+probe[i]+'_mec_r_gse_intpl'
     get_data,'mms'+probe[i]+'_mec_r_gse_intpl',data=pos_gse
     del_data,'mms'+probe[i]+'_mec_r_gse_intpl'
-    tinterpol_mxn,'mms'+probe[i]+'_mec_r_gsm','mms'+probes[i]+'_dfg_'+data_rate+'_l2pre_gse_btot',newname='mms'+probe[i]+'_mec_r_gsm_intpl'
+    tinterpol_mxn,'mms'+probe[i]+'_mec_r_gsm','mms'+probes[i]+'_dfg_b_gse_'+data_rate+'_l2pre_btot',newname='mms'+probe[i]+'_mec_r_gsm_intpl'
     get_data,'mms'+probe[i]+'_mec_r_gsm_intpl',data=pos_gsm
     del_data,'mms'+probe[i]+'_mec_r_gsm_intpl'
 

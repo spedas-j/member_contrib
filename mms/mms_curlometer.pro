@@ -1,4 +1,31 @@
-;mms_curlometer,trange=['2015-11-18/02:12:00','2015-11-18/02:13:30'],ref_probe='1',data_rate='srvy',/gsm,/plot
+;+
+; PROCEDURE:
+;         mms_curlometer
+;
+; PURPOSE:
+;         Calculate current denisty using curlometer technique 
+;
+; KEYWORDS:
+;         trange:       time range of interest [starttime, endtime] with the format
+;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
+;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
+;         ref_probe:    a probe used as a reference - value for MMS SC # (default value is '1')
+;         data_rate:    fgm data rate for the calculation
+;         gsm:          set this flag to calculate current in the GSM coordinate
+;         plot:         set this flag to plot
+;         lmn:          set this flag to calculate current in the LMN coordinate (Shue et al. [1998] model).
+;                       specific LMN coodinate can also be used if 3 x 3 matrix for coordnate transformation
+;                       are used as the input. the original coordinate system is the GSE or GSM coodinate depending on
+;                       the gsm flag.
+;         l2pre:        set this flag to use dfg l2pre data forcibly. if not set, l2 data
+;                       are used, if available (team member only)
+;
+; EXAMPLE:
+;     MMS>  mms_curlometer,trange=['2015-11-18/02:12:00','2015-11-18/02:13:30'],ref_probe='1',data_rate='srvy',/gsm,/plot
+;
+; NOTES:
+;     See the notes in mms_load_data for rules on the use of MMS data
+;-
 
 PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm=gsm,plot=plot,lmn=lmn,l2pre=l2pre
 
@@ -16,9 +43,9 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
       for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='fgm',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2',/no_attitude_data
     endif else begin
       inst='DFG'
-      for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_dfg_'+fgm_data_rate+'_l2pre_'+coord+'_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='dfg',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2pre',/no_attitude_data
+      for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_dfg_b_'+coord+'_'+fgm_data_rate+'_l2pre_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='dfg',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2pre',/no_attitude_data
     endelse
-    for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_mec_r_'+coord)) eq 0 then mms_load_mec,trange=[trange[0]-60.0,trange[1]+60.0],probes=strcompress(string(p),/remove_all)
+    for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_mec_r_'+coord)) eq 0 then mms_load_mec,trange=[trange[0]-60.0,trange[1]+60.0],probes=strcompress(string(p),/remove_all),varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
   endif else begin
     copy_data,'mms'+ref_probe+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','time_for_curlometer'
   endelse
@@ -27,8 +54,8 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
     if not undefined(trange) then time_clip,'mms'+ref_probe+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot',time_double(trange[0]),time_double(trange[1]),newname='time_for_curlometer'
     for p=1,4 do tinterpol_mxn,'mms'+strcompress(string(p),/remove_all)+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec','time_for_curlometer',newname='mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer'
   endif else begin
-    if not undefined(trange) then time_clip,'mms'+ref_probe+'_dfg_'+fgm_data_rate+'_l2pre_'+coord+'_btot',time_double(trange[0]),time_double(trange[1]),newname='time_for_curlometer'
-    for p=1,4 do tinterpol_mxn,'mms'+strcompress(string(p),/remove_all)+'_dfg_'+fgm_data_rate+'_l2pre_'+coord+'_bvec','time_for_curlometer',newname='mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer'
+    if not undefined(trange) then time_clip,'mms'+ref_probe+'_dfg_b_'+coord+'_'+fgm_data_rate+'_l2pre_btot',time_double(trange[0]),time_double(trange[1]),newname='time_for_curlometer'
+    for p=1,4 do tinterpol_mxn,'mms'+strcompress(string(p),/remove_all)+'_dfg_b_'+coord+'_'+fgm_data_rate+'_l2pre_bvec','time_for_curlometer',newname='mms'+strcompress(string(p),/remove_all)+'_b_for_curlometer'
   endelse
   for p=1,4 do tinterpol_mxn,'mms'+strcompress(string(p),/remove_all)+'_mec_r_'+coord,'time_for_curlometer',newname='mms'+strcompress(string(p),/remove_all)+'_pos_for_curlometer'
 

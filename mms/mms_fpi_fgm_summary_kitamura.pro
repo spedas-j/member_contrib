@@ -14,20 +14,20 @@
 ;                       ROI just after the specified time to 30 minutes after the end of the ROI.
 ;         probe:        a probe - value for MMS SC #
 ;         delete:       set this flag to delete all tplot variables at the beginning
-;         no_short:     set this flag to skip short plots (2 hours)
-;         no_update_fpi:set this flag to preserve the original fpi data. if not set and
+;         no_short:     set this flag to skip short plots (1 or 2 hours)
+;         no_update_fpi:set this flag to preserve the original FPI data. if not set and
 ;                       newer data is found the existing data will be overwritten 
-;         no_update_fgm:set this flag to preserve the original fgm data. if not set and
+;         no_update_fgm:set this flag to preserve the original FGM data. if not set and
 ;                       newer data is found the existing data will be overwritten
 ;         add_scpot:    set this flag to additionally plot scpot data with number densities
 ;         no_bss:       set this flag to skip loading bss data
 ;         full_bss:     set this flag to load detailed bss data (team member only)
 ;         no_load:      set this flag to skip loading data
-;         dfg_ql:       set this flag to use dfg ql data forcibly. if not set, l2pre data
+;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
 ;                       are used, if available (team member only)
 ;         no_output:    set this flag to skip making png and ps files
-;         fpi_sitl:     set this flag to use fpi fast sitl data forcibly. if not set, fast ql data
-;                       are used, if available (team member only)
+;         fpi_sitl:     set this flag to use FPI fast sitl data forcibly. if not set, FPI fast ql
+;                       data are used, if available (team member only)
 ;         plotdir:      set this flag to assine a directory for plots
 ;         plotcdir:     set this flag to assine a directory for plots with currents in the LMN coordinate
 ;
@@ -147,9 +147,9 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
     tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_gsm_srvy_l2_bvec_avg','mms'+probe+'_fgm_b_gsm_srvy_l2_btot']
   endif else begin
-    if strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gsm')) gt 0 then begin
+    if strlen(tnames('mms'+probe+'_dfg_b_gsm_srvy_l2pre')) gt 0 then begin
 ;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_l2pre_gse_bvec_avg','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
-      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec_avg','mms'+probe+'_dfg_srvy_l2pre_gsm_btot']
+      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_bvec_avg','mms'+probe+'_dfg_b_gsm_srvy_l2pre_btot']
 ;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_srvy_l2pre_gse_btot']
     endif else begin
 ;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_eBulkV_DSC','mms'+probe+'_fpi_iBulkV_DSC','mms'+probe+'_dfg_srvy_dmpa_bvec_avg','mms'+probe+'_dfg_srvy_dmpa_btot']

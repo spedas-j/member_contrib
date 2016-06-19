@@ -15,24 +15,28 @@
 ;         probe:        a probe - value for MMS SC #
 ;         delete:       set this flag to delete all tplot variables at the beginning
 ;         no_short:     set this flag to skip short plots (2 hours)
-;         no_update_fpi:set this flag to preserve the original fpi data. if not set and
+;         no_update_fpi:set this flag to preserve the original FPI data. if not set and
 ;                       newer data is found the existing data will be overwritten 
-;         no_update_fgm:set this flag to preserve the original fgm data. if not set and
+;         no_update_fgm:set this flag to preserve the original FGM data. if not set and
 ;                       newer data is found the existing data will be overwritten
 ;         add_scpot:    set this flag to additionally plot scpot data with number densities
 ;         no_bss:       set this flag to skip loading bss data
 ;         full_bss:     set this flag to load detailed bss data (team member only)
 ;         no_load:      set this flag to skip loading data
 ;         no_output:    set this flag to skip making png and ps files
+;         no_update_edp:set this flag to preserve the original EDP data. if not set and
+;                       newer data is found the existing data will be overwritten
+;         edp_comm:     set this flag to use EDP comm data (team member only)
 ;         plotdir:      set this flag to assine a directory for plots
 ;
 ; EXAMPLE:
 ;
-;     To make summary plots of fluxgate magnetometers (FGM (or DFG)) and fast plasma investigation (FPI) data
+;     To make summary plots of fluxgate magnetometers (FGM (or DFG)), fast plasma investigation (FPI) and 
+;     high frequency electric field wave data
 ;     team members
 ;     MMS>  mms_fpi_fgm_hfesp_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output
 ;     public users
-;     MMS>  mms_fpi_fgm_hfesp_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/add_scpot
+;     MMS>  mms_fpi_fgm_hfesp_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/add_scpot,/no_output
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
@@ -42,8 +46,8 @@
 ;-
 
 pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
-                                       no_bss=no_bss,full_bss=full_bss,no_load=no_load,no_output=no_output,$
-                                       add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,plotdir=plotdir
+                                       add_scpot=add_scpot,no_bss=no_bss,full_bss=full_bss,no_load=no_load,no_output=no_output,$
+                                       no_update_edp=no_update_edp,edp_comm=edp_comm,plotdir=plotdir
                                        
 
   probe=strcompress(string(probe),/remove_all)
@@ -82,9 +86,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
         mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,/no_attitude_data
       endif
     endif
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,/load_fpi,/magplot,/gsm
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,no_update_fpi=no_update_fpi,/load_fpi,/magplot,/gsm
   endif else begin
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,/magplot,/gsm
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,/magplot,/gsm
   endelse
   
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2_bvec')) ne 0 then begin
@@ -93,9 +97,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
     options,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSM!Cv'+fgm_dv,ysubtitle='[nT]',labflag=-1,datagap=0.26d
   endif else begin
     if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2_bvec')) ne 0 then begin
-      get_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_mod',dlim=dl
+      get_data,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod',dlim=dl
       fgm_dv=dl.cdf.gatt.data_version
-      options,'mms'+probe+'_dfg_srvy_l2pre_gsm_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_L2pre!CGSM!Cv'+fgm_dv,ysubtitle='[nT]',labflag=-1,datagap=0.26d
+      options,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_L2pre!CGSM!Cv'+fgm_dv,ysubtitle='[nT]',labflag=-1,datagap=0.26d
     endif
   endelse  
   

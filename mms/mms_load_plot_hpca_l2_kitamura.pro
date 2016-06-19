@@ -1,8 +1,69 @@
-;EXAMPLE:
-;MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-01/08:00:00',probe='1',/delete,/gsm,/lowi_pa,/lowh_pa
-;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/12:00:00','2015-09-01/13:00:00'],probe='1',/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/gsm
-;MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-01/08:00:00',probe='1',/brst,/delete,/gsm
-;MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],probe='1',/brst,/no_update_dfg,/no_update_fpi,/no_update_hpca,/delete,/gsm
+;+
+; PROCEDURE:
+;         mms_load_plot_hpca_l2_kitamura
+;
+; PURPOSE:
+;         Plot magnetic field (FGM (or DFG)), FPI, and HPCA data obtained by MMS
+;
+; KEYWORDS:
+;         trange:        time range of interest [starttime, endtime] with the format
+;                        ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
+;                        ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
+;                        if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
+;                        the time range is set as from 210 (or 30 (brst)) minutes before the 
+;                        beginning　of the ROI just after the specified time to 210
+;                        (or 30 (brst)) minutes　after the end of the ROI.
+;         probe:         a probe - value for MMS SC #
+;         delete:        set this flag to delete all tplot variables at the beginning
+;         brst:          set this flag to use HPCA burst data
+;         no_load_fgm:   set this flag to skip loading FGM data
+;         dfg_ql:        set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
+;                        are used, if available (team member only)
+;         no_update_fgm: set this flag to preserve the original FGM data. if not set and
+;                        newer data is found the existing data will be overwritten
+;         no_load_fpi:   set this flag to skip loading FPI data
+;         no_update_fpi: set this flag to preserve the original FPI data. if not set and
+;                        newer data is found the existing data will be overwritten
+;         no_update_hpca:set this flag to preserve the original HPCA data. if not set and
+;                        newer data is found the existing data will be overwritten
+;         no_update_mec: set this flag to preserve the original MEC data. if not set and
+;                        newer data is found the existing data will be overwritten
+;         no_bss:        set this flag to skip loading bss data
+;         full_bss:      set this flag to load detailed bss data (team member only)
+;         gsm:           set this flag to plot data in the GSM coordinate
+;         flux:          set this flag to set the differential flux as the unit for HPCA
+;                        E-t spectra
+;         lowi_pa:       set this flag to plot PA-t spectra for FPI-DIS data  
+;         lowh_pa:       set this flag to plot PA-t spectra for HPCA proton data
+;         lowhe_pa:      set this flag to plot PA-t spectra for HPCA helium data
+;         lowo_pa:       set this flag to plot PA-t spectra for HPCA oxygen data
+;         pa_erange:     set this to specify energy range of PA-t spectra
+;         zrange:        set this to specify zrange of HPCA E-t spectra 
+;         v_hpca:        set this flag to use HPCA proton velocity data. if not set, ion
+;                        velocity data from FPI-DIS are plotted
+;         plot_wave:     set this flag to plot with wave data
+;         plotdir:       set this to assine a directory for plots
+;         esp_plotcdir:  set this to assine a directory for plots with high frequency electric field
+;                        wave data
+;         no_short:      set this flag to skip short plots (1 hour)
+;
+; EXAMPLE:
+;
+;     To make plots of fluxgate magnetometers (FGM (or DFG)), fast plasma investigation (FPI), and
+;     hot plasma composition analyzer (HPCA) data
+;     team member
+;     MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-03/08:00:00',probe='1',/delete,/gsm,/lowi_pa,/lowh_pa,/lowhe_pa,/lowo_pa
+;     MMS>  mms_load_plot_hpca_l2_kitamura,'2015-09-03/08:00:00',probe='1',/delete,/brst,/gsm,/lowi_pa,/lowh_pa,/lowhe_pa,/lowo_pa
+;     public user
+;     MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-03/08:00:00','2015-09-04/00:00:00'],probe='1',/delete,/gsm,/lowi_pa,/lowh_pa,/lowhe_pa,/lowo_pa
+;     MMS>  mms_load_plot_hpca_l2_kitamura,['2015-09-03/08:00:00','2015-09-04/00:00:00'],probe='1',/delete,/brst,/gsm,/lowi_pa,/lowh_pa,/lowhe_pa,/lowo_pa
+;
+; NOTES:
+;     1) See the notes in mms_load_data for rules on the use of MMS data
+;     2) Set plotdir before use if you output plots
+;     3) Information of version of the first cdf files is shown in the plot,
+;        if multiple cdf files are loaded for FPI
+;-
 
 pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,$
                                    no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
@@ -51,7 +112,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
   loadct2,43
   time_stamp,/off
   if undefined(no_load_fgm) then mms_fgm_plot_kitamura,trange=trange,probe=probe,dfg_ql=dfg_ql,no_update=no_update_fgm,/no_avg,/load_fgm,/no_plot
-  if strlen(tnames('mms'+probe+'_mec_r_eci')) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update_mec
+  if strlen(tnames('mms'+probe+'_mec_r_eci')) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update_mec,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
   
   if undefined(pa_erange) then pa_erange=[1.d,300.d]
   if pa_erange[0] gt 100.d and pa_erange[1] ge 1000.d then begin
@@ -196,7 +257,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange,probe=probe,delete=delete,brst=brst,no
     tname_velocity='mms1_fpi_iBulkV_'+coord
   endelse
   
-  if undefined(wave_plot) then begin
+  if undefined(plot_wave) then begin
     if not undefined(flux) then begin
       tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_dist_fast_energy_omni','mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_hplus_flux_elev_0-360','mms'+probe+'_hpca_heplusplus_flux_elev_0-360','mms'+probe+'_hpca_heplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_heplus_flux_elev_0-360','mms'+probe+'_hpca_oplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_oplus_flux_elev_0-360',tname_density]
     endif else begin
