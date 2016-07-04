@@ -10,6 +10,7 @@
 ;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
 ;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
 ;         ref_probe:    a probe used as a reference - value for MMS SC # (default value is '1')
+;         delete:       set this flag to delete all tplot variables at the beginning
 ;         data_rate:    fgm data rate for the calculation
 ;         gsm:          set this flag to calculate current in the GSM coordinate
 ;         plot:         set this flag to plot
@@ -27,17 +28,19 @@
 ;     See the notes in mms_load_data for rules on the use of MMS data
 ;-
 
-PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm=gsm,plot=plot,lmn=lmn,l2pre=l2pre
+PRO mms_curlometer,trange=trange,ref_probe=ref_probe,delete=delete,data_rate=fgm_data_rate,gsm=gsm,plot=plot,lmn=lmn,l2pre=l2pre
 
   if not undefined(gsm) then coord='gsm' else coord='gse'
   if undefined(ref_probe) then ref_probe='1'
   if undefined(fgm_data_rate) then fgm_data_rate='srvy'
+  if not undefined(delete) then store_data,'*',/delete
   
 ; INOUT: SC position in km, magnetic field in nT
 ; OUTPUT: three components of electric current, |curl(B)|, |div(B)| in nA/(m^2)
 
   if not undefined(trange) then begin
     trange=time_double(trange)
+    timespan,trange[0],trange[1]-trange[0],/seconds
     if undefined(l2pre) then begin
       inst='FGM'
       for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='fgm',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2',/no_attitude_data
@@ -45,9 +48,12 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
       inst='DFG'
       for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_dfg_b_'+coord+'_'+fgm_data_rate+'_l2pre_bvec')) eq 0 then mms_load_fgm,trange=trange,instrument='dfg',probes=strcompress(string(p),/remove_all),data_rate=fgm_data_rate,level='l2pre',/no_attitude_data
     endelse
-    for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_mec_r_'+coord)) eq 0 then mms_load_mec,trange=[trange[0]-60.0,trange[1]+60.0],probes=strcompress(string(p),/remove_all),varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
+    for p=1,4 do if strlen(tnames('mms'+strcompress(string(p),/remove_all)+'_mec_r_'+coord)) eq 0 then mms_load_mec,trange=[trange[0]-60.0,trange[1]+60.0],probes=strcompress(string(p),/remove_all),varformat=['mms'+strcompress(string(p),/remove_all)+'_mec_r_eci','mms'+strcompress(string(p),/remove_all)+'_mec_r_gse','mms'+strcompress(string(p),/remove_all)+'_mec_r_gsm','mms'+strcompress(string(p),/remove_all)+'_mec_L_vec']
   endif else begin
     copy_data,'mms'+ref_probe+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','time_for_curlometer'
+    get_data,'time_for_curlometer',data=d
+    timespan,d.x[0],d.x[n_elements(d.x)-1l]-d.x[0],/seconds
+    undefine,d
   endelse
   
   if undefined(l2pre) then begin
@@ -99,6 +105,8 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
   drcdry=dblarr(3)
   drcdrz=dblarr(3)
   ji=dblarr(dnum,3)
+  ji_perp=dblarr(dnum,3)
+  B_avg=dblarr(dnum,3)
   rotb=dblarr(dnum)
   divb=dblarr(dnum)
   jpara=dblarr(dnum)
@@ -149,10 +157,14 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
     for j=0,2 do ji[i,j]=ji[i,j]/mu0/1.e3
     
     rotb[i]=sqrt(ji[i,0]^2+ji[i,1]^2+ji[i,2]^2)
-    B_avg=[average(all_b[*,i,0]),average(all_b[*,i,1]),average(all_b[*,i,2])]
-    n_para=B_avg/norm(B_avg,/double)
-    jpara[i]=sqrt((ji[i,0]*n_para[0])^2+(ji[i,1]*n_para[1])^2+(ji[i,2]*n_para[2])^2)
-    jperp[i]=sqrt(rotb[i]^2-jpara[i]^2)
+    B_avg[i,*]=[[average(all_b[*,i,0])],[average(all_b[*,i,1])],[average(all_b[*,i,2])]]
+    n_para=reform(B_avg[i,*]/norm(reform(B_avg[i,*]),/double))
+    jpara[i]=ji[i,0]*n_para[0]+ji[i,1]*n_para[1]+ji[i,2]*n_para[2]
+    ji_perp[i,0]=ji[i,0]-jpara[i]*n_para[0]
+    ji_perp[i,1]=ji[i,1]-jpara[i]*n_para[1]
+    ji_perp[i,2]=ji[i,2]-jpara[i]*n_para[2]
+    jpara[i]=abs(jpara[i])
+    jperp[i]=sqrt(ji_perp[i,0]^2+ji_perp[i,1]^2+ji_perp[i,2]^2)
 
     lhs=drx[0]*drcdrx[0]+dry[0]*drcdry[0]+drz[0]*drcdrz[0]
     lhs2=0.d
@@ -166,9 +178,16 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,data_rate=fgm_data_rate,gsm
 
   endfor
 
+  store_data,'mms_b_avg_for_curlometer',data={x:time,y:B_avg},dlimit={data_att:{coord_sys:coord}}
+  fac_matrix_make,'mms_b_avg_for_curlometer',other_dim='Xgse',newname='mms_fgm_fac_mat'
   store_data,'Current_'+coord,data={x:time,y:ji}
   options,'Current_'+coord,constant=0.0,ytitle='Current!CDensity!C'+strupcase(coord),ysubtitle='[nA/m!U2!N]',colors=[2,4,6],labels=['J!DX!N','J!DY!N','J!DZ!N'],labflag=-1,datagap=0.13d
-  store_data,'Current_magnitude',data={x:time,y:[[rotb],[jpara],[jperp]]}
+  tvector_rotate,'mms_fgm_fac_mat','Current_'+coord,newname='Current_fac'  
+  store_data,'Current_perp_'+coord,data={x:time,y:ji_perp}
+  options,'Current_perp_'+coord,constant=0.0,ytitle='Current!CDensity!CPerp!C'+strupcase(coord),ysubtitle='[nA/m!U2!N]',colors=[2,4,6],labels=['J!DX!N','J!DY!N','J!DZ!N'],labflag=-1,datagap=0.13d
+  get_data,'Current_fac',data=j_fac
+  options,'Current_fac',constant=0.0,ytitle='Current!CDensity!CFAC',ysubtitle='[nA/m!U2!N]',colors=[2,4,6],labels=['J!DX!N','J!DY!N','J!DZ!N'],labflag=-1,datagap=0.13d
+  store_data,'Current_magnitude',data={x:time,y:[[rotb],[reform(abs(j_fac.y[*,2]))],[sqrt(j_fac.y[*,0]*j_fac.y[*,0]+j_fac.y[*,1]*j_fac.y[*,1])]]}
   options,'Current_magnitude',ytitle='Current!CDensity!CMagnitude',ysubtitle='[nA/m!U2!N]',colors=[0,4,6],labels=['|J|','|J_para|','|J_perp|'],labflag=-1,datagap=0.13d
   ylim,'Current_magnitude',10.d,2000.d,1
   store_data,'divB_over_rotB',data={x:time,y:divb/rotb}
