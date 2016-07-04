@@ -87,12 +87,40 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
       if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 and public eq 0 then begin
         mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
+        if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse','mms'+probe+'_dfg_b_gse_srvy_l2pre'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_btot','mms'+probe+'_dfg_b_gse_srvy_l2pre_btot'
+          store_data,'mms'+probe+'_dfg_srvy_l2pre_gse*',/delete
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm','mms'+probe+'_dfg_b_gsm_srvy_l2pre'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec','mms'+probe+'_dfg_b_gsm_srvy_l2pre_bvec'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_btot','mms'+probe+'_dfg_b_gsm_srvy_l2pre_btot'
+          store_data,'mms'+probe+'_dfg_srvy_l2pre_gsm*',/delete
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa','mms'+probe+'_dfg_b_dmpa_srvy_l2pre'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_btot','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_btot'
+          store_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa*',/delete
+        endif
       endif else begin
         if public eq 0 then begin
           get_data,'mms'+probe+'_fgm_b_gse_srvy_l2_bvec',data=d
           if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
             store_data,'mms'+probe+'_fgm_*',/delete
             mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update,/no_attitude_data
+            if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse','mms'+probe+'_dfg_b_gse_srvy_l2pre'
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec'
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_btot','mms'+probe+'_dfg_b_gse_srvy_l2pre_btot'
+              store_data,'mms'+probe+'_dfg_srvy_l2pre_gse*',/delete
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm','mms'+probe+'_dfg_b_gsm_srvy_l2pre'
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec','mms'+probe+'_dfg_b_gsm_srvy_l2pre_bvec'
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_btot','mms'+probe+'_dfg_b_gsm_srvy_l2pre_btot'
+              store_data,'mms'+probe+'_dfg_srvy_l2pre_gsm*',/delete
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa','mms'+probe+'_dfg_b_dmpa_srvy_l2pre'
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec'
+              copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_btot','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_btot'
+              store_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa*',/delete
+            endif
           endif
         endif
       endelse

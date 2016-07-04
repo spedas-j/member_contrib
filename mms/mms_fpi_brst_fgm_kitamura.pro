@@ -27,6 +27,7 @@
 ;                       data are used, if available (team member only)
 ;         fpi_l1b:      set this flag to use FPI level-1b data if available (team member only)
 ;         time_clip:    set this flag to time clip the FPI and EDP data
+;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
 ;
 ; EXAMPLE:
 ;
@@ -40,12 +41,13 @@
 
 pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                               no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,$
-                              fpi_l1b=fpi_l1b,time_clip=time_clip
+                              fpi_l1b=fpi_l1b,time_clip=time_clip,gse=gse
 
   mms_init
   
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
+  if undefined(gse) then coord='gsm' else coord='gse'
   
   if not undefined(delete) then store_data,'*',/delete
   stime=time_double(trange)
@@ -72,11 +74,39 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update_fgm,/no_attitude_data
       if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 then begin
         mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,/no_attitude_data
+        if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse','mms'+probe+'_dfg_b_gse_srvy_l2pre'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_btot','mms'+probe+'_dfg_b_gse_srvy_l2pre_btot'
+          store_data,'mms'+probe+'_dfg_srvy_l2pre_gse*',/delete
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm','mms'+probe+'_dfg_b_gsm_srvy_l2pre'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec','mms'+probe+'_dfg_b_gsm_srvy_l2pre_bvec'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_btot','mms'+probe+'_dfg_b_gsm_srvy_l2pre_btot'
+          store_data,'mms'+probe+'_dfg_srvy_l2pre_gsm*',/delete
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa','mms'+probe+'_dfg_b_dmpa_srvy_l2pre'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec'
+          copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_btot','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_btot'
+          store_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa*',/delete
+        endif
       endif else begin
         get_data,'mms'+probe+'_fgm_b_gse_srvy_l2',data=d
         if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
           store_data,'mms'+probe+'_fgm_*_l2*',/delete
           mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,/no_attitude_data
+          if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse','mms'+probe+'_dfg_b_gse_srvy_l2pre'
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec'
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_btot','mms'+probe+'_dfg_b_gse_srvy_l2pre_btot'
+            store_data,'mms'+probe+'_dfg_srvy_l2pre_gse*',/delete
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm','mms'+probe+'_dfg_b_gsm_srvy_l2pre'
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_bvec','mms'+probe+'_dfg_b_gsm_srvy_l2pre_bvec'
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_gsm_btot','mms'+probe+'_dfg_b_gsm_srvy_l2pre_btot'
+            store_data,'mms'+probe+'_dfg_srvy_l2pre_gsm*',/delete
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa','mms'+probe+'_dfg_b_dmpa_srvy_l2pre'
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_bvec','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_bvec'
+            copy_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa_btot','mms'+probe+'_dfg_b_dmpa_srvy_l2pre_btot'
+            store_data,'mms'+probe+'_dfg_srvy_l2pre_dmpa*',/delete
+          endif
         endif
       endelse
     endif
@@ -104,7 +134,8 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
     endelse
   endif
   
-  mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,time_clip=time_clip,/load_fpi,/no_plot,/no_avg,/gsm
-  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,full_bss=full_bss,time_clip=time_clip,/magplot,/no_load_mec,/gsm
+  if undefined(gse) then gsm=1
+  mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,time_clip=time_clip,gsm=gsm,/load_fpi,/no_plot,/no_avg
+  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,full_bss=full_bss,time_clip=time_clip,gsm=gsm,/magplot,/no_load_mec
 
 end

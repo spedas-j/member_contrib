@@ -3,7 +3,7 @@
 ;         mms_fpi_fgm_hfesp_summary_kitamura
 ;
 ; PURPOSE:
-;         Plot magnetic field (FGM (or DFG)) and FPI data obtained by MMS
+;         Plot magnetic field (FGM (or DFG)), FPI, and high frequency electric field (EDP) data obtained by MMS
 ;
 ; KEYWORDS:
 ;         trange:       time range of interest [starttime, endtime] with the format
@@ -110,7 +110,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
   options,'mms'+probe+'_dis_fp',colors=255,thick=1.25,datagap=4.6d
   options,'mms'+probe+'_des_fp',colors=1,thick=1.25,datagap=4.6d
   
-  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/no_update
+  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
   
   tplot_force_monotonic,'mms'+probe+'_edp_hfesp_srvy_l2',/forward
   get_data,'mms'+probe+'_edp_hfesp_srvy_l2',data=hfesp,lim=l,dlim=dl

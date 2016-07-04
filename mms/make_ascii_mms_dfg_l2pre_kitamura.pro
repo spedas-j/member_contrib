@@ -26,7 +26,17 @@ pro make_ascii_mms_dfg_l2pre_kitamura,trange,probes=probes,brst=brst,no_load_dfg
   for i=0,n_elements(probes)-1 do begin
     
     if undefined(no_load_dfg) then mms_load_fgm,trange=trange,instrument='dfg',probes=probes[i],data_rate=data_rate,level='l2pre',no_update=no_update
-    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
+    if strlen(tnames('mms'+probes[i]+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probes[i]+'_dfg_srvy_l2pre_gse')) gt 0 then begin
+      copy_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gse','mms'+probes[i]+'_dfg_b_gse_srvy_l2pre'
+      copy_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gse_bvec','mms'+probes[i]+'_dfg_b_gse_srvy_l2pre_bvec'
+      copy_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gse_btot','mms'+probes[i]+'_dfg_b_gse_srvy_l2pre_btot'
+      store_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gse*',/delete
+      copy_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gsm','mms'+probes[i]+'_dfg_b_gsm_srvy_l2pre'
+      copy_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gsm_bvec','mms'+probes[i]+'_dfg_b_gsm_srvy_l2pre_bvec'
+      copy_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gsm_btot','mms'+probes[i]+'_dfg_b_gsm_srvy_l2pre_btot'
+      store_data,'mms'+probes[i]+'_dfg_srvy_l2pre_gsm*',/delete
+    endif
+    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update,varformat=['mms'+probes[i]+'_mec_r_eci','mms'+probes[i]+'_mec_r_gse','mms'+probes[i]+'_mec_r_gsm','mms'+probes[i]+'_mec_L_vec']
 
     get_data,'mms'+probes[i]+'_dfg_b_gse_'+data_rate+'_l2pre_btot',data=Btot,dlimit=dl
     get_data,'mms'+probes[i]+'_dfg_b_gse_'+data_rate+'_l2pre_bvec',data=Bvec_gse

@@ -1,8 +1,56 @@
-; MMS> mms_plot_hfesp_l2_kitamura,['2015-10-10/07:13:00','2015-10-10/07:20:00'],probe='1',/delete,/fpi_brst,/load_fgm,/load_fpi,/lowi_brst_pa,/lowi_brst_theta,/gsm
+;+
+; PROCEDURE:
+;         mms_plot_hfesp_l2_kitamura
+;
+; PURPOSE:
+;         Plot magnetic field (FGM (or DFG)), FPI, HPCA, and high frequency electric field (EDP) data obtained by MMS
+;
+; KEYWORDS:
+;         trange:         time range of interest [starttime, endtime] with the format
+;                         ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
+;                         ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
+;                         if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
+;                         the time range is set as from 30 minutes before the beginning of the
+;                         ROI just after the specified time to 30 minutes after the end of the ROI.
+;         probe:          a probe - value for MMS SC #
+;         delete:         set this flag to delete all tplot variables at the beginning
+;         fpi_brst:       set this flag to use FPI burst data
+;         hpca_brst:      set this flag to use HPCA burst data
+;         load_fgm:       set this flag to load FGM data
+;         no_update_mec:  set this flag to preserve the original MEC data. if not set and
+;                         newer data is found the existing data will be overwritten
+;         no_update_fgm:  set this flag to preserve the original FGM data. if not set and
+;                         newer data is found the existing data will be overwritten
+;         load_fpi:       set this flag to load FPI data
+;         load_hpca:      set this flag to load HPCA data
+;         no_short:       set this flag to skip short plots (1 hour)
+;         full_bss:       set this flag to load detailed bss data (team member only)
+;         plotdir:        set this flag to assine a directory for plots
+;         lowi_brst_pa:   set this flag to plot PA-t spectra for low-energy FPI-DIS burst data
+;         lowi_brst_theta:set this flag to plot theta-t spectra for low-energy FPI-DIS buest data
+;         pa_erange:      set this to specify the energy range of low-energy ions
+;         erangename:     set this to specify a part of the name of tplot variables for low-energy ions
+;         gsm:            set this flag to plot data in the GSM coordinate
+;
+; EXAMPLE:
+;
+;     To make summary plots of fluxgate magnetometers (FGM (or DFG)), fast plasma investigation (FPI) 
+;     hot plasma composition analyzer (HPCA), and high frequency electric field wave data
+;     team members
+;     MMS>  mms_plot_hfesp_l2_kitamura,'2015-10-10/04:00:00',probe='1',/delete,/fpi_brst,/load_fgm,/load_fpi,/lowi_brst_pa,/lowi_brst_theta,/gsm
+;     public users
+;     MMS>  mms_plot_hfesp_l2_kitamura,['2015-10-10/07:13:00','2015-10-10/07:20:00'],probe='1',/delete,/fpi_brst,/load_fgm,/load_fpi,/lowi_brst_pa,/lowi_brst_theta,/gsm
+;
+; NOTES:
+;     1) See the notes in mms_load_data for rules on the use of MMS data
+;     2) Set plotdir before use if you output plots
+;     3) Information of version of the first cdf files is shown in the plot,
+;        if multiple cdf files are loaded for FGM(DFG) or FPI
+;-
 
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
                                no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
-                               lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
+                               no_output=no_output,lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -148,7 +196,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   options,prefix+'_fpi_fp',colors=255,thick=1.25,datagap=4.6d
   undefine,ni
 
-  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',/no_update
+  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
   
   tplot_force_monotonic,prefix+'_edp_hfesp_srvy_l2',/forward
   get_data,prefix+'_edp_hfesp_srvy_l2',data=hfesp,lim=l,dlim=dl

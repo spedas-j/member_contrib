@@ -9,7 +9,7 @@
 ;         trange:       time range of interest [starttime, endtime] with the format
 ;                       ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
 ;                       ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
-;         probe:        probes - value for MMS SC # (default value is ['1','2','3','4'])
+;         probes:       probes - value for MMS SC # (default value is ['1','2','3','4'])
 ;         no_ele:       set this flag to skip the use of electron data (FPI-DES)
 ;         no_ion:       set this flag to skip the use of ion data (FPI-DIS)
 ;         lmn:          input 3 x 3 matrix for coordnate transformation to plot data in the
@@ -33,14 +33,14 @@
 ;
 ;     To plot FPI data
 ;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
-;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probe='1',/label_gsm
-;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probe='3',lmn=[[0.197390,0.201321,0.959430],[-0.116952,-0.966861,0.226942],[0.973324,-0.157004,-0.167304]],na=[0.9733,-0.1570,-0.1673],vn=-17.7d,/gsm,/no_ele
+;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probes=['2','3'],/label_gsm
+;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probes='3',lmn=[[0.197390,0.201321,0.959430],[-0.116952,-0.966861,0.226942],[0.973324,-0.157004,-0.167304]],na=[0.9733,-0.1570,-0.1673],vn=-17.7d,/gsm,/no_ele
 ;
 ; NOTES:
 ;     See the notes in mms_load_data for rules on the use of MMS data
 ;-
 
-PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,gse=gse,no_load_mec=no_load_mec,$
+PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lmn=lmn,va=va,vn=vn,gsm=gsm,gse=gse,no_load_mec=no_load_mec,$
                              no_load_fpi=no_load_fpi,no_load_fgm=no_load_fgm,no_update=no_update,label_gsm=label_gsm,delete=delete,fast=fast
 
   if not undefined(delete) then store_data,'*',/delete
@@ -55,63 +55,65 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
 
   if not undefined(gse) then coord='gse' else if undefined(gsm) then coord='DSC' else coord='gsm'
   
-  if undefined(probe) then probe=['1','2','3','4'] else if probe[0] eq '*' then probe=['1','2','3','4'] else probe=strcompress(string(probe),/remove_all)
+  if undefined(probes) then probes=['1','2','3','4'] else if probes[0] eq '*' then probes=['1','2','3','4'] else probes=strcompress(string(probes),/remove_all)
 
   if undefined(no_load_fgm) then begin
-    for i=0,n_elements(probe)-1 do begin
-      if undefined(fast) then mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='brst',level='l2',no_update=no_update,/no_attitude_data
-      mms_load_fgm,trange=trange,instrument='fgm',probes=probe[i],data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
+    for i=0,n_elements(probes)-1 do begin
+      if undefined(fast) then mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate='brst',level='l2',no_update=no_update,/no_attitude_data
+      mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
     endfor
   endif
 
-  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
+  if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes,no_update=no_update,varformat=['mms'+probes+'_mec_r_eci','mms'+probes+'_mec_r_gse','mms'+probes+'_mec_r_gsm','mms'+probes+'_mec_L_vec']
 
   if undefined(fast) then fpi_data_rate='brst' else fpi_data_rate='fast'
 
   if undefined(no_ele) then begin
-    for i=0,n_elements(probe)-1 do begin
-      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,/center_measurement
-      join_vec,'mms'+probe[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_des_bulkV_DSC'
-      copy_data,'mms'+probe[i]+'_des_numberdensity_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_des_numberDensity'
-      options,'mms'+probe[i]+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probe[i]+'_des!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
-      mms_cotrans,'mms'+probe[i]+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-      options,'mms'+probe[i]+'_des_bulkV_gse',constant=0.0,ytitle='mms'+probe[i]+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
-      mms_cotrans,'mms'+probe[i]+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
-      options,'mms'+probe[i]+'_des_bulkV_gsm',constant=0.0,ytitle='mms'+probe[i]+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
-      split_vec,'mms'+probe[i]+'_des_bulkV_'+coord
+    for i=0,n_elements(probes)-1 do begin
+      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,/center_measurement
+      join_vec,'mms'+probes[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkV_DSC'
+      copy_data,'mms'+probes[i]+'_des_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
+      options,'mms'+probes[i]+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+      mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      options,'mms'+probes[i]+'_des_bulkV_gse',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+      mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
+      options,'mms'+probes[i]+'_des_bulkV_gsm',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+      split_vec,'mms'+probes[i]+'_des_bulkV_'+coord
 
       if not undefined(lmn) and n_elements(lmn) eq 9 then begin
-        get_data,'mms'+probe[i]+'_des_bulkV_'+coord,data=v
+        get_data,'mms'+probes[i]+'_des_bulkV_'+coord,data=v
         v_lmn=dblarr(n_elements(v.x),3)
         for j=0l,n_elements(v.x)-1 do begin
           v_lmn[j,0]=v.y[j,0]*lmn[0,0]+v.y[j,1]*lmn[1,0]+v.y[j,2]*lmn[2,0]
           v_lmn[j,1]=v.y[j,0]*lmn[0,1]+v.y[j,1]*lmn[1,1]+v.y[j,2]*lmn[2,1]
           v_lmn[j,2]=v.y[j,0]*lmn[0,2]+v.y[j,1]*lmn[1,2]+v.y[j,2]*lmn[2,2]
         endfor
-        store_data,'mms'+probe[i]+'_des_bulkV_lmn',data={x:v.x,y:v_lmn}
-        split_vec,'mms'+probe[i]+'_des_bulkV_lmn',suffix=['_l','_m','_n']
+        store_data,'mms'+probes[i]+'_des_bulkV_lmn',data={x:v.x,y:v_lmn}
+        options,'mms'+probes[i]+'_des_bulkV_lmn',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CLMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=0.032d
+        split_vec,'mms'+probes[i]+'_des_bulkV_lmn',suffix=['_l','_m','_n']
       endif
       
       if not undefined(va) and n_elements(va) eq 3 then begin
         if undefined(vn) then vn=0.d
-        get_data,'mms'+probe[i]+'_des_bulkV_'+coord,data=v
+        get_data,'mms'+probes[i]+'_des_bulkV_'+coord,data=v
         nva=va/sqrt(va[0]*va[0]+va[1]*va[1]+va[2]*va[2])
         v_arb=dblarr(n_elements(v.x))
         for j=0l,n_elements(v.x)-1 do begin
           v_arb[j]=v.y[j,0]*nva[0]+v.y[j,1]*nva[1]+v.y[j,2]*nva[2]-vn
         endfor
-        store_data,'mms'+probe[i]+'_des_bulkV_arb',data={x:v.x,y:v_arb}
+        store_data,'mms'+probes[i]+'_des_bulkV_arb',data={x:v.x,y:v_arb}
       endif
 
-      copy_data,'mms'+probe[i]+'_des_bulkV_'+coord,'bulkVe'
+      copy_data,'mms'+probes[i]+'_des_bulkV_'+coord,'bulkVe'
       if coord ne 'DSC' then fgm_coord=coord else fgm_coord='dmpa'
-      box_ave_mms,variable1='bulkVe',variable2='mms'+probe[i]+'_fgm_b_'+fgm_coord+'_brst_l2_bvec',var2ave='mms'+probe[i]+'_fgm_b_brst_l2_bvec_des',inval=0.03d
+      box_ave_mms,variable1='bulkVe',variable2='mms'+probes[i]+'_fgm_b_'+fgm_coord+'_brst_l2_bvec',var2ave='mms'+probes[i]+'_fgm_b_brst_l2_bvec_des',inval=0.03d
       get_data,'bulkVe',data=v_des
-      get_data,'mms'+probe[i]+'_fgm_b_brst_l2_bvec_des',data=b_des
+      get_data,'mms'+probes[i]+'_fgm_b_brst_l2_bvec_des',data=b_des
       vpara_t=total(v_des.y*b_des.y,2)/sqrt(total(b_des.y^2,2))
       vperp_t= sqrt(total(v_des.y^2,2)-vpara_t^2)
-      store_data,'mms'+probe[i]+'_des_bulkVperp_mag',data={x:v_des.x,y:vperp_t}
-      store_data,'mms'+probe[i]+'_des_bulkVpara',data={x:v_des.x,y:vpara_t}
+      store_data,'mms'+probes[i]+'_des_bulkVperp_mag',data={x:v_des.x,y:vperp_t}
+      store_data,'mms'+probes[i]+'_des_bulkVpara',data={x:v_des.x,y:vpara_t}
+      options,'mms'+probes[i]+'_des_bulkVpara',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkVpara',ysubtitle='[km/s]',colors=6,datagap=0.032d
 
       vperpx=v_des.y[*,0]-dotp(v_des.y,b_des.y)*b_des.y[*,0]/(b_des.y[*,0]^2+b_des.y[*,1]^2+b_des.y[*,2]^2)
       vperpy=v_des.y[*,1]-dotp(v_des.y,b_des.y)*b_des.y[*,1]/(b_des.y[*,0]^2+b_des.y[*,1]^2+b_des.y[*,2]^2)
@@ -120,10 +122,11 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
       vperp[*,0]=vperpx
       vperp[*,1]=vperpy
       vperp[*,2]=vperpz
-      store_data,'mms'+probe[i]+'_des_bulkVperp_'+coord,data={x:v_des.x,y:vperp}
-      store_data,'mms'+probe[i]+'_des_bulkVperp_'+coord+'_x',data={x:v_des.x,y:vperpx}
-      store_data,'mms'+probe[i]+'_des_bulkVperp_'+coord+'_y',data={x:v_des.x,y:vperpy}
-      store_data,'mms'+probe[i]+'_des_bulkVperp_'+coord+'_z',data={x:v_des.x,y:vperpz}
+      store_data,'mms'+probes[i]+'_des_bulkVperp_'+coord,data={x:v_des.x,y:vperp}
+      options,'mms'+probes[i]+'_des_bulkVperp_'+coord,constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!C'+strupcase(coord),ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+      store_data,'mms'+probes[i]+'_des_bulkVperp_'+coord+'_x',data={x:v_des.x,y:vperpx}
+      store_data,'mms'+probes[i]+'_des_bulkVperp_'+coord+'_y',data={x:v_des.x,y:vperpy}
+      store_data,'mms'+probes[i]+'_des_bulkVperp_'+coord+'_z',data={x:v_des.x,y:vperpz}
 
       if not undefined(lmn) and n_elements(lmn) eq 9 then begin
         vperp_lmn=dblarr(n_elements(v_des.x),3)
@@ -132,44 +135,44 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
           vperp_lmn[j,1]=vperp[j,0]*lmn[0,1]+vperp[j,1]*lmn[1,1]+vperp[j,2]*lmn[2,1]
           vperp_lmn[j,2]=vperp[j,0]*lmn[0,2]+vperp[j,1]*lmn[1,2]+vperp[j,2]*lmn[2,2]
         endfor
-        store_data,'mms'+probe[i]+'_des_bulkVperp_lmn',data={x:v_des.x,y:vperp_lmn}
-        split_vec,'mms'+probe[i]+'_des_bulkVperp_lmn',suffix=['_l','_m','_n']
+        store_data,'mms'+probes[i]+'_des_bulkVperp_lmn',data={x:v_des.x,y:vperp_lmn}
+        options,'mms'+probes[i]+'_des_bulkVperp_lmn',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkVperp!CLMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=0.032d
+        split_vec,'mms'+probes[i]+'_des_bulkVperp_lmn',suffix=['_l','_m','_n']
       endif
 
       if not undefined(va) and n_elements(va) eq 3 then begin
-        get_data,'mms'+probe[i]+'_des_bulkVperp_'+coord,data=vperp
+        get_data,'mms'+probes[i]+'_des_bulkVperp_'+coord,data=vperp
         vperp_arb=dblarr(n_elements(vperp.x))
         for j=0l,n_elements(vperp.x)-1 do begin
           vperp_arb[j]=vperp.y[j,0]*nva[0]+vperp.y[j,1]*nva[1]+vperp.y[j,2]*nva[2]-vn
         endfor
-        store_data,'mms'+probe[i]+'_des_bulkVperp_arb',data={x:v.x,y:vperp_arb}
+        store_data,'mms'+probes[i]+'_des_bulkVperp_arb',data={x:v.x,y:vperp_arb}
       endif
       
-      if strlen(tnames('mms'+probe[i]+'_des_temppara_'+fpi_data_rate)) eq 0 then begin
+      if strlen(tnames('mms'+probes[i]+'_des_temppara_'+fpi_data_rate)) eq 0 then begin
         ;This part should be improved in future.
-        get_data,'mms'+probe[i]+'_des_TempXX',data=txx
-        get_data,'mms'+probe[i]+'_des_TempYY',data=tyy
-        get_data,'mms'+probe[i]+'_des_TempZZ',data=tzz
-        get_data,'mms'+probe[i]+'_des_TempXY',data=txy
-        get_data,'mms'+probe[i]+'_des_TempXZ',data=txz
-        get_data,'mms'+probe[i]+'_des_TempYZ',data=tyz
+        get_data,'mms'+probes[i]+'_des_TempXX',data=txx
+        get_data,'mms'+probes[i]+'_des_TempYY',data=tyy
+        get_data,'mms'+probes[i]+'_des_TempZZ',data=tzz
+        get_data,'mms'+probes[i]+'_des_TempXY',data=txy
+        get_data,'mms'+probes[i]+'_des_TempXZ',data=txz
+        get_data,'mms'+probes[i]+'_des_TempYZ',data=tyz
 
-        store_data,'mms'+probe[i]+'te_tensor',data={x:txx.x,y:[[txx.y],[tyy.y],[tzz.y],[txy.y],[txz.y],[tyz.y]]}
-        diag_t,'mms'+probe[i]+'te_tensor'
-        copy_data,'T_diag','mms'+probe[i]+'_fpi_DES_T_diag'
-        copy_data,'Saxis','mms'+probe[i]+'_fpi_DES_T_Saxis'
+        store_data,'mms'+probes[i]+'te_tensor',data={x:txx.x,y:[[txx.y],[tyy.y],[tzz.y],[txy.y],[txz.y],[tyz.y]]}
+        diag_t,'mms'+probes[i]+'te_tensor'
+        copy_data,'T_diag','mms'+probes[i]+'_fpi_DES_T_diag'
+        copy_data,'Saxis','mms'+probes[i]+'_fpi_DES_T_Saxis'
         get_data,'T_diag',data=t_diag
-        store_data,'mms'+probe[i]+'_fpi_DEStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
-        store_data,'mms'+probe[i]+'_fpi_DEStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
+        store_data,'mms'+probes[i]+'_fpi_DEStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
+        store_data,'mms'+probes[i]+'_fpi_DEStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
       endif else begin
-        copy_data,'mms'+probe[i]+'_des_tempperp_'+fpi_data_rate,'mms'+probe[i]+'_fpi_DEStempPerp'
-        copy_data,'mms'+probe[i]+'_des_temppara_'+fpi_data_rate,'mms'+probe[i]+'_fpi_DEStempPara'
+        copy_data,'mms'+probes[i]+'_des_tempperp_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DEStempPerp'
+        copy_data,'mms'+probes[i]+'_des_temppara_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DEStempPara'
       endelse
-
 
     endfor
 
-    if n_elements(probe) eq 4 then begin
+    if n_elements(probes) gt 1 then begin
       store_data,'mms_des_numberDensity',data=['mms1_des_numberDensity','mms2_des_numberDensity','mms3_des_numberDensity','mms4_des_numberDensity']
       store_data,'mms_des_bulkX',data=['mms1_des_bulkV_'+coord+'_x','mms2_des_bulkV_'+coord+'_x','mms3_des_bulkV_'+coord+'_x','mms4_des_bulkV_'+coord+'_x']
       store_data,'mms_des_bulkY',data=['mms1_des_bulkV_'+coord+'_y','mms2_des_bulkV_'+coord+'_y','mms3_des_bulkV_'+coord+'_y','mms4_des_bulkV_'+coord+'_y']
@@ -220,49 +223,51 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
   endif
 
   if undefined(no_ion) then begin
-    for i=0,n_elements(probe)-1 do begin
-      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probe[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,/center_measurement
-      join_vec,'mms'+probe[i]+'_dis_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_dis_bulkV_DSC'
-      copy_data,'mms'+probe[i]+'_dis_numberdensity_dbcs_'+fpi_data_rate,'mms'+probe[i]+'_dis_numberDensity'
-      options,'mms'+probe[i]+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probe[i]+'_dis!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
-      mms_cotrans,'mms'+probe[i]+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-      options,'mms'+probe[i]+'_dis_bulkV_gse',constant=0.0,ytitle='mms'+probe[i]+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
-      mms_cotrans,'mms'+probe[i]+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
-      options,'mms'+probe[i]+'_dis_bulkV_gsm',constant=0.0,ytitle='mms'+probe[i]+'_dis!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
-      split_vec,'mms'+probe[i]+'_dis_bulkV_'+coord
+    for i=0,n_elements(probes)-1 do begin
+      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,/center_measurement
+      join_vec,'mms'+probes[i]+'_dis_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkV_DSC'
+      copy_data,'mms'+probes[i]+'_dis_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
+      options,'mms'+probes[i]+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+      mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      options,'mms'+probes[i]+'_dis_bulkV_gse',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+      mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
+      options,'mms'+probes[i]+'_dis_bulkV_gsm',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+      split_vec,'mms'+probes[i]+'_dis_bulkV_'+coord
 
       if not undefined(lmn) and n_elements(lmn) eq 9 then begin
-        get_data,'mms'+probe[i]+'_dis_bulkV_'+coord,data=v
+        get_data,'mms'+probes[i]+'_dis_bulkV_'+coord,data=v
         v_lmn=dblarr(n_elements(v.x),3)
         for j=0l,n_elements(v.x)-1 do begin
           v_lmn[j,0]=v.y[j,0]*lmn[0,0]+v.y[j,1]*lmn[1,0]+v.y[j,2]*lmn[2,0]
           v_lmn[j,1]=v.y[j,0]*lmn[0,1]+v.y[j,1]*lmn[1,1]+v.y[j,2]*lmn[2,1]
           v_lmn[j,2]=v.y[j,0]*lmn[0,2]+v.y[j,1]*lmn[1,2]+v.y[j,2]*lmn[2,2]
         endfor
-        store_data,'mms'+probe[i]+'_dis_bulkV_lmn',data={x:v.x,y:v_lmn}
-        split_vec,'mms'+probe[i]+'_dis_bulkV_lmn',suffix=['_l','_m','_n']
+        store_data,'mms'+probes[i]+'_dis_bulkV_lmn',data={x:v.x,y:v_lmn}
+        options,'mms'+probes[i]+'_dis_bulkV_lmn',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CLMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=0.16d
+        split_vec,'mms'+probes[i]+'_dis_bulkV_lmn',suffix=['_l','_m','_n']
       endif
 
       if not undefined(va) and n_elements(va) eq 3 then begin
         if undefined(vn) then vn=0.d
-        get_data,'mms'+probe[i]+'_dis_bulkV_'+coord,data=v
+        get_data,'mms'+probes[i]+'_dis_bulkV_'+coord,data=v
         nva=va/sqrt(va[0]*va[0]+va[1]*va[1]+va[2]*va[2])
         v_arb=dblarr(n_elements(v.x))
         for j=0l,n_elements(v.x)-1 do begin
           v_arb[j]=v.y[j,0]*nva[0]+v.y[j,1]*nva[1]+v.y[j,2]*nva[2]-vn
         endfor
-        store_data,'mms'+probe[i]+'_dis_bulkV_arb',data={x:v.x,y:v_arb}
+        store_data,'mms'+probes[i]+'_dis_bulkV_arb',data={x:v.x,y:v_arb}
       endif
       
-      copy_data,'mms'+probe[i]+'_dis_bulkV_'+coord,'bulkVi'
+      copy_data,'mms'+probes[i]+'_dis_bulkV_'+coord,'bulkVi'
       if coord ne 'DSC' then fgm_coord=coord else fgm_coord='dmpa'
-      box_ave_mms,variable1='bulkVi',variable2='mms'+probe[i]+'_fgm_b_'+fgm_coord+'_brst_l2_bvec',var2ave='mms'+probe[i]+'_fgm_b_brst_l2_bvec_dis',inval=0.15d
+      box_ave_mms,variable1='bulkVi',variable2='mms'+probes[i]+'_fgm_b_'+fgm_coord+'_brst_l2_bvec',var2ave='mms'+probes[i]+'_fgm_b_brst_l2_bvec_dis',inval=0.15d
       get_data,'bulkVi',data=v_dis
-      get_data,'mms'+probe[i]+'_fgm_b_brst_l2_bvec_dis',data=b_dis
+      get_data,'mms'+probes[i]+'_fgm_b_brst_l2_bvec_dis',data=b_dis
       vpara_t=total(v_dis.y*b_dis.y,2)/sqrt(total(b_dis.y^2,2))
       vperp_t= sqrt(total(v_dis.y^2,2)-vpara_t^2)
-      store_data,'mms'+probe[i]+'_dis_bulkVperp_mag',data={x:v_dis.x,y:vperp_t}
-      store_data,'mms'+probe[i]+'_dis_bulkVpara',data={x:v_dis.x,y:vpara_t}
+      store_data,'mms'+probes[i]+'_dis_bulkVperp_mag',data={x:v_dis.x,y:vperp_t}
+      store_data,'mms'+probes[i]+'_dis_bulkVpara',data={x:v_dis.x,y:vpara_t}
+      options,'mms'+probes[i]+'_dis_bulkVpara',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkVpara',ysubtitle='[km/s]',colors=6,datagap=0.16d
 
       vperpx=v_dis.y[*,0]-dotp(v_dis.y,b_dis.y)*b_dis.y[*,0]/(b_dis.y[*,0]^2+b_dis.y[*,1]^2+b_dis.y[*,2]^2)
       vperpy=v_dis.y[*,1]-dotp(v_dis.y,b_dis.y)*b_dis.y[*,1]/(b_dis.y[*,0]^2+b_dis.y[*,1]^2+b_dis.y[*,2]^2)
@@ -271,10 +276,11 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
       vperp[*,0]=vperpx
       vperp[*,1]=vperpy
       vperp[*,2]=vperpz
-      store_data,'mms'+probe[i]+'_dis_bulkVperp_'+coord,data={x:v_dis.x,y:vperp}
-      store_data,'mms'+probe[i]+'_dis_bulkVperp_'+coord+'_x',data={x:v_dis.x,y:vperpx}
-      store_data,'mms'+probe[i]+'_dis_bulkVperp_'+coord+'_y',data={x:v_dis.x,y:vperpy}
-      store_data,'mms'+probe[i]+'_dis_bulkVperp_'+coord+'_z',data={x:v_dis.x,y:vperpz}
+      store_data,'mms'+probes[i]+'_dis_bulkVperp_'+coord,data={x:v_dis.x,y:vperp}
+      options,'mms'+probes[i]+'_dis_bulkVperp_'+coord,constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkVperp!C'+strupcase(coord),ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+      store_data,'mms'+probes[i]+'_dis_bulkVperp_'+coord+'_x',data={x:v_dis.x,y:vperpx}
+      store_data,'mms'+probes[i]+'_dis_bulkVperp_'+coord+'_y',data={x:v_dis.x,y:vperpy}
+      store_data,'mms'+probes[i]+'_dis_bulkVperp_'+coord+'_z',data={x:v_dis.x,y:vperpz}
 
       if not undefined(lmn) and n_elements(lmn) eq 9 then begin
         vperp_lmn=dblarr(n_elements(v_dis.x),3)
@@ -283,43 +289,44 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
           vperp_lmn[j,1]=vperp[j,0]*lmn[0,1]+vperp[j,1]*lmn[1,1]+vperp[j,2]*lmn[2,1]
           vperp_lmn[j,2]=vperp[j,0]*lmn[0,2]+vperp[j,1]*lmn[1,2]+vperp[j,2]*lmn[2,2]
         endfor
-        store_data,'mms'+probe[i]+'_dis_bulkVperp_lmn',data={x:v_dis.x,y:vperp_lmn}
-        split_vec,'mms'+probe[i]+'_dis_bulkVperp_lmn',suffix=['_l','_m','_n']
+        store_data,'mms'+probes[i]+'_dis_bulkVperp_lmn',data={x:v_dis.x,y:vperp_lmn}
+        options,'mms'+probes[i]+'_dis_bulkVperp_lmn',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkVperp!CLMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=0.16d
+        split_vec,'mms'+probes[i]+'_dis_bulkVperp_lmn',suffix=['_l','_m','_n']
       endif
       
       if not undefined(va) and n_elements(va) eq 3 then begin
-        get_data,'mms'+probe[i]+'_dis_bulkVperp_'+coord,data=vperp
+        get_data,'mms'+probes[i]+'_dis_bulkVperp_'+coord,data=vperp
         vperp_arb=dblarr(n_elements(vperp.x))
         for j=0l,n_elements(vperp.x)-1 do begin
           vperp_arb[j]=vperp.y[j,0]*nva[0]+vperp.y[j,1]*nva[1]+vperp.y[j,2]*nva[2]-vn
         endfor
-        store_data,'mms'+probe[i]+'_dis_bulkVperp_arb',data={x:v.x,y:vperp_arb}
+        store_data,'mms'+probes[i]+'_dis_bulkVperp_arb',data={x:v.x,y:vperp_arb}
       endif
       
-      if strlen(tnames('mms'+probe[i]+'_dis_temppara_'+fpi_data_rate)) eq 0 then begin
+      if strlen(tnames('mms'+probes[i]+'_dis_temppara_'+fpi_data_rate)) eq 0 then begin
         ;This part should be improved in future.
-        get_data,'mms'+probe[i]+'_dis_TempXX',data=txx
-        get_data,'mms'+probe[i]+'_dis_TempYY',data=tyy
-        get_data,'mms'+probe[i]+'_dis_TempZZ',data=tzz
-        get_data,'mms'+probe[i]+'_dis_TempXY',data=txy
-        get_data,'mms'+probe[i]+'_dis_TempXZ',data=txz
-        get_data,'mms'+probe[i]+'_dis_TempYZ',data=tyz
+        get_data,'mms'+probes[i]+'_dis_TempXX',data=txx
+        get_data,'mms'+probes[i]+'_dis_TempYY',data=tyy
+        get_data,'mms'+probes[i]+'_dis_TempZZ',data=tzz
+        get_data,'mms'+probes[i]+'_dis_TempXY',data=txy
+        get_data,'mms'+probes[i]+'_dis_TempXZ',data=txz
+        get_data,'mms'+probes[i]+'_dis_TempYZ',data=tyz
   
-        store_data,'mms'+probe[i]+'te_tensor',data={x:txx.x,y:[[txx.y],[tyy.y],[tzz.y],[txy.y],[txz.y],[tyz.y]]}
-        diag_t,'mms'+probe[i]+'te_tensor'
-        copy_data,'T_diag','mms'+probe[i]+'_fpi_DIS_T_diag'
-        copy_data,'Saxis','mms'+probe[i]+'_fpi_DIS_T_Saxis'
+        store_data,'mms'+probes[i]+'te_tensor',data={x:txx.x,y:[[txx.y],[tyy.y],[tzz.y],[txy.y],[txz.y],[tyz.y]]}
+        diag_t,'mms'+probes[i]+'te_tensor'
+        copy_data,'T_diag','mms'+probes[i]+'_fpi_DIS_T_diag'
+        copy_data,'Saxis','mms'+probes[i]+'_fpi_DIS_T_Saxis'
         get_data,'T_diag',data=t_diag
-        store_data,'mms'+probe[i]+'_fpi_DIStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
-        store_data,'mms'+probe[i]+'_fpi_DIStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
+        store_data,'mms'+probes[i]+'_fpi_DIStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
+        store_data,'mms'+probes[i]+'_fpi_DIStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
       endif else begin
-        copy_data,'mms'+probe[i]+'_dis_tempperp_'+fpi_data_rate,'mms'+probe[i]+'_fpi_DIStempPerp'
-        copy_data,'mms'+probe[i]+'_dis_temppara_'+fpi_data_rate,'mms'+probe[i]+'_fpi_DIStempPara'
+        copy_data,'mms'+probes[i]+'_dis_tempperp_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DIStempPerp'
+        copy_data,'mms'+probes[i]+'_dis_temppara_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DIStempPara'
       endelse
 
     endfor
 
-    if n_elements(probe) eq 4 then begin
+    if n_elements(probes) gt 1 then begin
       store_data,'mms_dis_numberDensity',data=['mms1_dis_numberDensity','mms2_dis_numberDensity','mms3_dis_numberDensity','mms4_dis_numberDensity']
       store_data,'mms_dis_bulkX',data=['mms1_dis_bulkV_'+coord+'_x','mms2_dis_bulkV_'+coord+'_x','mms3_dis_bulkV_'+coord+'_x','mms4_dis_bulkV_'+coord+'_x']
       store_data,'mms_dis_bulkY',data=['mms1_dis_bulkV_'+coord+'_y','mms2_dis_bulkV_'+coord+'_y','mms3_dis_bulkV_'+coord+'_y','mms4_dis_bulkV_'+coord+'_y']
@@ -370,20 +377,20 @@ PRO mms_fpi_l2_comp_kitamura,trange,probe=probe,no_ele=no_ele,no_ion=no_ion,lmn=
 
   if not undefined(label_gsm) or not undefined(gsm) then label_coord='gsm' else label_coord='gse'
 
-  if strlen(tnames('mms'+probe[0]+'_mec_r_'+label_coord)) gt 0 then begin
-    tkm2re,'mms'+probe[0]+'_mec_r_'+label_coord
-    split_vec,'mms'+probe[0]+'_mec_r_'+label_coord+'_re'
-    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_x',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_y',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe[0]+'_mec_r_'+label_coord+'_re_z',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
-    tplot_options,var_label=['mms'+probe[0]+'_mec_r_'+label_coord+'_re_z','mms'+probe[0]+'_mec_r_'+label_coord+'_re_y','mms'+probe[0]+'_mec_r_'+label_coord+'_re_x']
+  if strlen(tnames('mms'+probes[0]+'_mec_r_'+label_coord)) gt 0 then begin
+    tkm2re,'mms'+probes[0]+'_mec_r_'+label_coord
+    split_vec,'mms'+probes[0]+'_mec_r_'+label_coord+'_re'
+    options,'mms'+probes[0]+'_mec_r_'+label_coord+'_re_x',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probes[0]+'_mec_r_'+label_coord+'_re_y',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probes[0]+'_mec_r_'+label_coord+'_re_z',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
+    tplot_options,var_label=['mms'+probes[0]+'_mec_r_'+label_coord+'_re_z','mms'+probes[0]+'_mec_r_'+label_coord+'_re_y','mms'+probes[0]+'_mec_r_'+label_coord+'_re_x']
   endif else begin
-    tkm2re,'mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2'
-    split_vec,'mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re'
-    options,'mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_0',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_1',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
-    options,'mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_2',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
-    tplot_options,var_label=['mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_2','mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_1','mms'+probe[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_0']
+    tkm2re,'mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2'
+    split_vec,'mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re'
+    options,'mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_0',ytitle=strupcase(label_coord)+'X [R!DE!N]',format='(f8.4)'
+    options,'mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_1',ytitle=strupcase(label_coord)+'Y [R!DE!N]',format='(f8.4)'
+    options,'mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_2',ytitle=strupcase(label_coord)+'Z [R!DE!N]',format='(f8.4)'
+    tplot_options,var_label=['mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_2','mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_1','mms'+probes[0]+'_fgm_r_'+label_coord+'_srvy_l2_re_0']
   endelse
 
   tplot_options,'xmargin',[20,10]

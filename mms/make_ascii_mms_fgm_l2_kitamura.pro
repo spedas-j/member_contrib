@@ -24,10 +24,8 @@ pro make_ascii_mms_fgm_l2_kitamura,trange,probes=probes,brst=brst,no_load_fgm=no
 
   for i=0,n_elements(probes)-1 do begin
     
-    if undefined(no_load_fgm) then begin
-      mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate=data_rate,level='l2',no_update=no_update,/no_attitude_data
-    endif
-    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
+    if undefined(no_load_fgm) then mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate=data_rate,level='l2',no_update=no_update,/no_attitude_data
+    if undefined(no_load_mec) then mms_load_mec,trange=[trange[0]-600.d,trange[1]+600.d],probes=probes[i],no_update=no_update,varformat=['mms'+probes[i]+'_mec_r_eci','mms'+probes[i]+'_mec_r_gse','mms'+probes[i]+'_mec_r_gsm','mms'+probes[i]+'_mec_L_vec']
 
     get_data,'mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2_btot',data=Btot,dlimit=dl
     get_data,'mms'+probes[i]+'_fgm_b_gse_'+data_rate+'_l2_bvec',data=Bvec_gse
