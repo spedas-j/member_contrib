@@ -5,13 +5,9 @@
 ;Purpose:
 ;  Basic example on how to use mms_part_products to generate pitch angle and gyrophase distributions
 ;
-;$LastChangedBy: pcruce $
-;$LastChangedDate: 2015-12-11 14:25:49 -0800 (Fri, 11 Dec 2015) $
-;$LastChangedRevision: 19614 $
-;$URL: svn+ssh://thmsvn@ambrosia.ssl.berkeley.edu/repos/spdsoft/trunk/projects/mms/spedas/beta/mms_part_products/mms_part_products_crib.pro $
-;
-;Modified by N. Kitamura
-; MMS> mms_part_products_crib_kitamura,trange=[],probe='1',/load_fgm,/load_fpi,/load_mec,erange=[10.d,30000.d],parange=[0.d,180.d],gyrorange=[0.d,360.d],/ion,outputs='energy'
+; mms_part_products_crib
+; Modified by N. Kitamura
+; MMS> mms_part_products_crib_kitamura,trange=['2015-11-18/02:09:00','2015-11-18/02:15:00'],probe='1',/load_fgm,/load_fpi,/load_mec,erange=[10.d,30000.d],parange=[0.d,180.d],gyrorange=[0.d,360.d],/ion,outputs='energy'
 ;-
 ;
 ;
@@ -85,7 +81,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
     endif
   endif
 
-  if not undefined(load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+  if not undefined(load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
   pos_name='mms'+probe+'_mec_r_eci'
 
   ;load particle data
