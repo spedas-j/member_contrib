@@ -12,7 +12,7 @@
 ;
 ;
 PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,dfg_ql=dfg_ql,load_fpi=load_fpi,load_mec=load_mec,erange=erange,$
-                                    parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,bname=banme,fac_type=fac_type,regrid=redrid
+                                    parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,bname=bname,fac_type=fac_type,regrid=redrid
 
   if undefined(probe) then probe=['3']
   if undefined(fac_type) then fac_type='mphigeo'

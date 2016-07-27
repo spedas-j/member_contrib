@@ -102,7 +102,7 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
         mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype=['des-dist'],no_update=no_update,/time_clip
         distname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist'
         tname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_energy'
-      endif else begin
+      endif else begin        
         distname='mms'+probe+'_des_dist_'+fpi_data_rate
         tname='mms'+probe+'_des_dist_'+fpi_data_rate+'_energy'
       endelse

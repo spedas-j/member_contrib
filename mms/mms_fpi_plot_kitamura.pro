@@ -349,7 +349,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
 
     join_vec,'mms'+probe+'_fpi_iBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_iBulkV_DSC'
     options,'mms'+probe+'_fpi_iBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_i
-    if undefined(skip_cotrans) and undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update
+    if undefined(skip_cotrans) and undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
     if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
     if undefined(skip_cotrans) then begin
       mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
