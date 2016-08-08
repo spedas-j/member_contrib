@@ -15,7 +15,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
                                     parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,bname=bname,fac_type=fac_type,regrid=redrid
 
   if undefined(probe) then probe=['3']
-  if undefined(fac_type) then fac_type='mphigeo'
+  if undefined(fac_type) then fac_type='xgse'
   if undefined(regrid) then regrid=[32,16]
   if undefined(outputs) then outputs=['phi','theta','pa','gyro','energy']
   if undefined(fpi_data_rate) then begin
@@ -53,7 +53,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   endelse
   
   ;load magnetic field data
-  if not undefined(load_dfg) then begin
+  if not undefined(load_fgm) then begin
     if undefined(dfg_ql) then begin
       mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
       if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) eq 0 then begin
