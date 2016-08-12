@@ -26,7 +26,8 @@
 ;                       newer data is found the existing data will be overwritten
 ;         fpi_sitl:     set this flag to use FPI sitl data forcibly. if not set, FPI ql data
 ;                       is used, if available (team member only)
-;         fpi_l1b:      set this flag to use FPI level-1b data if available (team member only)
+;         fpi_l1b:      set this flag to use FPI fast level-1b data if available. if not available,
+;                       FPI fast ql data are used (team member only)
 ;         add_scpot:    set this flag to add spacecraft potential data to plot of number densities 
 ;         edp_comm:     set this flag to use EDP comm data (team member only)
 ;         no_update_edp:set this flag to preserve the original EDP data. if not set and
@@ -135,9 +136,11 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
           store_data,'mms'+probe+'_des_energyspectr_omni_avg',newname='mms'+probe+'_des_energySpectr_omni'
         endelse
       endelse
-    endif
+    endif else begin
+      fpi_suffix=''
+    endelse
     if strlen(tnames('mms'+probe+'_dis_energySpectr_pX'+fpi_suffix)) eq 0 or strlen(tnames('mms'+probe+'_des_energySpectr_pX'+fpi_suffix)) eq 0 then begin
-      mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi,/center_measurement,time_clip=time_clip
+      mms_load_fpi,trange=trange,probes=probe,level='sitl',data_rate='fast',no_update=no_update_fpi,time_clip=time_clip
       fpi_suffix=''
     endif
   endif

@@ -106,7 +106,15 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
         distname='mms'+probe+'_des_dist_'+fpi_data_rate
         tname='mms'+probe+'_des_dist_'+fpi_data_rate+'_energy'
       endelse
-    endif
+    endif else begin
+      if strlen(tnames('mms'+probe+'_des_dist_'+fpi_data_rate)) eq 0 then begin
+        distname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist'
+        tname='mms'+probe+'_des_'+fpi_data_rate+'SkyMap_dist_energy'
+      endif else begin
+        distname='mms'+probe+'_des_dist_'+fpi_data_rate
+        tname='mms'+probe+'_des_dist_'+fpi_data_rate+'_energy'
+      endelse
+    endelse
     
     mms_part_products,distname,trange=trange,outputs='energy'
     store_data,tname,newname='mms'+probe+'_des_'+fpi_data_rate+'_energySpectr_omni'+suffix
@@ -162,7 +170,15 @@ pro mms_fpi_specplot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=
         distname='mms'+probe+'_dis_dist_'+fpi_data_rate
         tname='mms'+probe+'_dis_dist_'+fpi_data_rate+'_energy'
       endelse
-    endif
+    endif else begin
+      if strlen(tnames('mms'+probe+'_dis_dist_'+fpi_data_rate)) eq 0 then begin
+        distname='mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist'
+        tname='mms'+probe+'_dis_'+fpi_data_rate+'SkyMap_dist_energy'
+      endif else begin
+        distname='mms'+probe+'_dis_dist_'+fpi_data_rate
+        tname='mms'+probe+'_dis_dist_'+fpi_data_rate+'_energy'
+      endelse
+    endelse
 
     mms_part_products,distname,trange=trange,outputs='energy'
     store_data,tname,newname='mms'+probe+'_dis_'+fpi_data_rate+'_energySpectr_omni'+suffix

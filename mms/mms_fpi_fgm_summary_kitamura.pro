@@ -26,6 +26,8 @@
 ;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
 ;                       are used, if available (team member only)
 ;         no_output:    set this flag to skip making png and ps files
+;         fpi_l1b:      set this flag to use FPI fast level-1b data if available. if not available,
+;                       FPI fast ql data are used (team member only)
 ;         fpi_sitl:     set this flag to use FPI fast sitl data forcibly. if not set, FPI fast ql
 ;                       data are used, if available (team member only)
 ;         plotdir:      set this flag to assine a directory for plots
@@ -49,7 +51,7 @@
 
 pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                                  no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,no_output=no_output,$
-                                 add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_sitl=fpi_sitl,$
+                                 add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,$
                                  plotdir=plotdir,plotcdir=plotcdir,gse=gse
 
   probe=strcompress(string(probe),/remove_all)
@@ -146,10 +148,10 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       endif
     endelse
     if undefined(gse) then gsm=1
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,gsm=gsm,/load_fpi,/magplot
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,/load_fpi,/magplot
   endif else begin
     if undefined(gse) then gsm=1
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_sitl=fpi_sitl,gsm=gsm,/magplot
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,/magplot
   endelse
   
   if undefined(no_bss) then begin
