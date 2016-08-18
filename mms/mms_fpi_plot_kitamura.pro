@@ -113,6 +113,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
         fpi_suffix=''
         mms_load_fpi,trange=trange,probes=probe,level='l2',data_rate='fast',no_update=no_update_fpi,datatype=['des-moms','dis-moms'],/center_measurement,time_clip=time_clip
         if strlen(tnames('mms'+probe+'_dis_energyspectr_px_fast')) eq 0 or strlen(tnames('mms'+probe+'_des_energyspectr_px_fast')) eq 0 then begin
+          store_data,'mms'+probe+'_d?s_errorflags_fast_moms',/delete
           fpi_suffix='_fast_ql'
           mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype=['des','dis'],time_clip=time_clip
         endif else begin
