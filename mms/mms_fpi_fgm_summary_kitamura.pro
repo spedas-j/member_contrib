@@ -192,8 +192,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
   if undefined(no_output) and not undefined(plotdir) then begin
     
     get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
-    fpiver='v'+dl.cdf.gatt.data_version
-    if fpiver eq 'v0.0.0' then fpiver='v'+strmid(dl.cdf.gatt.logical_file_id,4,5,/reverse_offset)
+    fpiver=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
     
     if undefined(roi) then roi=trange
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)

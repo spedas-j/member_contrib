@@ -191,7 +191,7 @@ PRO mms_curlometer,trange=trange,ref_probe=ref_probe,delete=delete,data_rate=fgm
   options,'Current_magnitude',ytitle='Current!CDensity!CMagnitude',ysubtitle='[nA/m!U2!N]',colors=[0,4,6],labels=['|J|','|J_para|','|J_perp|'],labflag=-1,datagap=0.13d
   ylim,'Current_magnitude',10.d,2000.d,1
   store_data,'divB_over_rotB',data={x:time,y:divb/rotb}
-  options,'divB_over_rotB',ytitle='divB/|rotB|',colors=1,panel_size=0.75,datagap=0.13d
+  options,'divB_over_rotB',ytitle='|divB|/|rotB|',colors=1,panel_size=0.75,datagap=0.13d
   ylim,'divB_over_rotB',0.03d,10.d,1
 
   if not undefined(lmn) then begin

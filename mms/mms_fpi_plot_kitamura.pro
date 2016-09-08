@@ -272,11 +272,11 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       avg_data,'mms'+probe+'_edp_fast_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
 ;      store_data,'mms'+probe+'_edp_scpot_avg',data=['mms'+probe+'_edp_slow_scpot_avg','mms'+probe+'_edp_fast_scpot_avg']
 ;      options,'mms'+probe+'_edp'+['','_slow','_fast']+'_scpot_avg',ystyle=9,ylog=1,axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[V]',yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}
-      options,'mms'+probe+'_edp'+['_slow','_fast']+'_scpot_avg',axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
+      options,'mms'+probe+'_edp'+['_slow','_fast']+'_scpot_avg',axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[-V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endif else begin
       mms_load_edp,trange=[trange[0]-600.d,trange[1]+600.d],data_rate='comm',probes=probe,datatype='scpot',level='l2',no_update=no_update_edp,time_clip=time_clip
       avg_data,'mms'+probe+'_edp_comm_scpot',10.d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
-      options,'mms'+probe+'_edp_comm_scpot_avg',axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
+      options,'mms'+probe+'_edp_comm_scpot_avg',axis={yaxis:1,ytitle:'MMS'+probe+'_EDP!Cs/c pot!C[-V]',ylog:1,ystyle:9,yrange:[0.05d,300.d],ytickformat:'mms_exponent2'}      
     endelse
 
   endif  
@@ -284,11 +284,9 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
  
   if strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_pX')) gt 0 then begin
     if fpi_suffix eq '_fast_l1b' then get_data,'mms'+probe+'_des_fastSkyMap_dist',dlim=dl else get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
-    fpiver_e='v'+dl.cdf.gatt.data_version
-    if fpiver_e eq 'v0.0.0' then fpiver_e='v'+strmid(dl.cdf.gatt.logical_file_id,4,5,/reverse_offset)
+    fpiver_e=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
     if fpi_suffix eq '_fast_l1b' then get_data,'mms'+probe+'_dis_fastSkyMap_dist',dlim=dl else get_data,'mms'+probe+'_fpi_iEnergySpectr_pX',dlim=dl
-    fpiver_i='v'+dl.cdf.gatt.data_version
-    if fpiver_i eq 'v0.0.0' then fpiver_i='v'+strmid(dl.cdf.gatt.logical_file_id,4,5,/reverse_offset)
+    fpiver_i=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
  
     options,['mms'+probe+'_fpi_eEnergySpectr_??'],datagap=dgap_e
     options,['mms'+probe+'_fpi_iEnergySpectr_??'],datagap=dgap_i

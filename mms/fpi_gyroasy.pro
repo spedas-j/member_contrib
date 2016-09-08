@@ -1,4 +1,4 @@
-PRO fpi_gyroasy,tname,range=range,tavg=tavg,full_out=full_out
+PRO fpi_gyroasy,tname,range=range,tavg=tavg,full_out=full_out,datagap=datagap
 
   if undefined(range) then range=1.25d
 
@@ -13,8 +13,10 @@ PRO fpi_gyroasy,tname,range=range,tavg=tavg,full_out=full_out
     endfor
   endfor
 
+  if undefined(datagap) then datagap=1.1d*(d.x[1]-d.x[0])
+
   store_data,tname+'_ratio',data={x:d.x,y:d.y,v:d.v},lim=l
-  options,tname+'_ratio',spec=1,datagap=1.1d*(d.x[1]-d.x[0]),color_table=0,yticks=4,zticks=1
+  options,tname+'_ratio',spec=1,datagap=datagap,color_table=0,yticks=4,zticks=1
   ylim,tname+'_ratio',0.d,360.d
   zlim,tname+'_ratio',1/range,range,1
 
@@ -23,7 +25,7 @@ PRO fpi_gyroasy,tname,range=range,tavg=tavg,full_out=full_out
     d_avg={x:d_orig.x,y:y,v:d_orig.v}
     if not undefined(full_out) then begin
       store_data,tname+'_avg',data=d_avg
-      options,tname+'_avg',spec=1,datagap=1.1d*(d.x[1]-d.x[0]),yticks=4,zticks=1
+      options,tname+'_avg',spec=1,datagap=datagap,yticks=4,zticks=1
       ylim,tname+'_avg',0.d,360.d
     endif
     for i=0l,n_elements(d_avg.x)-1 do begin
@@ -33,7 +35,7 @@ PRO fpi_gyroasy,tname,range=range,tavg=tavg,full_out=full_out
       endfor
     endfor
     store_data,tname+'_ratio_avg',data=d_avg
-    options,tname+'_ratio_avg',spec=1,datagap=1.1d*(d.x[1]-d.x[0]),color_table=0,yticks=4,zticks=1
+    options,tname+'_ratio_avg',spec=1,datagap=datagap,color_table=0,yticks=4,zticks=1
     ylim,tname+'_ratio_avg',0.d,360.d
     zlim,tname+'_ratio_avg',1/range,range,1
   endif
