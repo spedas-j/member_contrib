@@ -71,9 +71,9 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
 
   if undefined(no_load) then begin
     if undefined(dfg_ql) then begin
-      mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update_fgm,/no_attitude_data
+      mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update_fgm,versions=fgm_versions
       if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 then begin
-        mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,/no_attitude_data
+        mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,versions=fgm_versions
         if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
           copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse','mms'+probe+'_dfg_b_gse_srvy_l2pre'
           copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec'
@@ -92,7 +92,7 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
         get_data,'mms'+probe+'_fgm_b_gse_srvy_l2',data=d
         if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
           store_data,'mms'+probe+'_fgm_*_l2*',/delete
-          mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,/no_attitude_data
+          mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,versions=fgm_versions
           if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
             copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse','mms'+probe+'_dfg_b_gse_srvy_l2pre'
             copy_data,'mms'+probe+'_dfg_srvy_l2pre_gse_bvec','mms'+probe+'_dfg_b_gse_srvy_l2pre_bvec'
@@ -111,10 +111,10 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
       endelse
     endif
     if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2')) eq 0 and strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 then begin
-      mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_fgm,/no_attitude_data
+      mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_fgm,versions=fgm_versions
       get_data,'mms'+probe+'_dfg_srvy_gsm_dmpa',data=fgm_data,dlimits=fgm_dlimits
-      store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',data={x:fgm_data.X,y:[[fgm_data.Y[*,0]],[fgm_data.Y[*,1]],[fgm_data.Y[*,2]]]},dlimits=fgm_dlimits
-      store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',data={x:fgm_data.X,y:fgm_data.Y[*, 3]},dlimits=fgm_dlimits
+      store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',data={x:fgm_data.x,y:[[fgm_data.y[*,0]],[fgm_data.y[*,1]],[fgm_data.y[*,2]]]},dlimits=fgm_dlimits
+      store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',data={x:fgm_data.x,y:fgm_data.y[*, 3]},dlimits=fgm_dlimits
       options,'mms'+probe+'_dfg_srvy*dmpa_btot',colors=1
       undefine,fgm_data,fgm_dlimits
     endif else begin
@@ -123,10 +123,10 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
         if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
           store_data,'mms'+probe+'_dfg_srvy_l2pre*',/delete
           store_data,'mms'+probe+'_pos*',/delete
-          mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_fgm,/no_attitude_data
+          mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_fgm,versions=fgm_versions
           get_data,'mms'+probe+'_dfg_srvy_gsm_dmpa',data=fgm_data,dlimits=fgm_dlimits
-          store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',data={x:fgm_data.X,y:[[fgm_data.Y[*,0]],[fgm_data.Y[*,1]],[fgm_data.Y[*,2]]]},dlimits=fgm_dlimits
-          store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',data={x:fgm_data.X,y:fgm_data.Y[*, 3]},dlimits=fgm_dlimits
+          store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',data={x:fgm_data.x,y:[[fgm_data.y[*,0]],[fgm_data.y[*,1]],[fgm_data.y[*,2]]]},dlimits=fgm_dlimits
+          store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',data={x:fgm_data.x,y:fgm_data.y[*, 3]},dlimits=fgm_dlimits
           options,'mms'+probe+'_dfg_srvy*dmpa_btot',colors=1
           undefine,fgm_data,fgm_dlimits
         endif

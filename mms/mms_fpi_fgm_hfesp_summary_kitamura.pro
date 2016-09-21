@@ -81,9 +81,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
 
   if undefined(no_load) then begin
     if undefined(dfg_ql) then begin
-      mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update_fgm,/no_attitude_data
+      mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',no_update=no_update_fgm,versions=fgm_versions
       if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) eq 0 then begin
-        mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,/no_attitude_data
+        mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,versions=fgm_versions
       endif
     endif
     mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,no_update_fpi=no_update_fpi,/load_fpi,/magplot,/gsm
@@ -102,13 +102,33 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
       options,'mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_L2pre!CGSM!Cv'+fgm_dv,ysubtitle='[nT]',labflag=-1,datagap=0.26d
     endif
   endelse  
-  
-  get_data,'mms'+probe+'_dis_numberdensity_dbcs_fast',data=n_dis
-  get_data,'mms'+probe+'_des_numberdensity_dbcs_fast',data=n_des
-  store_data,'mms'+probe+'_dis_fp',data={x:n_dis.x,y:8979.d*sqrt(n_dis.y)}
-  store_data,'mms'+probe+'_des_fp',data={x:n_des.x,y:8979.d*sqrt(n_des.y)}
+
+  if strlen(tnames('mms'+probe+'_dis_numberdensity_fast')) gt 0 then begin
+    get_data,'mms'+probe+'_dis_numberdensity_fast',data=n_dis
+    store_data,'mms'+probe+'_dis_fp',data={x:n_dis.x,y:8979.d*sqrt(n_dis.y)}
+    undefine,n_dis
+  endif else begin
+    store_data,'mms'+probe+'_dis_fp',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+  endelse
   options,'mms'+probe+'_dis_fp',colors=255,thick=1.25,datagap=4.6d
+
+  if strlen(tnames('mms'+probe+'_des_numberdensity_fast')) gt 0 then begin
+    get_data,'mms'+probe+'_des_numberdensity_fast',data=n_des
+    store_data,'mms'+probe+'_des_fp',data={x:n_des.x,y:8979.d*sqrt(n_des.y)}
+    undefine,n_des
+  endif else begin
+    store_data,'mms'+probe+'_dis_fp',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+  endelse
   options,'mms'+probe+'_des_fp',colors=1,thick=1.25,datagap=4.6d
+
+  if strlen(tnames('mms'+probe+'_des_errorflags_fast_moms_flagbars')) gt 0 then begin
+    store_data,'mms'+probe+'_des_errorflags_fast_moms_flagbars',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+    options,'mms'+probe+'_des_errorflags_fast_moms_flagbars',xstyle=4,ystyle=4,ticklen=0,panel_size=0.5,labsize=1
+  endif
+  if strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms_flagbars')) gt 0 then begin
+    store_data,'mms'+probe+'_dis_errorflags_fast_moms_flagbars',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+    options,'mms'+probe+'_dis_errorflags_fast_moms_flagbars',xstyle=4,ystyle=4,ticklen=0,panel_size=0.5,labsize=1
+  endif
   
   mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
   
@@ -152,8 +172,12 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
 
   if undefined(no_output) and not undefined(plotdir) then begin
     
-    get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
-    fpiver=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
+    if strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_pX')) ne 0 then begin
+      get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
+      fpiver=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
+    endif else begin
+      fpiver='v0.0.0'
+    endelse
     
     if undefined(roi) then roi=trange
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)

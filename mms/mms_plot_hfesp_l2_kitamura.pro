@@ -103,17 +103,21 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   if not undefined(load_fpi) then mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,/no_plot,/load_fpi,/time_clip
   if strlen(tnames(prefix+'_dis_dist_fast_energy_omni')) eq 0 then copy_data,prefix+'_fpi_iEnergySpectr_omni',prefix+'_dis_dist_fast_energy_omni'
   if strlen(tnames(prefix+'_fpi_iEnergySpectr_omni')) gt 0 then begin
-    get_data,prefix+'_fpi_iEnergySpectr_omni',lim=l
-    store_data,prefix+'_dis_dist_fast_energy_omni',lim=l
+    get_data,prefix+'_fpi_iEnergySpectr_omni',limit=l
+    store_data,prefix+'_dis_dist_fast_energy_omni',limit=l
   endif
   zlim,prefix+'_dis_dist_fast_energy_omni',1e4,1e8,1
   options,prefix+'_dis_dist_fast_energy_omni',minzlog=0,datagap=4.6d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
   
   if not undefined(fpi_brst) then begin
-    if not undefined(load_fpi) then mms_load_fpi,probes=probe,trange=trange,datatype='dis-moms',level='l2',data_rate='brst',no_update=no_update_fpi,/center_measurement,/time_clip
-    ylim,prefix+'_dis_energyspectr_omni_avg',1e1,3e4,1
-    zlim,prefix+'_dis_energyspectr_omni_avg',1e4,1e8,1
-    options,prefix+'_dis_energyspectr_omni_avg',minzlog=0,datagap=0.16d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    if not undefined(load_fpi) then begin
+      mms_load_fpi,probes=probe,trange=trange,datatype='dis-moms',level='l2',data_rate='brst',no_update=no_update_fpi,/center_measurement,/time_clip
+      if strlen(tnames(prefix+'_dis_numberdensity_dbcs_brst')) gt 0 and strlen(tnames(prefix+'_dis_numberdensity_brst')) eq 0 then copy_data,prefix+'_dis_numberdensity_dbcs_brst',prefix+'_dis_numberdensity_brst'
+    endif
+    if strlen(tnames(prefix+'_dis_energyspectr_omni_brst')) gt 0 then brst_dis_spec=prefix+'_dis_energyspectr_omni_brst' else brst_dis_spec=prefix+'_dis_energyspectr_omni_avg'
+    ylim,brst_dis_spec,2e0,3e4,1
+    zlim,brst_dis_spec,1e4,1e8,1
+    options,brst_dis_spec,minzlog=0,datagap=0.16d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
     if not undefined(lowi_brst_pa) or not undefined(lowi_brst_theta) then begin
       if undefined(pa_erange) then pa_erange=[1.d,300.d]
       if pa_erange[0] gt 100.d and pa_erange[1] ge 1000.d then begin
@@ -122,13 +126,17 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
         erangename=strcompress(string(pa_erange[0],format='(i6)'),/remove_all)+'-'+strcompress(string(pa_erange[1],format='(i6)'),/remove_all)+'eV'
       endelse
       if strlen(tnames(prefix+'_dis_dist_brst')) eq 0 then mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l2',datatype='dis-dist',no_update=no_update_fpi,/center_measurement,/time_clip
-      mms_part_products,prefix+'_dis_dist_brst',trange=trange,outputs='energy',suffix='_omni'
-      ylim,prefix+'_dis_dist_brst_energy_omni',1e1,3e4,1
-      zlim,prefix+'_dis_dist_brst_energy_omni',1e4,1e8,1
-      options,prefix+'_dis_dist_brst_energy_omni',minzlog=0,datagap=0.16d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
-      store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',prefix+'_dis_dist_brst_energy_omni']
+      if brst_dis_spec eq prefix+'_dis_energyspectr_omni_avg' then begin
+        mms_part_products,prefix+'_dis_dist_brst',trange=trange,outputs='energy',suffix='_omni'
+        ylim,prefix+'_dis_dist_brst_energy_omni',2e0,3e4,1
+        zlim,prefix+'_dis_dist_brst_energy_omni',1e4,1e8,1
+        options,prefix+'_dis_dist_brst_energy_omni',minzlog=0,datagap=0.16d,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+        store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',prefix+'_dis_dist_brst_energy_omni']
+      endif else begin
+        store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',brst_dis_spec]
+      endelse
     endif else begin
-      store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',prefix+'_dis_energyspectr_omni_avg']
+      store_data,prefix+'_dis_energy_omni',data=[prefix+'_dis_dist_fast_energy_omni',brst_dis_spec]
     endelse
     if not undefined(lowi_brst_pa) then begin
       mms_part_products,prefix+'_dis_dist_brst',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
@@ -144,11 +152,18 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     endif
     dis_spec=prefix+'_dis_energy_omni'
     options,dis_spec,minzlog=0,ytitle='MMS'+probe+'_DIS!CiEnergySpectr!Comni',ysubtitle='[eV]',ztitle='eV/(cm!U2!N s sr eV)',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
-    ylim,dis_spec,1e1,3e4,1
+    ylim,dis_spec,2e0,3e4,1
     zlim,dis_spec,1e4,1e8,1
-    join_vec,prefix+'_dis_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
+    
+    
+    if strlen(tnames('mms'+probe+'_dis_bulkv_gse_brst')) gt 0 then begin
+      copy_data,prefix+'_dis_bulkv_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
+      copy_data,prefix+'_dis_bulkv_gse_brst','mms'+probe+'_dis_bulkV_gse'
+    endif else begin
+      join_vec,prefix+'_dis_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
+      mms_cotrans,prefix+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+    endelse
     options,prefix+'_dis_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
-    mms_cotrans,prefix+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
     options,prefix+'_dis_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     mms_cotrans,prefix+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
     options,prefix+'_dis_bulkV_gsm',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
@@ -170,7 +185,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   endif
   
   if strlen(tnames(prefix+'_hpca_hplus_number_density')) gt 0 then begin
-    store_data,prefix+'_fpi_hpca_numberDensity',data=[prefix+'_dis_numberdensity_dbcs_fast',prefix+'_hpca_hplus_number_density',prefix+'_hpca_heplusplus_number_density',prefix+'_hpca_heplus_number_density',prefix+'_hpca_oplus_number_density']
+    store_data,prefix+'_fpi_hpca_numberDensity',data=[prefix+'_dis_numberdensity_fast',prefix+'_hpca_hplus_number_density',prefix+'_hpca_heplusplus_number_density',prefix+'_hpca_heplus_number_density',prefix+'_hpca_oplus_number_density']
     options,prefix+'_fpi_hpca_numberDensity',ytitle='MMS'+probe+'!CFPI_HPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,3,2,4],labels=['DIS','H+','He++','He+','O+'],labflag=-1,constant=[0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
     ylim,prefix+'_fpi_hpca_numberDensity',0.001d,100.0d,1
     tname_density=prefix+'_fpi_hpca_numberDensity'
@@ -183,18 +198,22 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     if undefined(hpca_brst) then options,prefix+'_hpca_fp',colors=1,thick=1,datagap=600.d else options,prefix+'_hpca_fp',colors=1,thick=1,datagap=25.d
     undefine,nh,nhe,na,no
   endif else begin
-    options,prefix+'_des_numberdensity_dbcs_fast',datagap=4.6d
-    options,prefix+'_dis_numberdensity_dbcs_fast',datagap=4.6d
-    options,prefix+'_dis_numberdensity_dbcs_brst',datagap=0.16d
-    store_data,prefix+'_fpi_numberdensity',data=[prefix+'_des_numberdensity_dbcs_fast',prefix+'_dis_numberdensity_dbcs_fast',prefix+'_dis_numberdensity_dbcs_brst']
+    options,prefix+'_des_numberdensity_fast',datagap=4.6d
+    options,prefix+'_dis_numberdensity_fast',datagap=4.6d
+    options,prefix+'_dis_numberdensity_brst',datagap=0.16d
+    store_data,prefix+'_fpi_numberdensity',data=[prefix+'_des_numberdensity_fast',prefix+'_dis_numberdensity_fast',prefix+'_dis_numberdensity_brst']
     options,prefix+'_fpi_numberdensity',ytitle='MMS'+probe+'!CFPI!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,4],labels=['Electron','Ion','Ion_brst'],labflag=-1,constant=[0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
     ylim,prefix+'_fpi_numberdensity',0.001d,100.0d,1
     tname_density=prefix+'_fpi_numberdensity'
   endelse
-  get_data,prefix+'_dis_numberdensity_dbcs_fast',data=ni
-  store_data,prefix+'_fpi_fp',data={x:ni.x,y:8979.d*sqrt(ni.y)}
+  if strlen(tnames(prefix+'_dis_numberdensity_fast')) gt 0 then begin
+    get_data,prefix+'_dis_numberdensity_fast',data=ni
+    store_data,prefix+'_fpi_fp',data={x:ni.x,y:8979.d*sqrt(ni.y)}
+    undefine,ni
+  endif else begin
+    store_data,prefix+'_fpi_fp',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+  endelse
   options,prefix+'_fpi_fp',colors=255,thick=1.25,datagap=4.6d
-  undefine,ni
 
   mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
   

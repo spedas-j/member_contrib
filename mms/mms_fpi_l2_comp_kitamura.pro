@@ -59,8 +59,8 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
 
   if undefined(no_load_fgm) then begin
     for i=0,n_elements(probes)-1 do begin
-      if undefined(fast) then mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate='brst',level='l2',no_update=no_update,/no_attitude_data
-      mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate='srvy',level='l2',no_update=no_update,/no_attitude_data
+      if undefined(fast) then mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate='brst',level='l2',no_update=no_update,versions=fgm_versions
+      mms_load_fgm,trange=trange,instrument='fgm',probes=probes[i],data_rate='srvy',level='l2',no_update=no_update,versions=fgm_versions
     endfor
   endif
 
@@ -70,11 +70,16 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
 
   if undefined(no_ele) then begin
     for i=0,n_elements(probes)-1 do begin
-      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,/center_measurement
-      join_vec,'mms'+probes[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkV_DSC'
-      copy_data,'mms'+probes[i]+'_des_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
-      options,'mms'+probes[i]+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
-      mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,versions=des_versions,/center_measurement
+      if des_versions[0,0] le 2 then begin
+        copy_data,'mms'+probes[i]+'_des_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
+        join_vec,'mms'+probes[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkV_DSC'
+        options,'mms'+probes[i]+'_des_bulkV_DSC',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
+        mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      endif else begin
+        copy_data,'mms'+probes[i]+'_des_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
+        copy_data,'mms'+probes[i]+'_des_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkV_gse'
+      endelse
       options,'mms'+probes[i]+'_des_bulkV_gse',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
       mms_cotrans,'mms'+probes[i]+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
       options,'mms'+probes[i]+'_des_bulkV_gsm',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
@@ -149,15 +154,13 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
         store_data,'mms'+probes[i]+'_des_bulkVperp_arb',data={x:v.x,y:vperp_arb}
       endif
       
-      if strlen(tnames('mms'+probes[i]+'_des_temppara_'+fpi_data_rate)) eq 0 then begin
-        ;This part should be improved in future.
-        get_data,'mms'+probes[i]+'_des_TempXX',data=txx
-        get_data,'mms'+probes[i]+'_des_TempYY',data=tyy
-        get_data,'mms'+probes[i]+'_des_TempZZ',data=tzz
-        get_data,'mms'+probes[i]+'_des_TempXY',data=txy
-        get_data,'mms'+probes[i]+'_des_TempXZ',data=txz
-        get_data,'mms'+probes[i]+'_des_TempYZ',data=tyz
-
+      if des_versions[0,0] le 2 and fpi_data_rate eq 'fast' then begin
+        get_data,'mms'+probes[i]+'_des_tempxx_dbcs_'+fpi_data_rate,data=txx
+        get_data,'mms'+probes[i]+'_des_tempyy_dbcs_'+fpi_data_rate,data=tyy
+        get_data,'mms'+probes[i]+'_des_tempzz_dbcs_'+fpi_data_rate,data=tzz
+        get_data,'mms'+probes[i]+'_des_tempxy_dbcs_'+fpi_data_rate,data=txy
+        get_data,'mms'+probes[i]+'_des_tempxz_dbcs_'+fpi_data_rate,data=txz
+        get_data,'mms'+probes[i]+'_des_tempyz_dbcs_'+fpi_data_rate,data=tyz
         store_data,'mms'+probes[i]+'te_tensor',data={x:txx.x,y:[[txx.y],[tyy.y],[tzz.y],[txy.y],[txz.y],[tyz.y]]}
         diag_t,'mms'+probes[i]+'te_tensor'
         copy_data,'T_diag','mms'+probes[i]+'_fpi_DES_T_diag'
@@ -224,11 +227,17 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
 
   if undefined(no_ion) then begin
     for i=0,n_elements(probes)-1 do begin
-      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,/center_measurement
-      join_vec,'mms'+probes[i]+'_dis_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkV_DSC'
-      copy_data,'mms'+probes[i]+'_dis_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
-      options,'mms'+probes[i]+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
-      mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,versions=dis_versions,/center_measurement
+
+      if dis_versions[0,0] le 2 then begin
+        copy_data,'mms'+probes[i]+'_dis_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
+        join_vec,'mms'+probes[i]+'_dis_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkV_DSC'
+        options,'mms'+probes[i]+'_dis_bulkV_DSC',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
+        mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      endif else begin
+        copy_data,'mms'+probes[i]+'_dis_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
+        copy_data,'mms'+probes[i]+'_dis_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkV_gse'
+      endelse
       options,'mms'+probes[i]+'_dis_bulkV_gse',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
       mms_cotrans,'mms'+probes[i]+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
       options,'mms'+probes[i]+'_dis_bulkV_gsm',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
@@ -303,26 +312,8 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
         store_data,'mms'+probes[i]+'_dis_bulkVperp_arb',data={x:v.x,y:vperp_arb}
       endif
       
-      if strlen(tnames('mms'+probes[i]+'_dis_temppara_'+fpi_data_rate)) eq 0 then begin
-        ;This part should be improved in future.
-        get_data,'mms'+probes[i]+'_dis_TempXX',data=txx
-        get_data,'mms'+probes[i]+'_dis_TempYY',data=tyy
-        get_data,'mms'+probes[i]+'_dis_TempZZ',data=tzz
-        get_data,'mms'+probes[i]+'_dis_TempXY',data=txy
-        get_data,'mms'+probes[i]+'_dis_TempXZ',data=txz
-        get_data,'mms'+probes[i]+'_dis_TempYZ',data=tyz
-  
-        store_data,'mms'+probes[i]+'te_tensor',data={x:txx.x,y:[[txx.y],[tyy.y],[tzz.y],[txy.y],[txz.y],[tyz.y]]}
-        diag_t,'mms'+probes[i]+'te_tensor'
-        copy_data,'T_diag','mms'+probes[i]+'_fpi_DIS_T_diag'
-        copy_data,'Saxis','mms'+probes[i]+'_fpi_DIS_T_Saxis'
-        get_data,'T_diag',data=t_diag
-        store_data,'mms'+probes[i]+'_fpi_DIStempPerp',data={x:t_diag.x,y:(t_diag.y[*,1]+t_diag.y[*,2])/2.d}
-        store_data,'mms'+probes[i]+'_fpi_DIStempPara',data={x:t_diag.x,y:t_diag.y[*,0]}
-      endif else begin
-        copy_data,'mms'+probes[i]+'_dis_tempperp_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DIStempPerp'
-        copy_data,'mms'+probes[i]+'_dis_temppara_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DIStempPara'
-      endelse
+      copy_data,'mms'+probes[i]+'_dis_tempperp_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DIStempPerp'
+      copy_data,'mms'+probes[i]+'_dis_temppara_'+fpi_data_rate,'mms'+probes[i]+'_fpi_DIStempPara'
 
     endfor
 
