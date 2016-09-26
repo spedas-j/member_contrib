@@ -184,7 +184,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     if strlen(tnames('mms'+probe+'_dfg_b_gsm_srvy_l2pre')) gt 0 then begin
       tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec_avg','mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_btot']
     endif else begin
-      if not undefined(gse) then coord='dmpa' else coord='dmpa_gsm'
+      if not undefined(gse) then coord='dmpa' else coord='gsm_dmpa'
       tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_'+coord+'_bvec_avg','mms'+probe+'_dfg_srvy_'+coord+'_btot']
     endelse
   endelse

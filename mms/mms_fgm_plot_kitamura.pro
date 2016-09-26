@@ -183,11 +183,12 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
         ncoord=strupcase(coord)
         options,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_FGM!CL2_'+ncoord+'!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
       endif else begin
-        avg_data,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec',2.5d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
         if strlen(tnames('mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre')) gt 0 and undefined(dfg_ql) then begin
+          avg_data,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec',2.5d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
           ncoord=strupcase(coord)
           options,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!CL2pre_'+ncoord+'!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
         endif else begin
+          avg_data,'mms'+probe+'_dfg_srvy_'+coord+'_bvec',2.5d,trange=[time_double(time_string(trange[0],format=0,precision=-3)),time_double(time_string(trange[1],format=0,precision=-3))+24.d*3600.d]
           if coord eq 'dmpa' then ncoord='GSE' else ncoord='GSM'
           options,'mms'+probe+'_dfg_srvy_'+coord+'_bvec_avg',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'_DFG!C'+strupcase(coord)+'!C(near '+ncoord+')!C2.5 sec!Caveraged',ysubtitle='[nT]',labflag=-1
         endelse

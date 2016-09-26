@@ -165,24 +165,28 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
           store_data,'mms'+probe+'_d?s_errorflags_fast_moms',/delete
           fpi_suffix='_fast_ql'
           mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype='des',time_clip=time_clip,versions=des_versions
-          if des_versions[0,0] gt 2 then begin
-            copy_data,'mms'+probe+'_des_energyspectr_px_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_pX'+fpi_suffix
-            copy_data,'mms'+probe+'_des_energyspectr_mx_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_mX'+fpi_suffix
-            copy_data,'mms'+probe+'_des_energyspectr_py_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_pY'+fpi_suffix
-            copy_data,'mms'+probe+'_des_energyspectr_my_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_mY'+fpi_suffix
-            copy_data,'mms'+probe+'_des_energyspectr_pz_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_pZ'+fpi_suffix
-            copy_data,'mms'+probe+'_des_energyspectr_mz_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_mZ'+fpi_suffix
-            copy_data,'mms'+probe+'_des_energyspectr_omni_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_omni'+fpi_suffix
-          endif
+          if not undefined(des_versions) then begin
+            if des_versions[0,0] gt 2 then begin
+              copy_data,'mms'+probe+'_des_energyspectr_px_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_pX'+fpi_suffix
+              copy_data,'mms'+probe+'_des_energyspectr_mx_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_mX'+fpi_suffix
+              copy_data,'mms'+probe+'_des_energyspectr_py_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_pY'+fpi_suffix
+              copy_data,'mms'+probe+'_des_energyspectr_my_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_mY'+fpi_suffix
+              copy_data,'mms'+probe+'_des_energyspectr_pz_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_pZ'+fpi_suffix
+              copy_data,'mms'+probe+'_des_energyspectr_mz_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_mZ'+fpi_suffix
+              copy_data,'mms'+probe+'_des_energyspectr_omni_fast'+fpi_suffix,'mms'+probe+'_des_energySpectr_omni'+fpi_suffix
+            endif
+          endif  
           mms_load_fpi,trange=trange,probes=probe,level='ql',data_rate='fast',no_update=no_update_fpi,suffix=fpi_suffix,datatype='dis',time_clip=time_clip,versions=dis_versions
-          if dis_versions[0,0] gt 2 then begin
-            copy_data,'mms'+probe+'_dis_energyspectr_px_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_pX'+fpi_suffix
-            copy_data,'mms'+probe+'_dis_energyspectr_mx_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_mX'+fpi_suffix
-            copy_data,'mms'+probe+'_dis_energyspectr_py_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_pY'+fpi_suffix
-            copy_data,'mms'+probe+'_dis_energyspectr_my_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_mY'+fpi_suffix
-            copy_data,'mms'+probe+'_dis_energyspectr_pz_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_pZ'+fpi_suffix
-            copy_data,'mms'+probe+'_dis_energyspectr_mz_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_mZ'+fpi_suffix
-            copy_data,'mms'+probe+'_dis_energyspectr_omni_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_omni'+fpi_suffix
+          if not undefined(dis_versions) then begin
+            if dis_versions[0,0] gt 2 then begin
+              copy_data,'mms'+probe+'_dis_energyspectr_px_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_pX'+fpi_suffix
+              copy_data,'mms'+probe+'_dis_energyspectr_mx_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_mX'+fpi_suffix
+              copy_data,'mms'+probe+'_dis_energyspectr_py_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_pY'+fpi_suffix
+              copy_data,'mms'+probe+'_dis_energyspectr_my_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_mY'+fpi_suffix
+              copy_data,'mms'+probe+'_dis_energyspectr_pz_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_pZ'+fpi_suffix
+              copy_data,'mms'+probe+'_dis_energyspectr_mz_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_mZ'+fpi_suffix
+              copy_data,'mms'+probe+'_dis_energyspectr_omni_fast'+fpi_suffix,'mms'+probe+'_dis_energySpectr_omni'+fpi_suffix
+            endif
           endif
         endif else begin
           copy_data,'mms'+probe+'_des_energyspectr_px_fast','mms'+probe+'_des_energySpectr_pX'
@@ -454,7 +458,9 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   if undefined(skip_cotrans) and undefined(no_load_mec) then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
   if not undefined(dis_versions) and not undefined(des_versions) then begin
     if dis_versions[0,0] le 2 or des_versions[0,0] le 2 then if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
-  endif
+  endif else begin
+    skip_cotrans=1
+  endelse
   
   if strlen(tnames('mms'+probe+'_dis_bulkv_gse_fast'+fpi_suffix)) gt 0 then begin
     copy_data,'mms'+probe+'_dis_bulkv_dbcs_fast'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_DSC'
