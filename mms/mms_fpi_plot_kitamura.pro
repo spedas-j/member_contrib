@@ -472,7 +472,11 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     if strlen(tnames('mms'+probe+'_fpi_iBulkV_gse')) eq 0 then begin
       store_data,'mms'+probe+'_fpi_iBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
       ylim,'mms'+probe+'_fpi_iBulkV_gse',-100.d,100.d,0
-    endif
+    endif else begin
+      get_data,'mms'+probe+'_fpi_iBulkV_gse',data=vi
+      if max(vi.y) eq 0.d and min(vi.y) eq 0.d then store_data,'mms'+probe+'_fpi_iBulkV_gse',/delete
+      undefine,vi
+    endelse  
   endif else begin
     join_vec,'mms'+probe+'_fpi_iBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_iBulkV_DSC'
     if strlen(tnames('mms'+probe+'_fpi_iBulkV_DSC')) eq 0 then begin
@@ -483,7 +487,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   endelse
   options,'mms'+probe+'_fpi_iBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_i
   options,'mms'+probe+'_fpi_iBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
-  if undefined(skip_cotrans) then begin
+  if undefined(skip_cotrans) and strlen(tnames('mms'+probe+'_fpi_iBulkV_gse')) gt 0 then begin
     mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
     options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
   endif
@@ -499,7 +503,11 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
       if strlen(tnames('mms'+probe+'_fpi_eBulkV_gse')) eq 0 then begin
         store_data,'mms'+probe+'_fpi_eBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
         ylim,'mms'+probe+'_fpi_eBulkV_gse',-100.d,100.d,0
-      endif
+      endif else begin
+        get_data,'mms'+probe+'_fpi_eBulkV_gse',data=ve
+        if max(ve.y) eq 0.d and min(ve.y) eq 0.d then store_data,'mms'+probe+'_fpi_eBulkV_gse',/delete
+        undefine,ve
+      endelse
     endif else begin
       join_vec,'mms'+probe+'_fpi_eBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_eBulkV_DSC'
       if strlen(tnames('mms'+probe+'_fpi_eBulkV_DSC')) eq 0 then begin
@@ -510,7 +518,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     endelse
     options,'mms'+probe+'_fpi_eBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CElectron!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_e
     options,'mms'+probe+'_fpi_eBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CElectron!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
-    if undefined(skip_cotrans) then begin
+    if undefined(skip_cotrans) and strlen(tnames('mms'+probe+'_fpi_eBulkV_gse')) gt 0 then begin
       mms_cotrans,'mms'+probe+'_fpi_eBulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
       options,'mms'+probe+'_fpi_eBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CElectron!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
     endif

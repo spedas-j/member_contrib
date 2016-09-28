@@ -287,6 +287,15 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
       if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) gt 0 and undefined(dfg_ql) then ql_name='' else ql_name='_ql' 
 
       if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) eq 0 then mms_load_mec,trange=trange,probes=probe,no_update=no_update,varformat=['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec']
+      if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) gt 0 then begin
+        time_clip,'mms'+probe+'_mec_r_'+strlowcase(ncoord),trange[0],trange[1],newname='mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_temp'
+        get_data,'mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_temp',data=d_temp
+        if finite(d_temp.y[n_elements(d_temp.x)-1l,0],/nan) eq 1 then begin
+          store_data,['mms'+probe+'_mec_r_eci','mms'+probe+'_mec_r_gse','mms'+probe+'_mec_r_gsm','mms'+probe+'_mec_L_vec','mms'+probe+'_defatt_spin???'],/delete
+        endif  
+        store_data,'mms'+probe+'_mec_r_'+strlowcase(ncoord)+'_temp',/delete
+        undefine,d_temp
+      endif  
 
       if strlen(tnames('mms'+probe+'_mec_r_'+strlowcase(ncoord))) gt 0 then begin
         tkm2re,'mms'+probe+'_mec_r_'+strlowcase(ncoord)
