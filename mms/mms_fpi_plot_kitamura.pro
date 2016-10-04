@@ -412,13 +412,13 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   endelse
   
   if strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_omni')) eq 0 then store_data,'mms'+probe+'_fpi_eEnergySpectr_omni',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[10.d,30000.d]}
-  options,'mms'+probe+'_fpi_eEnergySpectr_omni',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!C'+des_level+'!C'+fpiver_e+'!Comni',ysubtitle='[eV]',datagap=dgap_e,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+  options,'mms'+probe+'_fpi_eEnergySpectr_omni',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!C'+des_level+'!C'+fpiver_e+'!Comni',ysubtitle='[eV]',datagap=dgap_e,ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
   ylim,'mms'+probe+'_fpi_eEnergySpectr_omni',6.d,30000.d,1
   if fpi_suffix ne '_fast_l1b' and (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix)) eq 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',0.1d,50000.d,1
   if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms')))[0] gt 0 or strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix)) gt 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',3e5,3e9,1
   
   if strlen(tnames('mms'+probe+'_fpi_iEnergySpectr_omni')) eq 0 then store_data,'mms'+probe+'_fpi_iEnergySpectr_omni',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[10.d,30000.d]}
-  options,'mms'+probe+'_fpi_iEnergySpectr_omni',spec=1,ytitle='MMS'+probe+'_FPI!CIon!C'+dis_level+'!C'+fpiver_i+'!Comni',ysubtitle='[eV]',datagap=dgap_i,ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+  options,'mms'+probe+'_fpi_iEnergySpectr_omni',spec=1,ytitle='MMS'+probe+'_FPI!CIon!C'+dis_level+'!C'+fpiver_i+'!Comni',ysubtitle='[eV]',datagap=dgap_i,ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
   ylim,'mms'+probe+'_fpi_iEnergySpectr_omni',2.d,30000.d,1
   if fpi_suffix ne '_fast_l1b' and (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix)) eq 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',0.1d,2000.d,1
   if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms')))[0] gt 0 or strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix)) gt 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e4,3e8,1

@@ -46,6 +46,8 @@
 ;         esp_plotcdir:  set this to assine a directory for plots with high frequency electric field
 ;                        wave data
 ;         no_short:      set this flag to skip short plots (1 hour)
+;         shift_1x_1:    set this flag to use special margin 1 for phase-1x
+;         shift_1x_2:    set this flag to use special margin 2 for phase-1x
 ;
 ; EXAMPLE:
 ;
@@ -69,7 +71,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
                                    no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
                                    no_bss=no_bss,full_bss=full_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,$
                                    pa_erange=pa_erange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,$
-                                   no_short=no_short
+                                   no_short=no_short,shift_1x_1=shift_1x_1,shift_1x_2=shift_1x_2
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -83,8 +85,18 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
       roi=mms_get_roi(trange,/next)
       trange=dblarr(2)
       if undefined(brst) then begin
-        trange[0]=roi[0]-60.d*210.d
-        trange[1]=roi[1]+60.d*210.d
+        if undefined(shift_1x_1) then begin
+          if undefined(shift_1x_2) then begin
+            trange[0]=roi[0]-60.d*210.d
+            trange[1]=roi[1]+60.d*210.d
+          endif else begin
+            trange[0]=roi[0]-60.d*210.d
+            trange[1]=roi[1]
+          endelse
+        endif else begin
+          trange[0]=roi[0]-60.d*360.d
+          trange[1]=roi[1]
+        endelse
       endif else begin
         trange[0]=roi[0]-60.d*30.d
         trange[1]=roi[1]+60.d*30.d

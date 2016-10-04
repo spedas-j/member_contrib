@@ -33,14 +33,21 @@
 ;         plotdir:      set this flag to assine a directory for plots
 ;         plotcdir:     set this flag to assine a directory for plots with currents in the LMN coordinate
 ;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
+;         no_avg_fgm:   set this flag to skip making 2.5 sec averaged FGM(DFG) data
+;         fom:          set this flag to plot FOMs (team member only)
 ;
 ; EXAMPLE:
 ;
 ;     To make summary plots of fluxgate magnetometers (FGM (or DFG)) and fast plasma investigation (FPI) data
 ;     team members
-;     MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output
+;      (normal use)
+;        MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output,/no_avg_fgm
+;      (to check FOMs and status of data downlink)
+;        MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output,/no_avg_fgm,/full_bss,/fom
+;      (to check data in current SITL window)
+;        MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output,/no_avg_fgm,/no_bss
 ;     public users
-;     MMS>  mms_fpi_fgm_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/add_scpot
+;        MMS>  mms_fpi_fgm_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/add_scpot,/no_avg_fgm
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
@@ -52,7 +59,7 @@
 pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                                  no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,no_output=no_output,$
                                  add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,$
-                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse
+                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom
 
   probe=strcompress(string(probe),/remove_all)
 
@@ -148,10 +155,10 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       endif
     endelse
     if undefined(gse) then gsm=1
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,/load_fpi,/magplot
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,no_avg=no_avg_fgm,/load_fpi,/magplot
   endif else begin
     if undefined(gse) then gsm=1
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,/magplot
+    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,no_avg=no_avg_fgm,/magplot
   endelse
   
   if undefined(no_bss) then begin
@@ -178,15 +185,28 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
   if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) eq 0 then ncoord='DSC' else ncoord='gsm'
   if not undefined(gse) then ncoord='gse'
 
+  fpi_set=['mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord]
+
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
-    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec_avg','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot']
+;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec_avg','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot']
+    if undefined(no_avg_fgm) then fgm_set=['mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec_avg','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot'] else fgm_set=['mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot']
   endif else begin
     if strlen(tnames('mms'+probe+'_dfg_b_gsm_srvy_l2pre')) gt 0 then begin
-      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec_avg','mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_btot']
+;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec_avg','mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_btot']
+     if undefined(no_avg_fgm) then fgm_set=['mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec_avg','mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_btot'] else fgm_set=['mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_bvec','mms'+probe+'_dfg_b_'+coord+'_srvy_l2pre_btot']
     endif else begin
       if not undefined(gse) then coord='dmpa' else coord='gsm_dmpa'
-      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_'+coord+'_bvec_avg','mms'+probe+'_dfg_srvy_'+coord+'_btot']
+;      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_dfg_srvy_'+coord+'_bvec_avg','mms'+probe+'_dfg_srvy_'+coord+'_btot']
+       if undefined(no_avg_fgm) then fgm_set=['mms'+probe+'_dfg_srvy_'+coord+'_bvec_avg','mms'+probe+'_dfg_srvy_'+coord+'_btot'] else fgm_set=['mms'+probe+'_dfg_srvy_'+coord+'_bvec','mms'+probe+'_dfg_srvy_'+coord+'_btot']
     endelse
+  endelse
+
+  if not undefined(fom) then begin
+    spd_mms_load_bss,trange=trange,datatype='fom'
+    options,'mms_bss_fom',colors=6,constant=[50.d,100.d,150.d,200.d,250.d]
+    tplot,['mms_bss',fpi_set,fgm_set,'mms_bss_fom']
+  endif else begin
+    tplot,['mms_bss',fpi_set,fgm_set]
   endelse
 
   if undefined(no_output) and not undefined(plotdir) then begin

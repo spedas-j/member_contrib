@@ -132,7 +132,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   if des_versions[0,0] gt 2 then omni_spec_des='mms'+probe+'_des_energyspectr_omni_brst' else omni_spec_des='mms'+probe+'_des_energyspectr_omni_avg'
   if strlen(tnames(omni_spec_des)) gt 0 and strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_omni')) gt 0 then begin
     store_data,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',data=['mms'+probe+'_fpi_eEnergySpectr_omni',omni_spec_des]
-    options,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     options,omni_spec_des,datagap=0.04d
     ylim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',6.d,30000.d,1
     zlim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',3e5,3e9,1
@@ -148,7 +148,7 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   if dis_versions[0,0] gt 2 then omni_spec_dis='mms'+probe+'_dis_energyspectr_omni_brst' else omni_spec_dis='mms'+probe+'_dis_energyspectr_omni_avg'
   if strlen(tnames(omni_spec_dis)) gt 0 and strlen(tnames('mms'+probe+'_fpi_iEnergySpectr_omni')) gt 0 then begin
     store_data,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',data=['mms'+probe+'_fpi_iEnergySpectr_omni',omni_spec_dis]
-    options,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CIon!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztickformat='mms_exponent2'
+    options,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CIon!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     options,omni_spec_dis,datagap=0.16d
     ylim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',2.d,30000.d,1
     zlim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',3e4,3e8,1
