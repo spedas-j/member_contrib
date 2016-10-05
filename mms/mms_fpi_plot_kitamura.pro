@@ -260,7 +260,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     copy_data,'mms'+probe+'_dis_energySpectr_pZ'+fpi_suffix,'mms'+probe+'_fpi_iEnergySpectr_pZ'
     copy_data,'mms'+probe+'_dis_energySpectr_mZ'+fpi_suffix,'mms'+probe+'_fpi_iEnergySpectr_mZ'
     
-    if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix)) eq 0 then begin
+    if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix+'_moms')) eq 0 then begin
       copy_data,'mms'+probe+'_dis_numberDensity'+fpi_suffix,'mms'+probe+'_fpi_DISnumberDensity'
       copy_data,'mms'+probe+'_dis_bulkX'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_X_DSC'
       copy_data,'mms'+probe+'_dis_bulkY'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_Y_DSC'
@@ -305,7 +305,7 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     copy_data,'mms'+probe+'_des_energySpectr_pZ'+fpi_suffix,'mms'+probe+'_fpi_eEnergySpectr_pZ'
     copy_data,'mms'+probe+'_des_energySpectr_mZ'+fpi_suffix,'mms'+probe+'_fpi_eEnergySpectr_mZ'
     
-    if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix)) eq 0 then begin
+    if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix+'_moms')) eq 0 then begin
       copy_data,'mms'+probe+'_des_numberDensity'+fpi_suffix,'mms'+probe+'_fpi_DESnumberDensity'
       copy_data,'mms'+probe+'_des_bulkX'+fpi_suffix,'mms'+probe+'_fpi_eBulkV_X_DSC'
       copy_data,'mms'+probe+'_des_bulkY'+fpi_suffix,'mms'+probe+'_fpi_eBulkV_Y_DSC'
@@ -397,13 +397,13 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     copy_data,'mms'+probe+'_des_energySpectr_omni_fast_l1b','mms'+probe+'_fpi_eEnergySpectr_omni'
     copy_data,'mms'+probe+'_dis_energySpectr_omni_fast_l1b','mms'+probe+'_fpi_iEnergySpectr_omni'
   endif else begin
-    if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix)) eq 0 then begin
+    if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix+'_moms')) eq 0 then begin
       mms_load_fpi_calc_omni,probe,datatype='des',level='sitl'
       store_data,'mms'+probe+'_fpi_eEnergySpectr_omni_avg',newname='mms'+probe+'_fpi_eEnergySpectr_omni'
     endif else begin
       copy_data,'mms'+probe+'_des_energySpectr_omni'+fpi_suffix,'mms'+probe+'_fpi_eEnergySpectr_omni'
     endelse
-    if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix)) eq 0 then begin
+    if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms*')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix+'_moms')) eq 0 then begin
       mms_load_fpi_calc_omni,probe,datatype='dis',level='sitl'
       store_data,'mms'+probe+'_fpi_iEnergySpectr_omni_avg',newname='mms'+probe+'_fpi_iEnergySpectr_omni'
     endif else begin
@@ -414,14 +414,14 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   if strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_omni')) eq 0 then store_data,'mms'+probe+'_fpi_eEnergySpectr_omni',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[10.d,30000.d]}
   options,'mms'+probe+'_fpi_eEnergySpectr_omni',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!C'+des_level+'!C'+fpiver_e+'!Comni',ysubtitle='[eV]',datagap=dgap_e,ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
   ylim,'mms'+probe+'_fpi_eEnergySpectr_omni',6.d,30000.d,1
-  if fpi_suffix ne '_fast_l1b' and (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix)) eq 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',0.1d,50000.d,1
-  if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms')))[0] gt 0 or strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix)) gt 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',3e5,3e9,1
+  if fpi_suffix ne '_fast_l1b' and (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms')))[0] eq 0 and strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix+'_moms')) eq 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',0.1d,50000.d,1
+  if (strlen(tnames('mms'+probe+'_des_errorflags_fast_moms')))[0] gt 0 or strlen(tnames('mms'+probe+'_des_errorflags_fast'+fpi_suffix+'_moms')) gt 0 then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',3e5,3e9,1
   
   if strlen(tnames('mms'+probe+'_fpi_iEnergySpectr_omni')) eq 0 then store_data,'mms'+probe+'_fpi_iEnergySpectr_omni',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[10.d,30000.d]}
   options,'mms'+probe+'_fpi_iEnergySpectr_omni',spec=1,ytitle='MMS'+probe+'_FPI!CIon!C'+dis_level+'!C'+fpiver_i+'!Comni',ysubtitle='[eV]',datagap=dgap_i,ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
   ylim,'mms'+probe+'_fpi_iEnergySpectr_omni',2.d,30000.d,1
-  if fpi_suffix ne '_fast_l1b' and (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix)) eq 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',0.1d,2000.d,1
-  if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms')))[0] gt 0 or strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix)) gt 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e4,3e8,1
+  if fpi_suffix ne '_fast_l1b' and (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms')))[0] eq 0 and strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix+'_moms')) eq 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',0.1d,2000.d,1
+  if (strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms')))[0] gt 0 or strlen(tnames('mms'+probe+'_dis_errorflags_fast'+fpi_suffix+'_moms')) gt 0 then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e4,3e8,1
 
   if strlen(tnames('mms'+probe+'_fpi_DISnumberDensity')) eq 0 then store_data,'mms'+probe+'_fpi_DISnumberDensity',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
   options,'mms'+probe+'_fpi_DISnumberDensity',ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=6,ylog=1,datagap=dgap_i,ytickformat='mms_exponent2',labels=''

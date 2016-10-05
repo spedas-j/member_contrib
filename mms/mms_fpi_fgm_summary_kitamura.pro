@@ -203,16 +203,13 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
 
   if not undefined(fom) then begin
     spd_mms_load_bss,trange=trange,datatype='fom'
-    options,'mms_bss_fom',colors=6,constant=[50.d,100.d,150.d,200.d,250.d]
+    options,'mms_bss_fom',colors=6,constant=[50.d,100.d,150.d,200.d,250.d],panel_size=0.66
     tplot,['mms_bss',fpi_set,fgm_set,'mms_bss_fom']
   endif else begin
     tplot,['mms_bss',fpi_set,fgm_set]
   endelse
 
   if undefined(no_output) and not undefined(plotdir) then begin
-    
-    get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
-    fpiver=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
     
     if undefined(roi) then roi=trange
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
@@ -223,7 +220,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     tplot_options,'ymargin'
     tplot_options,'tickinterval',3600
     set_plot,'ps'
-    device,filename=dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
+    device,filename=dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
     tplot,trange=trange
     device,/close
     set_plot,thisDevice
@@ -233,7 +230,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     window,xsize=1600,ysize=900
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
-    makepng,dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver
+    makepng,dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)
     if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
     options,'mms_bss','labsize'
     tplot_options,'tickinterval'
@@ -244,7 +241,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       tplot_options,'tickinterval',600
       while start_time lt roi[1] do begin
         set_plot,'ps'
-        device,filename=dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
+        device,filename=dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
         tplot,trange=[start_time,start_time+2.d*3600.d]
         device,/close
         set_plot,thisDevice
@@ -254,7 +251,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
         window,xsize=1600,ysize=900
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+2.d*3600.d]
-        makepng,dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours'
+        makepng,dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_2hours'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
@@ -270,18 +267,23 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     if undefined(roi) then roi=trange
 
     mms_curlometer,trange=[roi[0]-3600.d,roi[1]+3600.d],ref_probe=probe,data_rate='srvy',/gsm,/lmn
-    tinterpol_mxn,'mms_avg_pos_gsm','mms'+probe+'_fpi_iBulkV_gsm',newname='mms_avg_pos_gsm_ion'
-    get_data,'mms_avg_pos_gsm_ion',data=pos
-    get_data,'mms'+probe+'_fpi_iBulkV_gsm',data=vi_gsm
-    gsm2lmn,[[pos.x],[pos.y[*,0]],[pos.y[*,1]],[pos.y[*,2]]],vi_gsm.y,vi_lmn
-    store_data,'mms'+probe+'_fpi_iBulkV_lmn',data={x:vi_gsm.x,y:vi_lmn}
-    if not undefined(fpi_sitl) then begin
-      dis_level='SITL'
+    if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) gt 0 then begin
+      tinterpol_mxn,'mms_avg_pos_gsm','mms'+probe+'_fpi_iBulkV_gsm',newname='mms_avg_pos_gsm_ion'
+      get_data,'mms_avg_pos_gsm_ion',data=pos
+      get_data,'mms'+probe+'_fpi_iBulkV_gsm',data=vi_gsm,dlimit=dl
+      gsm2lmn,[[pos.x],[pos.y[*,0]],[pos.y[*,1]],[pos.y[*,2]]],vi_gsm.y,vi_lmn
+      store_data,'mms'+probe+'_fpi_iBulkV_lmn',data={x:vi_gsm.x,y:vi_lmn}
+      if not undefined(fpi_sitl) then begin
+        dis_level='SITL'
+      endif else begin
+        if dl.cdf.gatt.data_type ne 'fast_ql_dis' then dis_level='L2' else dis_level='QL'
+      endelse
+      undefine,pos,vi_gsm,vi_lmn,dl
     endif else begin
-      if strlen(tnames('mms'+probe+'_dis_errorflags_fast')) gt 0 then dis_level='L2' else dis_level='QL'
+      dis_level='L2'
+      store_data,'mms'+probe+'_fpi_iBulkV_lmn',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
     endelse
     options,'mms'+probe+'_fpi_iBulkV_lmn',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_LMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=4.6d
-    undefine,pos,vi_gsm,vi_lmn
     tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_lmn','mms'+probe+'_b_for_curlometer_tlmn','Current_lmn','Current_magnitude','divB_over_rotB']
 
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
