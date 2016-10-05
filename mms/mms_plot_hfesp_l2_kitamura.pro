@@ -236,10 +236,10 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   store_data,prefix+'_edp_hfesp_srvy_l2',data={x:hfesp.x,y:hfesp.y,v:hfesp.v[0:321]},lim=l,dlim=dl
   
   ylim,prefix+'_edp_hfesp_srvy_l2',0.d,6.e4,0
-  if undefined(tail) then zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1 else zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-4,1
+  zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1
   options,prefix+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
   store_data,prefix+'_fp_fc_hfesp',data=[prefix+'_edp_hfesp_srvy_l2',prefix+'_fgm_fce',prefix+'_hpca_fp',prefix+'_fpi_fp']
-  if undefined(tail) then ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1 else ylim,prefix+'_fp_fc_hfesp',3e2,6e4,1
+  if undefined(tail) then ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1 else ylim,prefix+'_fp_fc_hfesp',6e2,6e4,1
   options,prefix+'_fp_fc_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_HPCA(Magenta)!CFce_FGM(Black)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',ytickformat='mms_exponent2'
 
   if undefined(no_bss) then begin
