@@ -31,6 +31,9 @@
 ;         pa_erange:      set this to specify the energy range of low-energy ions
 ;         erangename:     set this to specify a part of the name of tplot variables for low-energy ions
 ;         gsm:            set this flag to plot data in the GSM coordinate
+;         shift_1x_1:     set this flag to use special margin 1 for phase-1x
+;         shift_1x_2:     set this flag to use special margin 2 for phase-1x
+;         tail:           set this flag to use special ranges for tail region
 ;
 ; EXAMPLE:
 ;
@@ -50,7 +53,8 @@
 
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
                                no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
-                               no_output=no_output,lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,gsm=gsm
+                               no_output=no_output,lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,$
+                               gsm=gsm,shift_1x_1=shift_1x_1,shift_1x_2=shift_1x_2,tail=tail
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -64,8 +68,18 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
       roi=mms_get_roi(trange,/next)
       trange=dblarr(2)
       if undefined(hpca_brst) then begin
-        trange[0]=roi[0]-60.d*210.d
-        trange[1]=roi[1]+60.d*210.d
+        if undefined(shift_1x_1) then begin
+          if undefined(shift_1x_2) then begin
+            trange[0]=roi[0]-60.d*210.d
+            trange[1]=roi[1]+60.d*210.d
+          endif else begin
+            trange[0]=roi[0]-60.d*210.d
+            trange[1]=roi[1]
+          endelse
+        endif else begin
+          trange[0]=roi[0]-60.d*360.d
+          trange[1]=roi[1]
+        endelse
       endif else begin
         trange[0]=roi[0]-60.d*30.d
         trange[1]=roi[1]+60.d*30.d
@@ -186,8 +200,8 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   
   if strlen(tnames(prefix+'_hpca_hplus_number_density')) gt 0 then begin
     store_data,prefix+'_fpi_hpca_numberDensity',data=[prefix+'_dis_numberdensity_fast',prefix+'_hpca_hplus_number_density',prefix+'_hpca_heplusplus_number_density',prefix+'_hpca_heplus_number_density',prefix+'_hpca_oplus_number_density']
-    options,prefix+'_fpi_hpca_numberDensity',ytitle='MMS'+probe+'!CFPI_HPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,3,2,4],labels=['DIS','H+','He++','He+','O+'],labflag=-1,constant=[0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
-    ylim,prefix+'_fpi_hpca_numberDensity',0.001d,100.0d,1
+    options,prefix+'_fpi_hpca_numberDensity',ytitle='MMS'+probe+'!CFPI_HPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,3,2,4],labels=['DIS','H+','He++','He+','O+'],labflag=-1,constant=[0.001,0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
+    if undefined(tail) then ylim,prefix+'_fpi_hpca_numberDensity',0.001d,100.0d,1 else ylim,prefix+'_fpi_hpca_numberDensity',0.0001d,20.0d,1
     tname_density=prefix+'_fpi_hpca_numberDensity'
     get_data,prefix+'_hpca_hplus_number_density',data=nh
     get_data,prefix+'_hpca_heplusplus_number_density',data=na
@@ -202,8 +216,8 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     options,prefix+'_dis_numberdensity_fast',datagap=4.6d
     options,prefix+'_dis_numberdensity_brst',datagap=0.16d
     store_data,prefix+'_fpi_numberdensity',data=[prefix+'_des_numberdensity_fast',prefix+'_dis_numberdensity_fast',prefix+'_dis_numberdensity_brst']
-    options,prefix+'_fpi_numberdensity',ytitle='MMS'+probe+'!CFPI!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,4],labels=['Electron','Ion','Ion_brst'],labflag=-1,constant=[0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
-    ylim,prefix+'_fpi_numberdensity',0.001d,100.0d,1
+    options,prefix+'_fpi_numberdensity',ytitle='MMS'+probe+'!CFPI!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,4],labels=['Electron','Ion','Ion_brst'],labflag=-1,constant=[0.001,0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
+    if undefined(tail) then ylim,prefix+'_fpi_numberdensity',0.001d,100.0d,1 else ylim,prefix+'_fpi_numberdensity',0.0001d,20.0d,1
     tname_density=prefix+'_fpi_numberdensity'
   endelse
   if strlen(tnames(prefix+'_dis_numberdensity_fast')) gt 0 then begin
@@ -222,10 +236,10 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   store_data,prefix+'_edp_hfesp_srvy_l2',data={x:hfesp.x,y:hfesp.y,v:hfesp.v[0:321]},lim=l,dlim=dl
   
   ylim,prefix+'_edp_hfesp_srvy_l2',0.d,6.e4,0
-  zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1
+  if undefined(tail) then zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-5,1 else zlim,prefix+'_edp_hfesp_srvy_l2',1e-11,1e-4,1
   options,prefix+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
   store_data,prefix+'_fp_fc_hfesp',data=[prefix+'_edp_hfesp_srvy_l2',prefix+'_fgm_fce',prefix+'_hpca_fp',prefix+'_fpi_fp']
-  ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1
+  if undefined(tail) then ylim,prefix+'_fp_fc_hfesp',3e3,7e4,1 else ylim,prefix+'_fp_fc_hfesp',3e2,6e4,1
   options,prefix+'_fp_fc_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_HPCA(Magenta)!CFce_FGM(Black)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',ytickformat='mms_exponent2'
 
   if undefined(no_bss) then begin

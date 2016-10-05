@@ -11,8 +11,8 @@
 ;                        ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
 ;                        if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
 ;                        the time range is set as from 210 (or 30 (brst)) minutes before the 
-;                        beginning　of the ROI just after the specified time to 210
-;                        (or 30 (brst)) minutes　after the end of the ROI.
+;                        beginning of the ROI just after the specified time to 210
+;                        (or 30 (brst)) minutes after the end of the ROI.
 ;         probe:         a probe - value for MMS SC #
 ;         delete:        set this flag to delete all tplot variables at the beginning
 ;         brst:          set this flag to use HPCA burst data
@@ -48,6 +48,7 @@
 ;         no_short:      set this flag to skip short plots (1 hour)
 ;         shift_1x_1:    set this flag to use special margin 1 for phase-1x
 ;         shift_1x_2:    set this flag to use special margin 2 for phase-1x
+;         tail:          set this flag to use special ranges for tail region
 ;
 ; EXAMPLE:
 ;
@@ -71,7 +72,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
                                    no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
                                    no_bss=no_bss,full_bss=full_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,$
                                    pa_erange=pa_erange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,$
-                                   no_short=no_short,shift_1x_1=shift_1x_1,shift_1x_2=shift_1x_2
+                                   no_short=no_short,shift_1x_1=shift_1x_1,shift_1x_2=shift_1x_2,tail=tail
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -207,13 +208,13 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   
   if strlen(tnames(prefix+'_fpi_DISnumberDensity')) gt 0 then begin
     store_data,prefix+'_fpi_hpca_numberDensity',data=[prefix+'_fpi_DISnumberDensity',prefix+'_hpca_hplus_number_density',prefix+'_hpca_heplusplus_number_density',prefix+'_hpca_heplus_number_density',prefix+'_hpca_oplus_number_density']
-    options,prefix+'_fpi_hpca_numberDensity',ytitle='MMS'+probe+'!CFPI_HPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,3,2,4],labels=['DIS','H+','He++','He+','O+'],labflag=-1,constant=[0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
-    ylim,prefix+'_fpi_hpca_numberDensity',0.001d,100.0d,1
+    options,prefix+'_fpi_hpca_numberDensity',ytitle='MMS'+probe+'!CFPI_HPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,3,2,4],labels=['DIS','H+','He++','He+','O+'],labflag=-1,constant=[0.001,0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
+    if undefined(tail) then ylim,prefix+'_fpi_hpca_numberDensity',0.001d,100.0d,1 else ylim,prefix+'_fpi_hpca_numberDensity',0.0001d,20.0d,1
     tname_density=prefix+'_fpi_hpca_numberDensity'
   endif else begin
     store_data,prefix+'_hpca_numberDensity',data=[prefix+'_hpca_hplus_number_density',prefix+'_hpca_heplusplus_number_density',prefix+'_hpca_heplus_number_density',prefix+'_hpca_oplus_number_density']
-    options,prefix+'_hpca_numberDensity',ytitle='MMS'+probe+'!CHPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[6,3,2,4],labels=['H+','He++','He+','O+'],labflag=-1,constant=[0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
-    ylim,prefix+'_hpca_numberDensity',0.001d,100.0d,1
+    options,prefix+'_hpca_numberDensity',ytitle='MMS'+probe+'!CHPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[6,3,2,4],labels=['H+','He++','He+','O+'],labflag=-1,constant=[0.001,0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
+    if undefined(tail) then ylim,prefix+'_hpca_numberDensity',0.001d,100.0d,1 else ylim,prefix+'_hpca_numberDensity',0.0001d,20.0d,1
     tname_density=prefix+'_hpca_numberDensity'
   endelse
 
@@ -365,6 +366,6 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
     tplot_options,'charsize'
   endif
   
-  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange_orig,probe=probe,erangename=erangename,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,/gsm
+  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange_orig,probe=probe,erangename=erangename,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,shift_1x_1=shift_1x_1,shift_1x_2=shift_1x_2,tail=tail,/gsm
   
 end
