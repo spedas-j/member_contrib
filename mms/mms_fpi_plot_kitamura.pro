@@ -382,12 +382,14 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
     fpiver_e=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
   endif else begin
     fpiver_e='no data'
+    des_level='L2'
   endelse  
   if strlen(tnames('mms'+probe+'_fpi_iEnergySpectr_pX')) gt 0 then begin
     if fpi_suffix eq '_fast_l1b' then get_data,'mms'+probe+'_fpi_DISnumberDensity',dlimit=dl else get_data,'mms'+probe+'_fpi_iEnergySpectr_pX',dlimit=dl
     fpiver_i=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
   endif else begin
     fpiver_i='no data'
+    dis_level='L2'
   endelse
  
   options,['mms'+probe+'_fpi_eEnergySpectr_??'],datagap=dgap_e
