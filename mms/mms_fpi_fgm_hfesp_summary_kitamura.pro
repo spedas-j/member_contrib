@@ -121,11 +121,11 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
   endelse
   options,'mms'+probe+'_des_fp',colors=1,thick=1.25,datagap=4.6d
 
-  if strlen(tnames('mms'+probe+'_des_errorflags_fast_moms_flagbars')) gt 0 then begin
+  if strlen(tnames('mms'+probe+'_des_errorflags_fast_moms_flagbars')) eq 0 then begin
     store_data,'mms'+probe+'_des_errorflags_fast_moms_flagbars',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
     options,'mms'+probe+'_des_errorflags_fast_moms_flagbars',xstyle=4,ystyle=4,ticklen=0,panel_size=0.5,labsize=1
   endif
-  if strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms_flagbars')) gt 0 then begin
+  if strlen(tnames('mms'+probe+'_dis_errorflags_fast_moms_flagbars')) eq 0 then begin
     store_data,'mms'+probe+'_dis_errorflags_fast_moms_flagbars',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
     options,'mms'+probe+'_dis_errorflags_fast_moms_flagbars',xstyle=4,ystyle=4,ticklen=0,panel_size=0.5,labsize=1
   endif
@@ -163,6 +163,12 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
   endif else begin
     time_stamp,/off
   endelse
+
+  if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) eq 0 then begin
+    store_data,'mms'+probe+'_fpi_iBulkV_gsm',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+    ylim,'mms'+probe+'_fpi_iBulkV_gsm',-100.d,100.d,0
+    options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_L2!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
+  endif
 
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
     tplot,['mms_bss','mms'+probe+'_des_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fp_hfesp','mms'+probe+'_fpi_iBulkV_gsm','mms'+probe+'_fgm_b_gsm_srvy_l2_mod']
