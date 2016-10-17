@@ -167,7 +167,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
   if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) eq 0 then begin
     store_data,'mms'+probe+'_fpi_iBulkV_gsm',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
     ylim,'mms'+probe+'_fpi_iBulkV_gsm',-100.d,100.d,0
-    options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_L2!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
+    options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_L2!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=4.6d
   endif
 
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
@@ -178,12 +178,12 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
 
   if undefined(no_output) and not undefined(plotdir) then begin
     
-    if strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_pX')) ne 0 then begin
-      get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
-      fpiver=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
-    endif else begin
-      fpiver='v0.0.0'
-    endelse
+;    if strlen(tnames('mms'+probe+'_fpi_eEnergySpectr_pX')) ne 0 then begin
+;      get_data,'mms'+probe+'_fpi_eEnergySpectr_pX',dlim=dl
+;      fpiver=stregex(dl.cdf.gatt.logical_file_id,'v([0-9]+)\.([0-9]+)\.([0-9])',/extract)
+;    endif else begin
+;      fpiver='v0.0.0'
+;    endelse
     
     if undefined(roi) then roi=trange
     ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
@@ -194,7 +194,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
     tplot_options,'ymargin'
     tplot_options,'tickinterval',3600
     set_plot,'ps'
-    device,filename=dn+'\mms'+probe+'_fpi_hfesp_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
+    device,filename=dn+'\mms'+probe+'_fpi_hfesp_ROI_'+time_string(roi[0],format=2,precision=0)+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
     tplot,trange=trange
     device,/close
     set_plot,thisDevice
@@ -204,7 +204,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
     window,xsize=1920,ysize=1080
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
-    makepng,dn+'\mms'+probe+'_fpi_hfesp_ROI_'+time_string(roi[0],format=2,precision=0)+'_'+fpiver
+    makepng,dn+'\mms'+probe+'_fpi_hfesp_ROI_'+time_string(roi[0],format=2,precision=0)
     if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
     options,'mms_bss','labsize'
     tplot_options,'tickinterval'
@@ -215,7 +215,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
       tplot_options,'tickinterval',600
       while start_time lt roi[1] do begin
         set_plot,'ps'
-        device,filename=dn+'\mms'+probe+'_fpi_hfesp_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
+        device,filename=dn+'\mms'+probe+'_fpi_hfesp_'+time_string(start_time,format=2,precision=-2)+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
         tplot,trange=[start_time,start_time+2.d*3600.d]
         device,/close
         set_plot,thisDevice
@@ -225,7 +225,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
         window,xsize=1920,ysize=1080
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,start_time+2.d*3600.d]
-        makepng,dn+'\mms'+probe+'_fpi_hfesp_'+time_string(start_time,format=2,precision=-2)+'_'+fpiver+'_2hours'
+        makepng,dn+'\mms'+probe+'_fpi_hfesp_'+time_string(start_time,format=2,precision=-2)+'_2hours'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
