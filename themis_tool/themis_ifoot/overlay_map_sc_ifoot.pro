@@ -15,6 +15,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   draw_plottime_fp=draw_plottime_fp, fp_time=fp_time, $
   fp_psym=fp_psym, fp_symsize=fp_symsize, fp_symthick=fp_symthick, $
   fp_color=fp_color, $
+  mintick=mintick, $
   help=help
 
 ;Usage
@@ -110,6 +111,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   
   ;hourly ticks on trajectory
         tdbl = ts + 3600* DINDGEN(ROUND(te-ts)/3600+1)
+        if keyword_set(mintick) then tdbl = ts + 60* DINDGEN(ROUND(te-ts)/60+1)
         lat = INTERPOL( tlat.y, tlat.x, tdbl, /spline)
         mlt = INTERPOL( tmlt.y, tmlt.x, tdbl, /spline)
         phi= mlt/24.*360.
