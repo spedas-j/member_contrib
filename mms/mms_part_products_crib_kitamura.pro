@@ -12,7 +12,7 @@
 ;
 ;
 PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,dfg_ql=dfg_ql,load_fpi=load_fpi,load_mec=load_mec,erange=erange,$
-                                    parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,bname=bname,fac_type=fac_type,regrid=redrid
+                                    parange=parange,gyrorange=gyrorange,ion=ion,outputs=outputs,no_update=no_update,bname=bname,fac_type=fac_type,regrid=redrid,fpi_data_rate=fpi_data_rate
 
   if undefined(probe) then probe=['3']
   if undefined(fac_type) then fac_type='xgse'
@@ -21,7 +21,10 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   if undefined(fpi_data_rate) then begin
     fpi_data_rate='brst'
     datagap=4.6d
-  endif
+  endif else begin
+    fpi_data_rate='fast'
+    datagap=4.6d
+  endelse
   probe=string(probe,format='(i0)')
   if undefined(trange) then begin
     if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 and undefined(dfg_ql) then begin
@@ -94,15 +97,15 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   endelse
   
   if not undefined(load_fpi) then begin
-    mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l2',datatype='d'+species+'s-dist',no_update=no_update,/center_measurement,/time_clip
-    if strlen(tnames('mms'+probe+'_d'+species+'s_dist_brst')) eq 0 then begin
-      mms_load_fpi,probe=probe,trange=trange,data_rate='brst',level='l1b',datatype='d'+species+'s-dist',no_update=no_update,/time_clip
+    mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype='d'+species+'s-dist',no_update=no_update,/center_measurement,/time_clip
+    if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate)) eq 0 then begin
+      mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l1b',datatype='d'+species+'s-dist',no_update=no_update,/time_clip
     endif
   endif
-  if strlen(tnames('mms'+probe+'_d'+species+'s_dist_brst')) eq 0 then begin
-    name='mms'+probe+'_d'+species+'s_brstSkyMap_dist'
+  if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate)) eq 0 then begin
+    name='mms'+probe+'_d'+species+'s_brstSkyMap_'+fpi_data_rate
   endif else begin
-    name='mms'+probe+'_d'+species+'s_dist_brst'
+    name='mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate
   endelse
 
   if undefined(bname) then begin
@@ -150,7 +153,7 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
 
   for i=0,n_elements(outputs)-1 do begin
     mms_part_products,name,probe=probe,mag_name=bname,pos_name=pos_name,trange=trange,outputs=outputs,energy=erange,pitch=parange,gyro=gyrorange,regrid=regrid,fac_type=fac_type,datagap=datagap
-    if strlen(tnames('mms'+probe+'_d'+species+'s_dist_brst')) eq 0 then begin
+    if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate)) eq 0 then begin
       copy_data,'mms'+probe+'_d'+species+'s_brstSkyMap_dist_'+outputs[i],'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
     endif else begin
       copy_data,'mms'+probe+'_d'+species+'s_dist_brst_'+outputs[i],'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname     

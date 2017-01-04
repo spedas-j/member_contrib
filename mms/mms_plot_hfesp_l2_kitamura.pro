@@ -31,9 +31,9 @@
 ;         pa_erange:      set this to specify the energy range of low-energy ions
 ;         erangename:     set this to specify a part of the name of tplot variables for low-energy ions
 ;         gsm:            set this flag to plot data in the GSM coordinate
-;         shift_1x_1:     set this flag to use special margin 1 for phase-1x
-;         shift_1x_2:     set this flag to use special margin 2 for phase-1x
+;         margin:         set this flag to use a specific margin
 ;         tail:           set this flag to use special ranges for tail region
+;         v_hpca:         set this flag to use HPCA proton velocity data. if not set, ion
 ;
 ; EXAMPLE:
 ;
@@ -54,7 +54,7 @@
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
                                no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
                                no_output=no_output,lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,$
-                               gsm=gsm,shift_1x_1=shift_1x_1,shift_1x_2=shift_1x_2,tail=tail
+                               gsm=gsm,margin=margin,tail=tail,v_hpca=v_hpca
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -67,23 +67,18 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     if public eq 0 then begin
       roi=mms_get_roi(trange,/next)
       trange=dblarr(2)
-      if undefined(hpca_brst) then begin
-        if undefined(shift_1x_1) then begin
-          if undefined(shift_1x_2) then begin
-            trange[0]=roi[0]-60.d*210.d
-            trange[1]=roi[1]+60.d*210.d
-          endif else begin
-            trange[0]=roi[0]-60.d*210.d
-            trange[1]=roi[1]
-          endelse
-        endif else begin
-          trange[0]=roi[0]-60.d*360.d
-          trange[1]=roi[1]
-        endelse
+      if undefined(margin) then begin
+        if undefined(hpca_brst) then margin=210.d else margin=30.d
+      endif
+      if n_elements(margin) eq 1 then begin
+        smargin=margin
+        emargin=margin
       endif else begin
-        trange[0]=roi[0]-60.d*30.d
-        trange[1]=roi[1]+60.d*30.d
+        smargin=abs(margin[0])
+        emargin=margin[1]
       endelse
+      trange[0]=roi[0]-60.d*smargin
+      trange[1]=roi[1]+60.d*emargin
     endif else begin
       print
       print,'Please input start and end time to use public data'
@@ -198,7 +193,16 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     endelse
   endif
   
+  if not undefined(v_hpca) then begin
+    tname_velocity=prefix+'_hpca_hplus_ion_bulk_velocity_'+strupcase(coord)
+    if strlen(tnames(tname_velocity)) eq 0 then begin
+      store_data,tname_velocity,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      options,tname_velocity,constant=0.0,ytitle='MMS'+probe+'!CHPCA!CH+!CBulkV_'+strupcase(coord),ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=600.d
+    endif
+  endif
+  
   if strlen(tnames(prefix+'_hpca_hplus_number_density')) gt 0 then begin
+    options,prefix+'_dis_numberdensity_fast',datagap=4.6d
     store_data,prefix+'_fpi_hpca_numberDensity',data=[prefix+'_dis_numberdensity_fast',prefix+'_hpca_hplus_number_density',prefix+'_hpca_heplusplus_number_density',prefix+'_hpca_heplus_number_density',prefix+'_hpca_oplus_number_density']
     options,prefix+'_fpi_hpca_numberDensity',ytitle='MMS'+probe+'!CFPI_HPCA!CNumber!CDensity',ysubtitle='[cm!U-3!N]',colors=[0,6,3,2,4],labels=['DIS','H+','He++','He+','O+'],labflag=-1,constant=[0.001,0.01,0.1,1.0,10.0],ytickformat='mms_exponent2'
     if undefined(tail) then ylim,prefix+'_fpi_hpca_numberDensity',0.001d,100.0d,1 else ylim,prefix+'_fpi_hpca_numberDensity',0.0001d,20.0d,1
@@ -311,6 +315,9 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
       start_time=time_double(time_string(trange[0],format=0,precision=-2))
       tplot_options,'tickinterval',300
       while start_time lt trange[1]-1.d*3600.d do begin
+        ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
+        dn=plotdir+'\'+ts[0]+'\'+ts[1]
+        if ~file_test(dn) then file_mkdir,dn
         options,'mms_bss',labsize=0.9
         tplot_options,'xmargin',[15,15]
         set_plot,'ps'
