@@ -217,6 +217,8 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     if ~file_test(dn) then file_mkdir,dn
     
     thisDevice=!D.NAME
+    tplot_options,'charsize'
+    tplot_options,'xmargin'
     tplot_options,'ymargin'
     tplot_options,'tickinterval',3600
     set_plot,'ps'
@@ -240,9 +242,12 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       start_time=time_double(time_string(roi[0],format=0,precision=-2))-double(fix(ts[3]) mod 2)*3600.d
       tplot_options,'tickinterval',600
       while start_time lt roi[1] do begin
+        ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
+        dn=plotdir+'\'+ts[0]+'\'+ts[1]
+        if ~file_test(dn) then file_mkdir,dn
         set_plot,'ps'
         device,filename=dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
-        tplot,trange=[start_time,start_time+2.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+7201.d,format=0,precision=-2))]
         device,/close
         set_plot,thisDevice
         !p.background=255
@@ -250,12 +255,12 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
         if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
         window,xsize=1600,ysize=900
         tplot_options,'ymargin',[2.5,0.2]
-        tplot,trange=[start_time,start_time+2.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+7201.d,format=0,precision=-2))]
         makepng,dn+'\mms'+probe+'_fpi_'+time_string(start_time,format=2,precision=-2)+'_2hours'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
-        start_time=start_time+2.d*3600.d
+        start_time=time_double(time_string(start_time+7201.d,format=0,precision=-2))
       endwhile      
       tplot_options,'tickinterval'
     endif
@@ -286,17 +291,16 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     options,'mms'+probe+'_fpi_iBulkV_lmn',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_LMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=4.6d
     tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_lmn','mms'+probe+'_b_for_curlometer_tlmn','Current_lmn','Current_magnitude','divB_over_rotB']
 
-    ts=strsplit(time_string(time_double(roi[0]),format=3,precision=-2),/extract)
-    dn=plotcdir+'\'+ts[0]+'\'+ts[1]
-    if ~file_test(dn) then file_mkdir,dn
-
     thisDevice=!D.NAME
     start_time=time_double(time_string(roi[0],format=0,precision=-2))
     tplot_options,'tickinterval',300
     while start_time lt roi[1] do begin
+      ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
+      dn=plotcdir+'\'+ts[0]+'\'+ts[1]
+      if ~file_test(dn) then file_mkdir,dn
       set_plot,'ps'
       device,filename=dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hour.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
-      tplot,trange=[start_time,start_time+1.d*3600.d]
+      tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
       device,/close
       set_plot,thisDevice
       !p.background=255
@@ -304,12 +308,12 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
       window,xsize=1600,ysize=900
       tplot_options,'ymargin',[2.5,0.2]
-      tplot,trange=[start_time,start_time+1.d*3600.d]
+      tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
       makepng,dn+'\mms'+probe+'_fpi_current_'+time_string(start_time,format=2,precision=-2)+'_1hour'
       if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
       options,'mms_bss','labsize'
       tplot_options,'ymargin'
-      start_time=start_time+1.d*3600.d
+      start_time=time_double(time_string(start_time+3601.d,format=0,precision=-2))
     endwhile
     tplot_options,'tickinterval'
 

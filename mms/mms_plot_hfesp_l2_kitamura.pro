@@ -29,7 +29,8 @@
 ;         lowi_brst_pa:   set this flag to plot PA-t spectra for low-energy FPI-DIS burst data
 ;         lowi_brst_theta:set this flag to plot theta-t spectra for low-energy FPI-DIS buest data
 ;         pa_erange:      set this to specify the energy range of low-energy ions
-;         erangename:     set this to specify a part of the name of tplot variables for low-energy ions
+;         erangename:     set this to specify a part of the name of tplot variables for ions
+;         h_erangename:   set this to specify a part of the name of tplot variables for H+
 ;         gsm:            set this flag to plot data in the GSM coordinate
 ;         margin:         set this flag to use a specific margin
 ;         tail:           set this flag to use special ranges for tail region
@@ -54,14 +55,16 @@
 pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brst,hpca_brst=hpca_brst,load_fgm=load_fgm,no_update_mec=no_update_mec,$
                                no_update_fgm=no_update_fgm,load_fpi=load_fpi,load_hpca=load_hpca,no_short=no_short,full_bss=full_bss,plotdir=plotdir,$
                                no_output=no_output,lowi_brst_pa=lowi_brst_pa,lowi_brst_theta=lowi_brst_theta,pa_erange=pa_erange,erangename=erangename,$
-                               gsm=gsm,margin=margin,tail=tail,v_hpca=v_hpca
+                               h_erangename=h_erangename,gsm=gsm,margin=margin,tail=tail,v_hpca=v_hpca
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
   
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
-
+  
+  hpca_min_version='2.0.0'
+  
   trange=time_double(trange)
   if n_elements(trange) eq 1 then begin
     if public eq 0 then begin
@@ -185,7 +188,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   endelse
 
   if not undefined(load_hpca) then begin
-    mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=hpca_data_rate,no_update=no_update_hpca,/time_clip
+    mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=hpca_data_rate,no_update=no_update_hpca,min_version=hpca_min_version/time_clip
     if undefined(hpca_brst) then begin
       options,prefix+'_hpca_*plus_number_density',datagap=600.d
     endif else begin
@@ -276,8 +279,9 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   tplot_options,'xmargin',[17,10]
 
   if undefined(erangename) then erangename=''
+  if undefined(h_erangename) then h_erangename=''
 
-  tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni',dis_spec,'mms'+probe+'_dis_dist_'+ion_pa_rate+'_pa_'+erangename,'mms'+probe+'_dis_dist_brst_theta_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_fp_fc_hfesp',tname_density,tname_velocity]
+  tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni',dis_spec,'mms'+probe+'_dis_dist_'+ion_pa_rate+'_pa_'+erangename,'mms'+probe+'_dis_dist_brst_theta_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+h_erangename,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_fp_fc_hfesp',tname_density,tname_velocity]
 
   if not undefined(plotdir) then begin
 
@@ -314,7 +318,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     if undefined(no_short) then begin
       start_time=time_double(time_string(trange[0],format=0,precision=-2))
       tplot_options,'tickinterval',300
-      while start_time lt trange[1]-1.d*3600.d do begin
+      while start_time lt trange[1] do begin
         ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
         dn=plotdir+'\'+ts[0]+'\'+ts[1]
         if ~file_test(dn) then file_mkdir,dn
@@ -322,7 +326,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
         tplot_options,'xmargin',[15,15]
         set_plot,'ps'
         device,filename=dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
-        tplot,trange=[start_time,start_time+1.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
         device,/close
         set_plot,thisDevice
         !p.background=255
@@ -331,12 +335,12 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
         window,xsize=1920,ysize=1080
         tplot_options,'xmargin',[17,13]
         tplot_options,'ymargin',[2.5,0.2]
-        tplot,trange=[start_time,start_time+1.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
         makepng,dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
-        start_time=start_time+1.d*3600.d
+        start_time=time_double(time_string(start_time+3601.d,format=0,precision=-2))
       endwhile
       tplot_options,'tickinterval'
       tplot_options,'xmargin'

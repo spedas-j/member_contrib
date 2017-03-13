@@ -38,6 +38,13 @@
 ;         lowhe_pa:      set this flag to plot PA-t spectra for HPCA helium data
 ;         lowo_pa:       set this flag to plot PA-t spectra for HPCA oxygen data
 ;         pa_erange:     set this to specify energy range of PA-t spectra
+;         hpa_erange:    set this to specify energy range of H+ PA-t spectra
+;         hepa_erange:   set this to specify energy range of He+ PA-t spectra
+;         opa_erange:    set this to specify energy range of O+ PA-t spectra
+;         pa_zrange:     set this to specify color range of PA-t spectra
+;         hpa_zrange:    set this to specify color range of H+ PA-t spectra
+;         hepa_zrange:   set this to specify color range of He+ PA-t spectra
+;         opa_zrange:    set this to specify color range of O+ PA-t spectra
 ;         zrange:        set this to specify zrange of HPCA E-t spectra 
 ;         v_hpca:        set this flag to use HPCA proton velocity data. if not set, ion
 ;                        velocity data from FPI-DIS are plotted
@@ -70,14 +77,18 @@
 pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=brst,no_load_fgm=no_load_fgm,dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,$
                                    no_load_fpi=no_load_fpi,no_update_fpi=no_update_fpi,no_update_hpca=no_update_hpca,no_update_mec=no_update_mec,$
                                    no_bss=no_bss,full_bss=full_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,$
-                                   pa_erange=pa_erange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,plotdir=plotdir,esp_plotdir=esp_plotdir,$
-                                   no_short=no_short,margin=margin,tail=tail
+                                   pa_erange=pa_erange,hpa_erange=hpa_erange,hepa_erange=hepa_erange,opa_erange=opa_erange,pa_zrange=pa_zrange,$
+                                   hpa_zrange=hpa_zrange,hepa_zrange=hepa_zrange,opa_zrange=opa_zrange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,$
+                                   plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short,margin=margin,tail=tail
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
   
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
+
+  hpca_min_version='2.0.0'
+  if undefined(pa_zrange) then pa_zrange=[1e3,1e7]
 
   trange=time_double(trange_orig)
   if n_elements(trange) eq 1 then begin
@@ -115,11 +126,9 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   if not undefined(brst) then begin
     data_rate='brst'
     gap_hpca=25.d
-    min_version='1.1.0'
-    endif else begin
+  endif else begin
     data_rate='srvy'
     gap_hpca=600.d
-    min_version='2.0.0'
   endelse
   
   mms_init
@@ -133,6 +142,24 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
     erangename=strcompress(string(pa_erange[0]/1000.d,format='(f5.1)'),/remove_all)+'-'+strcompress(string(pa_erange[1]/1000.d,format='(f5.1)'),/remove_all)+'keV'
   endif else begin
     erangename=strcompress(string(pa_erange[0],format='(i6)'),/remove_all)+'-'+strcompress(string(pa_erange[1],format='(i6)'),/remove_all)+'eV'
+  endelse
+  if undefined(hpa_erange) then hpa_erange=pa_erange
+  if hpa_erange[0] gt 100.d and hpa_erange[1] ge 1000.d then begin
+    erangename_h=strcompress(string(hpa_erange[0]/1000.d,format='(f5.1)'),/remove_all)+'-'+strcompress(string(hpa_erange[1]/1000.d,format='(f5.1)'),/remove_all)+'keV'
+  endif else begin
+    erangename_h=strcompress(string(hpa_erange[0],format='(i6)'),/remove_all)+'-'+strcompress(string(hpa_erange[1],format='(i6)'),/remove_all)+'eV'
+  endelse
+  if undefined(hepa_erange) then hepa_erange=pa_erange
+  if hepa_erange[0] gt 100.d and hepa_erange[1] ge 1000.d then begin
+    erangename_he=strcompress(string(hepa_erange[0]/1000.d,format='(f5.1)'),/remove_all)+'-'+strcompress(string(hepa_erange[1]/1000.d,format='(f5.1)'),/remove_all)+'keV'
+  endif else begin
+    erangename_he=strcompress(string(hepa_erange[0],format='(i6)'),/remove_all)+'-'+strcompress(string(hepa_erange[1],format='(i6)'),/remove_all)+'eV'
+  endelse
+  if undefined(opa_erange) then opa_erange=pa_erange
+  if opa_erange[0] gt 100.d and opa_erange[1] ge 1000.d then begin
+    erangename_o=strcompress(string(opa_erange[0]/1000.d,format='(f5.1)'),/remove_all)+'-'+strcompress(string(opa_erange[1]/1000.d,format='(f5.1)'),/remove_all)+'keV'
+  endif else begin
+    erangename_o=strcompress(string(opa_erange[0],format='(i6)'),/remove_all)+'-'+strcompress(string(opa_erange[1],format='(i6)'),/remove_all)+'eV'
   endelse
  
   if not undefined(lowi_pa) then begin
@@ -152,12 +179,11 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
       store_data,prefix+'_dis_theta_fast',/delete
       store_data,prefix+'_dis_energy_fast',/delete
       store_data,prefix+'_dis_phi_fast',/delete
-    endif else begin
-      store_data,prefix+'_dis_dist_fast_pa_'+erangename,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
-    endelse
+    endif
+    if strlen(tnames(prefix+'_dis_dist_fast_pa_'+erangename)) eq 0 then store_data,prefix+'_dis_dist_fast_pa_'+erangename,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
     ylim,prefix+'_dis_dist_fast_pa_'+erangename,0.d,180.d,0
     options,prefix+'_dis_dist_fast_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CFPI DIS!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=5.d,yticks=4,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
-    zlim,prefix+'_dis_dist_fast_pa_'+erangename,1e3,1e7,1
+    zlim,prefix+'_dis_dist_fast_pa_'+erangename,pa_zrange[0],pa_zrange[1],1
   endif
   
   if undefined(no_load_fpi) then mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,/no_plot,/load_fpi
@@ -169,8 +195,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   zlim,prefix+'_dis_dist_fast_energy_omni',1e4,1e8,1
   options,prefix+'_dis_dist_fast_energy_omni',minzlog=0
 
-  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=min_version;,/time_clip
-  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=min_version;,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=hpca_min_version;,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=hpca_min_version;,/time_clip
   mms_hpca_calc_anodes,fov=[0,360],probe=probe
 
   ion_sp=[['hplus','heplusplus','heplus','oplus'],['H!U+!N','He!U++!N','He!U+!N','O!U+!N']]
@@ -222,33 +248,39 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
 
   if not undefined(lowh_pa) then begin
     if strlen(tnames(prefix+'_hpca_hplus_phase_space_density')) gt 0 then begin
-      mms_part_products,prefix+'_hpca_hplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
+      mms_part_products,prefix+'_hpca_hplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=hpa_erange,outputs='pa',suffix='_'+erangename_h
     endif else begin
-      store_data,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
+      store_data,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename_h,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
     endelse
-    ylim,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,0.d,180.d,0
-    options,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA H+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
-    zlim,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename,1e3,1e7,1
+    if strlen(tnames(prefix+'_hpca_hplus_phase_space_density_pa_'+erangename_h)) eq 0 then store_data,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename_h,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
+    ylim,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename_h,0.d,180.d,0
+    options,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename_h,spec=1,ytitle='MMS'+probe+'!CHPCA H+!C'+erangename_h+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    if undefined(hpa_zrange) then hpa_zrange=pa_zrange
+    zlim,prefix+'_hpca_hplus_phase_space_density_pa_'+erangename_h,hpa_zrange[0],hpa_zrange[1],1
   endif
   if not undefined(lowhe_pa) then begin
     if strlen(tnames(prefix+'_hpca_heplus_phase_space_density')) gt 0 then begin
-      mms_part_products,prefix+'_hpca_heplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
+      mms_part_products,prefix+'_hpca_heplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=hepa_erange,outputs='pa',suffix='_'+erangename_he
     endif else begin
-      store_data,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
+      store_data,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename_he,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
     endelse
-    ylim,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,0.d,180.d,0
-    options,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA He+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
-    zlim,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename,1e3,1e7,1
+    if strlen(tnames(prefix+'_hpca_heplus_phase_space_density_pa_'+erangename_he)) eq 0 then store_data,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename_he,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
+    ylim,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename_he,0.d,180.d,0
+    options,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename_he,spec=1,ytitle='MMS'+probe+'!CHPCA He+!C'+erangename_he+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    if undefined(hepa_zrange) then hepa_zrange=pa_zrange
+    zlim,prefix+'_hpca_heplus_phase_space_density_pa_'+erangename_he,hepa_zrange[0],hepa_zrange[1],1
   endif
   if not undefined(lowo_pa) then begin
     if strlen(tnames(prefix+'_hpca_oplus_phase_space_density')) gt 0 then begin
-      mms_part_products,prefix+'_hpca_oplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=pa_erange,outputs='pa',suffix='_'+erangename
+      mms_part_products,prefix+'_hpca_oplus_phase_space_density',trange=trange,mag_name=prefix+'_fgm_b_dmpa_srvy_l2_bvec',pos_name=prefix+'_mec_r_eci',energy=opa_erange,outputs='pa',suffix='_'+erangename_o
     endif else begin
-      store_data,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
+      store_data,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
     endelse
-    ylim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,0.d,180.d,0
-    options,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,spec=1,ytitle='MMS'+probe+'!CHPCA O+!C'+erangename+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
-    zlim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename,1e3,1e7,1
+    if strlen(tnames(prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o)) eq 0 then store_data,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]],v:[0.d,180.d]}
+    ylim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,0.d,180.d,0
+    options,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,spec=1,ytitle='MMS'+probe+'!CHPCA O+!C'+erangename_o+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
+    if undefined(opa_zrange) then opa_zrange=pa_zrange
+    zlim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,opa_zrange[0],opa_zrange[1],1
   endif
   
   if undefined(no_bss) then begin
@@ -296,10 +328,10 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   
   if undefined(plot_wave) then begin
     if not undefined(flux) then begin
-      tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_dist_fast_energy_omni','mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_hplus_flux_elev_0-360','mms'+probe+'_hpca_heplusplus_flux_elev_0-360','mms'+probe+'_hpca_heplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_heplus_flux_elev_0-360','mms'+probe+'_hpca_oplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_oplus_flux_elev_0-360',tname_density,tname_velocity]
+      tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_dist_fast_energy_omni','mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename_h,'mms'+probe+'_hpca_hplus_flux_elev_0-360','mms'+probe+'_hpca_heplusplus_flux_elev_0-360','mms'+probe+'_hpca_heplus_phase_space_density_pa_'+erangename_he,'mms'+probe+'_hpca_heplus_flux_elev_0-360','mms'+probe+'_hpca_oplus_phase_space_density_pa_'+erangename_o,'mms'+probe+'_hpca_oplus_flux_elev_0-360',tname_density,tname_velocity]
     endif else begin
 ;      tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_dist_fast_energy_omni','mms'+probe+'_hpca_hplus_flux_elev_0-360','mms'+probe+'_hpca_heplusplus_flux_elev_0-360','mms'+probe+'_hpca_heplus_flux_elev_0-360','mms'+probe+'_hpca_oplus_flux_elev_0-360','mms'+probe+'_fpi_hpca_numberDensity']
-      tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_dist_fast_energy_omni','mms'+probe+'_dis_dist_fast_pa_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_hpca_heplusplus_eflux_elev_0-360','mms'+probe+'_hpca_heplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_heplus_eflux_elev_0-360','mms'+probe+'_hpca_oplus_phase_space_density_pa_'+erangename,'mms'+probe+'_hpca_oplus_eflux_elev_0-360',tname_density,tname_velocity]
+      tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_dist_fast_energy_omni','mms'+probe+'_dis_dist_fast_pa_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+erangename_h,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_hpca_heplusplus_eflux_elev_0-360','mms'+probe+'_hpca_heplus_phase_space_density_pa_'+erangename_he,'mms'+probe+'_hpca_heplus_eflux_elev_0-360','mms'+probe+'_hpca_oplus_phase_space_density_pa_'+erangename_o,'mms'+probe+'_hpca_oplus_eflux_elev_0-360',tname_density,tname_velocity]
     endelse
   endif else begin
     tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec','mms'+probe+'_fgm_srvy_fac_hpfilt','mms'+probe+'_fgm_srvy_fac_xy_dpwrspc_gyro','mms'+probe+'_edp_slow_fast_dce_fac_xy_dpwrspc_gyro','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_hpca_hplus_flux_elev_0-360','mms'+probe+'_hpca_heplus_flux_elev_0-360','mms'+probe+'_hpca_oplus_flux_elev_0-360',tname_density]
@@ -340,7 +372,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
     if undefined(no_short) then begin
       start_time=time_double(time_string(trange[0],format=0,precision=-2))
       tplot_options,'tickinterval',300
-      while start_time lt trange[1]-1.d*3600.d do begin
+      while start_time lt trange[1] do begin
         ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
         dn=plotdir+'\'+ts[0]+'\'+ts[1]
         if ~file_test(dn) then file_mkdir,dn
@@ -348,7 +380,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
         tplot_options,'xmargin',[15,15]
         set_plot,'ps'
         device,filename=dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
-        tplot,trange=[start_time,start_time+1.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
         device,/close
         set_plot,thisDevice
         !p.background=255
@@ -357,12 +389,12 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
         window,xsize=1920,ysize=1080
         tplot_options,'xmargin',[17,13]
         tplot_options,'ymargin',[2.5,0.2]
-        tplot,trange=[start_time,start_time+1.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
         makepng,dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
-        start_time=start_time+1.d*3600.d
+        start_time=time_double(time_string(start_time+3601.d,format=0,precision=-2))
       endwhile
       tplot_options,'tickinterval'
       tplot_options,'xmargin'
@@ -370,6 +402,6 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
     tplot_options,'charsize'
   endif
   
-  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange_orig,probe=probe,erangename=erangename,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,margin=margin,tail=tail,v_hpca=v_hpca,/gsm
+  if not undefined(esp_plotdir) then mms_plot_hfesp_l2_kitamura,trange_orig,probe=probe,erangename=erangename,h_erangename=erangename_h,hpca_brst=brst,full_bss=full_bss,plotdir=esp_plotdir,no_short=no_short,margin=margin,tail=tail,v_hpca=v_hpca,/gsm
   
 end

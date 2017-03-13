@@ -105,21 +105,35 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
 
   if strlen(tnames('mms'+probe+'_dis_numberdensity_fast')) gt 0 then begin
     get_data,'mms'+probe+'_dis_numberdensity_fast',data=n_dis
+    get_data,'mms'+probe+'_dis_densityextrapolation_high_fast',data=n_dis_h
+    get_data,'mms'+probe+'_dis_densityextrapolation_low_fast',data=n_dis_l
+    store_data,'mms'+probe+'_fpi_DISnumberDensity_noext',data={x:n_dis.x,y:(n_dis.y-n_dis_h.y-n_dis_l.y)}
+    options,'mms'+probe+'_fpi_DISnumberDensity_noext',colors=6,ystyle=9,linestyle=1,datagap=4.6d
     store_data,'mms'+probe+'_dis_fp',data={x:n_dis.x,y:8979.d*sqrt(n_dis.y)}
-    undefine,n_dis
+    store_data,'mms'+probe+'_dis_fp_noext',data={x:n_dis.x,y:8979.d*sqrt(n_dis.y-n_dis_h.y-n_dis_l.y)}
+    undefine,n_dis,n_dis_h,n_dis_l
   endif else begin
     store_data,'mms'+probe+'_dis_fp',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+    store_data,'mms'+probe+'_dis_fp_noext',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
   endelse
   options,'mms'+probe+'_dis_fp',colors=255,thick=1.25,datagap=4.6d
+  options,'mms'+probe+'_dis_fp_noext',colors=255,linestyle=1,datagap=4.6d
 
   if strlen(tnames('mms'+probe+'_des_numberdensity_fast')) gt 0 then begin
     get_data,'mms'+probe+'_des_numberdensity_fast',data=n_des
+    get_data,'mms'+probe+'_des_densityextrapolation_high_fast',data=n_des_h
+    get_data,'mms'+probe+'_des_densityextrapolation_low_fast',data=n_des_l
+    store_data,'mms'+probe+'_fpi_DESnumberDensity_noext',data={x:n_des.x,y:(n_des.y-n_des_h.y-n_des_l.y)}
+    options,'mms'+probe+'_fpi_DESnumberDensity_noext',colors=2,ystyle=9,linestyle=1,datagap=4.6d
     store_data,'mms'+probe+'_des_fp',data={x:n_des.x,y:8979.d*sqrt(n_des.y)}
-    undefine,n_des
+    store_data,'mms'+probe+'_des_fp_noext',data={x:n_des.x,y:8979.d*sqrt(n_des.y-n_des_h.y-n_des_l.y)}
+    undefine,n_des,n_des_h,n_des_l
   endif else begin
     store_data,'mms'+probe+'_dis_fp',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
+    store_data,'mms'+probe+'_dis_fp_noext',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
   endelse
   options,'mms'+probe+'_des_fp',colors=1,thick=1.25,datagap=4.6d
+  options,'mms'+probe+'_des_fp_noext',colors=1,linestyle=1,datagap=4.6d
 
   if strlen(tnames('mms'+probe+'_des_errorflags_fast_moms_flagbars')) eq 0 then begin
     store_data,'mms'+probe+'_des_errorflags_fast_moms_flagbars',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
@@ -129,6 +143,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
     store_data,'mms'+probe+'_dis_errorflags_fast_moms_flagbars',data={x:[trange],y:[!values.f_nan,!values.f_nan]}
     options,'mms'+probe+'_dis_errorflags_fast_moms_flagbars',xstyle=4,ystyle=4,ticklen=0,panel_size=0.5,labsize=1
   endif
+
+  get_data,'mms'+probe+'_fpi_numberDensity',lim=lim
+  store_data,'mms'+probe+'_fpi_numberDensity_full',data=['mms'+probe+'_edp_slow_scpot_avg','mms'+probe+'_edp_fast_scpot_avg','mms'+probe+'_fpi_DESnumberDensity_noext','mms'+probe+'_fpi_DESnumberDensity','mms'+probe+'_fpi_DISnumberDensity_noext','mms'+probe+'_fpi_DISnumberDensity'],lim=lim
   
   mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
   
@@ -137,9 +154,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
   store_data,'mms'+probe+'_edp_hfesp_srvy_l2',data={x:hfesp.x,y:hfesp.y,v:hfesp.v[0:321]},lim=l,dlim=dl
   
   ylim,'mms'+probe+'_edp_hfesp_srvy_l2',0.d,6.e4,0
-  zlim,'mms'+probe+'_edp_hfesp_srvy_l2',1e-11,1e-5,1
+  zlim,'mms'+probe+'_edp_hfesp_srvy_l2',1e-17,1e-9,1
   options,'mms'+probe+'_edp_hfesp_srvy_l2',panel_size=2.0,ytitle='MMS'+probe+'!CEDP!CHF',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',datagap=20.d
-  store_data,'mms'+probe+'_fp_hfesp',data=['mms'+probe+'_edp_hfesp_srvy_l2','mms'+probe+'_des_fp','mms'+probe+'_dis_fp']
+  store_data,'mms'+probe+'_fp_hfesp',data=['mms'+probe+'_edp_hfesp_srvy_l2','mms'+probe+'_des_fp','mms'+probe+'_des_fp_noext','mms'+probe+'_dis_fp','mms'+probe+'_dis_fp_noext']
   ylim,'mms'+probe+'_fp_hfesp',3e3,7e4,1
   options,'mms'+probe+'_fp_hfesp',panel_size=2.0,ytitle='MMS'+probe+'_EDP_HF!CFpe_DIS(White)!CFpe_DES(Magenta)',ysubtitle='[Hz]',ztitle='(V/m)!U2!N Hz!U-1!N',ztickformat='mms_exponent2',ytickformat='mms_exponent2'
   
@@ -171,9 +188,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
   endif
 
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
-    tplot,['mms_bss','mms'+probe+'_des_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fp_hfesp','mms'+probe+'_fpi_iBulkV_gsm','mms'+probe+'_fgm_b_gsm_srvy_l2_mod']
+    tplot,['mms_bss','mms'+probe+'_des_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity_full','mms'+probe+'_fp_hfesp','mms'+probe+'_fpi_iBulkV_gsm','mms'+probe+'_fgm_b_gsm_srvy_l2_mod']
   endif else begin
-    tplot,['mms_bss','mms'+probe+'_des_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fp_hfesp','mms'+probe+'_fpi_iBulkV_gsm','mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod']
+    tplot,['mms_bss','mms'+probe+'_des_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_dis_errorflags_fast_moms_flagbars','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity_full','mms'+probe+'_fp_hfesp','mms'+probe+'_fpi_iBulkV_gsm','mms'+probe+'_dfg_b_gsm_srvy_l2pre_mod']
   endelse
 
   if undefined(no_output) and not undefined(plotdir) then begin
@@ -191,7 +208,9 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
     if ~file_test(dn) then file_mkdir,dn
     
     thisDevice=!D.NAME
+    tplot_options,'xmargin'
     tplot_options,'ymargin'
+    tplot_options,'charsize'
     tplot_options,'tickinterval',3600
     set_plot,'ps'
     device,filename=dn+'\mms'+probe+'_fpi_hfesp_ROI_'+time_string(roi[0],format=2,precision=0)+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
@@ -214,9 +233,12 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
       start_time=time_double(time_string(roi[0],format=0,precision=-2))-double(fix(ts[3]) mod 2)*3600.d
       tplot_options,'tickinterval',600
       while start_time lt roi[1] do begin
+        ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
+        dn=plotdir+'\'+ts[0]+'\'+ts[1]
+        if ~file_test(dn) then file_mkdir,dn
         set_plot,'ps'
         device,filename=dn+'\mms'+probe+'_fpi_hfesp_'+time_string(start_time,format=2,precision=-2)+'_2hours.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
-        tplot,trange=[start_time,start_time+2.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+7201.d,format=0,precision=-2))]
         device,/close
         set_plot,thisDevice
         !p.background=255
@@ -224,12 +246,12 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
         if not undefined(full_bss) then options,'mms_bss',thick=5.0,panel_size=0.55,labsize=0.8 else options,'mms_bss',thick=5.0,panel_size=0.25,labsize=0.8
         window,xsize=1920,ysize=1080
         tplot_options,'ymargin',[2.5,0.2]
-        tplot,trange=[start_time,start_time+2.d*3600.d]
+        tplot,trange=[start_time,time_double(time_string(start_time+7201.d,format=0,precision=-2))]
         makepng,dn+'\mms'+probe+'_fpi_hfesp_'+time_string(start_time,format=2,precision=-2)+'_2hours'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'
         tplot_options,'ymargin'
-        start_time=start_time+2.d*3600.d
+        start_time=time_double(time_string(start_time+7201.d,format=0,precision=-2))
       endwhile      
       tplot_options,'tickinterval'
     endif
