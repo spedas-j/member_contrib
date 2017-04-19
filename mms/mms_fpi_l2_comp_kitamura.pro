@@ -32,7 +32,7 @@
 ; EXAMPLE:
 ;
 ;     To plot FPI data
-;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm
+;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],/label_gsm,/gsm
 ;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probes=['2','3'],/label_gsm
 ;     MMS>  mms_fpi_l2_comp_kitamura,['2015-11-18/02:09','2015-11-18/02:15'],probes='3',lmn=[[0.197390,0.201321,0.959430],[-0.116952,-0.966861,0.226942],[0.973324,-0.157004,-0.167304]],na=[0.9733,-0.1570,-0.1673],vn=-17.7d,/gsm,/no_ele
 ;
@@ -92,6 +92,7 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
         mms_cotrans,'mms'+probes[i]+'_des_bulkv',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
       endif else begin
         copy_data,'mms'+probes[i]+'_des_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
+        copy_data,'mms'+probes[i]+'_des_bulkv_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_DSC'
         copy_data,'mms'+probes[i]+'_des_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_gse'
       endelse
       options,'mms'+probes[i]+'_des_bulkv_gse',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
@@ -250,6 +251,7 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
         mms_cotrans,'mms'+probes[i]+'_dis_bulkv',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
       endif else begin
         copy_data,'mms'+probes[i]+'_dis_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
+        copy_data,'mms'+probes[i]+'_dis_bulkv_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_DSC'
         copy_data,'mms'+probes[i]+'_dis_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_gse'
       endelse
       options,'mms'+probes[i]+'_dis_bulkv_gse',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i

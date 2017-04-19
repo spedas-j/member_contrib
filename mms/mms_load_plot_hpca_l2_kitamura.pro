@@ -195,8 +195,8 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   zlim,prefix+'_dis_dist_fast_energy_omni',1e4,1e8,1
   options,prefix+'_dis_dist_fast_energy_omni',minzlog=0
 
-  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=hpca_min_version;,/time_clip
-  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=hpca_min_version;,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=hpca_min_version,/center_measurement;,/time_clip
+  mms_load_hpca,probes=probe,trange=trange,datatype='ion',level='l2',data_rate=data_rate,no_update=no_update_hpca,min_version=hpca_min_version,/center_measurement;,/time_clip
   mms_hpca_calc_anodes,fov=[0,360],probe=probe
 
   ion_sp=[['hplus','heplusplus','heplus','oplus'],['H!U+!N','He!U++!N','He!U+!N','O!U+!N']]

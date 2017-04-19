@@ -208,7 +208,7 @@ pro mms_fpi_fgm_hfesp_summary_kitamura,trange,probe,delete=delete,no_short=no_sh
     if ~file_test(dn) then file_mkdir,dn
     
     thisDevice=!D.NAME
-    tplot_options,'xmargin'
+    tplot_options,'xmargin',[20,12]
     tplot_options,'ymargin'
     tplot_options,'charsize'
     tplot_options,'tickinterval',3600
