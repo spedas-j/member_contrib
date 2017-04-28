@@ -49,7 +49,20 @@ end
 ;KEYWORDS:
 ; display_object = Object reference to be passed to dprint for output.
 ;-
-PRO avg_data,name,res,newname=newname,append=append,trange=trange,day=day, display_object=display_object
+PRO avg_data,names,res,newname=newname,append=append,trange=trange,day=day, display_object=display_object
+
+varnms = tnames(names) 
+if ~keyword_set(append) then tappend = '_avg' else tappend = 0
+if n_elements(varnms) gt 1 then begin
+  for i=0L, n_elements(varnms)-1 do begin
+    append = tappend 
+    avg_data,varnms[i],res,append=append,trange=trange,$
+      day=day, display_object=display_object
+  endfor
+  return
+endif
+
+name = varnms[0]
 get_data,name,ptr=p1,dlim=dlim,lim=lim
 if not keyword_set(p1) then begin
    dprint, 'data not defined!', display_object=display_object
