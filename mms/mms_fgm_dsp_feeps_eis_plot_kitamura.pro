@@ -3,7 +3,7 @@
 ;         mms_fgm_dsp_feeps_eis_plot_kitamura
 ;
 ; PURPOSE:
-;         Plot magnetic field data obtained by MMS-FGM(DFG)
+;         Plot magnetic field, wave spectrum, high energy electron data
 ;
 ; KEYWORDS:
 ;         trange:       time range of interest [starttime, endtime] with the format
@@ -14,26 +14,27 @@
 ;                       ROI just after the specified time to 30 minutes after the end of the ROI.
 ;         probe:        a probe - value for MMS SC # (default value is '1')
 ;         load_fgm:     set this flag to load FGM data
-;         no_plot:      set this flag to skip plotting
-;         no_avg:       set this flag to skip making 2.5 sec averaged FGM data
-;         dfg_ql:       set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
-;                       is used, if available (team member only)
+;         wave_fast:    set this flag to plot fast survey DSP data. if not set, slow survey data is used
+;         no_wave:      set this flag to skip plotting DSP data
+;         no_feeps:     set this flag to skip plotting FEEPS data
+;         no_eis:       set this flag to skip plotting EIS electron data
+;         eis_pa_energy:set this flag to plot EIS PA-t plot using specified energy range
+;         dfg_ql:       set this flag to use DFG QL data (team member only) if not set, FGM L2 data is used
 ;         gsm:          set this flag to plot FGM(DFG) data in the GSM (or DMPA_GSM) coordinate
+;         
 ;
 ; EXAMPLE:
 ;
-;     To plot data from fluxgate magnetometers (FGM)
-;     MMS>  mms_fgm_dsp_feeps_eis_plot_kitamura,trange=['2015-09-02/00:00:00','2015-09-03/00:00:00'],probe='1',/no_avg
-;     MMS>  mms_fgm_dsp_feeps_eis_plot_kitamura,trange=['2015-09-02/00:00:00','2015-09-03/00:00:00'],probe='1',/no_avg,/load_fgm
+;     MMS>  mms_fgm_dsp_feeps_eis_plot_kitamura,trange=['2015-09-02/00:00:00','2015-09-03/00:00:00'],probe='1',/gsm,/wave_fast
+;     MMS>  mms_fgm_dsp_feeps_eis_plot_kitamura,trange=['2015-09-02/00:00:00','2015-09-03/00:00:00'],probe='1',/gsm,/wave_fast,/no_feeps,/no_eis
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
-;     2) FGM(DFG) data should be loaded before running this procedure or use load_fgm flag
-;     3) Information of version of the first cdf files is shown in the plot,
+;     2) Information of version of the first cdf files is shown in the plot,
 ;        if multiple cdf files are loaded for FGM(DFG)
 ;-
 
-pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,no_wave=no_wave,no_feeps=no_feeps,no_eis=no_eis,eis_pa_energy=eis_pa_energy,delete=delete
+pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_fast=wave_fast,no_wave=no_wave,no_feeps=no_feeps,no_eis=no_eis,eis_pa_energy=eis_pa_energy,dfg_ql=dfg_ql,delete=delete
 
   loadct2,43
   time_stamp,/off
@@ -44,6 +45,8 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,no_wav
 
   if undefined(probe) then probe='1'
   probe=strcompress(string(probe),/remove_all)
+
+  if undefined(wave_fast) then dsp_data_rate='slow' else dsp_data_rate='fast'
 
   if n_elements(trange) eq 1 then begin
     if public eq 0 and status eq 1 then begin
@@ -65,48 +68,91 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,no_wav
   timespan,trange[0],dt,/seconds
 
   if undefined(gsm) then coord='gse' else coord='gsm'
-  mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2'
+  
+  if undefined(dfg_ql) then begin
+    
+    mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2'
 
-  if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) gt 0 then begin
-    get_data,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec',dlim=dl
-    if n_elements(dl.cdf.gatt.data_version) gt 0 then begin
-      fgm_dv=dl.cdf.gatt.data_version
+    if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) gt 0 then begin
+      get_data,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec',dlim=dl
+      if n_elements(dl.cdf.gatt.data_version) gt 0 then begin
+        fgm_dv=dl.cdf.gatt.data_version
 
-      if strlen(tnames('mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec')) gt 0 then begin
-        options,'mms'+probe+'_fgm_b_gse_srvy_l2_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_gse_srvy_l2_btot',ytitle='MMS'+probe+'!CFGM!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_gse_srvy_l2',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CFGM_L2!CGSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        get_data,'mms'+probe+'_fgm_b_gse_srvy_l2',data=b
-        store_data,'mms'+probe+'_fgm_b_gse_srvy_l2_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
-        options,'mms'+probe+'_fgm_b_gse_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_gsm_srvy_l2_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_gsm_srvy_l2_btot',ytitle='MMS'+probe+'!CFGM!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_gsm_srvy_l2',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CFGM_L2!CGSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        get_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data=b
-        store_data,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
-        options,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_btot',ytitle='MMS'+probe+'!CFGM!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
-        options,'mms'+probe+'_fgm_b_dmpa_srvy_l2',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        get_data,'mms'+probe+'_fgm_b_dmpa_srvy_l2',data=b
-        store_data,'mms'+probe+'_fgm_b_dmpa_srvy_l2_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
-        options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA',ysubtitle='[nT]',labflag=-1,datagap=0.26d
-        undefine,b
+        if strlen(tnames('mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec')) gt 0 then begin
+          options,'mms'+probe+'_fgm_b_gse_srvy_l2_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_gse_srvy_l2_btot',ytitle='MMS'+probe+'!CFGM!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_gse_srvy_l2',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CFGM_L2!CGSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          get_data,'mms'+probe+'_fgm_b_gse_srvy_l2',data=b
+          store_data,'mms'+probe+'_fgm_b_gse_srvy_l2_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+          options,'mms'+probe+'_fgm_b_gse_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSE',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_gsm_srvy_l2_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_gsm_srvy_l2_btot',ytitle='MMS'+probe+'!CFGM!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_gsm_srvy_l2',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CFGM_L2!CGSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          get_data,'mms'+probe+'_fgm_b_gsm_srvy_l2',data=b
+          store_data,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+          options,'mms'+probe+'_fgm_b_gsm_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CGSM',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_btot',ytitle='MMS'+probe+'!CFGM!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_fgm_b_dmpa_srvy_l2',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          get_data,'mms'+probe+'_fgm_b_dmpa_srvy_l2',data=b
+          store_data,'mms'+probe+'_fgm_b_dmpa_srvy_l2_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+          options,'mms'+probe+'_fgm_b_dmpa_srvy_l2_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CFGM_L2!CDMPA',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          undefine,b
+
+        endif
+
+        get_data,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot',data=d
+        fce=1.6022e-19*d.y*1.0e-9/(9.1094e-31*2.0*3.14159)
+        fcp=1.6022e-19*d.y*1.0e-9/(1.6726e-27*2.0*3.14159)
+        store_data,'mms'+probe+'_gyro',data={x:d.x,y:[[fce],[fcp]]}
+        options,'mms'+probe+'_gyro',color=255,width=2
 
       endif
-
-      get_data,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot',data=d
-      fce=1.6022e-19*d.y*1.0e-9/(9.1094e-31*2.0*3.14159)
-      fcp=1.6022e-19*d.y*1.0e-9/(1.6726e-27*2.0*3.14159)
-      store_data,'mms'+probe+'_gyro',data={x:d.x,y:[[fce],[fcp]]}
-      options,'mms'+probe+'_gyro',color=255,width=2
-
-    endif  
+    endif else begin
+      print
+      print,'FGM data files are not found in this interval.'
+      print
+    endelse
       
   endif else begin
-    print
-    print,'FGM data files are not found in this interval.'
-    print
+    
+    mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql'
+
+    if strlen(tnames('mms'+probe+'_dfg_srvy_dmpa_bvec')) gt 0 then begin
+      get_data,'mms'+probe+'_dfg_srvy_dmpa_bvec',dlim=dl
+      if n_elements(dl.cdf.gatt.data_version) gt 0 then begin
+        fgm_dv=dl.cdf.gatt.data_version
+
+        if strlen(tnames('mms'+probe+'_dfg_srvy_dmpa_bvec')) gt 0 then begin
+          options,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_QL!CDMPA_GSM!C(near GSM)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_dfg_srvy_gsm_dmpa_btot',ytitle='MMS'+probe+'!CDFG!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_dfg_srvy_gsm_dmpa_bvec',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CDFG_QL!CDMPA_GSM!C(near GSM)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          get_data,'mms'+probe+'_dfg_srvy_gsm_dmpa',data=b
+          store_data,'mms'+probe+'_dfg_srvy_gsm_dmpa_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+          options,'mms'+probe+'_dfg_srvy_gsm_dmpa_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_QL!CDMPA_GSM!C(near GSM)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_dfg_srvy_dmpa_bvec',constant=0.0,colors=[2,4,6],labels=['B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_QL!CDMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_dfg_srvy_dmpa_btot',ytitle='MMS'+probe+'!CDFG!CBtotal',ysubtitle='[nT]',labels='L2!C  v'+fgm_dv,labflag=-1,datagap=0.26d
+          options,'mms'+probe+'_dfg_srvy_dmpa',constant=0.0,colors=[2,4,6,0],labels=['B!DX!N','B!DY!N','B!DZ!N','|B|'],ytitle='MMS'+probe+'!CDFG_QL!CDMPA!C(near GSE)',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          get_data,'mms'+probe+'_dfg_srvy_dmpa',data=b
+          store_data,'mms'+probe+'_dfg_srvy_dmpa_mod',data={x:b.x,y:[[b.y[*,3]],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+          options,'mms'+probe+'_dfg_srvy_dmpa_mod',constant=0.0,colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],ytitle='MMS'+probe+'!CDFG_QL!CDMPA',ysubtitle='[nT]',labflag=-1,datagap=0.26d
+          undefine,b
+
+        endif
+
+        get_data,'mms'+probe+'_dfg_srvy_dmpa_btot',data=d
+        fce=1.6022e-19*d.y*1.0e-9/(9.1094e-31*2.0*3.14159)
+        fcp=1.6022e-19*d.y*1.0e-9/(1.6726e-27*2.0*3.14159)
+        store_data,'mms'+probe+'_gyro',data={x:d.x,y:[[fce],[fcp]]}
+        options,'mms'+probe+'_gyro',color=255,width=2
+
+      endif
+    endif else begin
+      print
+      print,'DFG data files are not found in this interval.'
+      print
+    endelse
+    
   endelse
 
   mms_load_mec,trange=trange,probes=probe
@@ -117,13 +163,13 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,no_wav
   tplot_options,var_label=['mms'+probe+'_mec_l_dipole','mms'+probe+'_mec_mlt','mms'+probe+'_mec_mlat']
 
   if undefined(no_wave) then begin
-    mms_load_dsp,trange=trange,probes=probe,datatype=['epsd','bpsd'],data_rate='slow',level='l2'
+    mms_load_dsp,trange=trange,probes=probe,datatype=['epsd','bpsd'],data_rate=dsp_data_rate,level='l2'
     store_data,'mms'+probe+'_dsp_epsd_x_gyro',data=['mms'+probe+'_dsp_epsd_x','mms'+probe+'_gyro']
-    store_data,'mms'+probe+'_dsp_bpsd_scm1_slow_l2_gyro',data=['mms'+probe+'_dsp_bpsd_scm1_slow_l2','mms'+probe+'_gyro']
-    ylim,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_slow_l2_gyro'],30.d,8000.d,1
-    options,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_slow_l2_gyro'],datagap=30.d
+    store_data,'mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro',data=['mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2','mms'+probe+'_gyro']
+    ylim,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro'],30.d,8000.d,1
+    options,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro'],datagap=30.d
     zlim,['mms'+probe+'_dsp_epsd_x_gyro'],1e-10,1e-6,1
-    zlim,['mms'+probe+'_dsp_bpsd_scm1_slow_l2_gyro'],1e-10,1e-4,1
+    zlim,['mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro'],1e-10,1e-4,1
   endif
   if undefined(no_eis) then begin
     mms_load_eis,trange=trange,probes=probe,datatype=['electronenergy'],data_rate='srvy',level='l2',/no_interp
@@ -148,7 +194,11 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,no_wav
   endif
 
   tplot_options,'xmargin',[18,10]
-;  tplot,['mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_slow_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
-  tplot,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_slow_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
+  if undefined(dfg_ql) then begin
+    tplot,['mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
+  endif else begin  
+    tplot,['mms'+probe+'_dfg_srvy_dmpa_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
+  endelse
+;  tplot,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
 
 end

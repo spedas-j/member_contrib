@@ -19,12 +19,17 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   if undefined(regrid) then regrid=[32,16]
   if undefined(outputs) then outputs=['phi','theta','pa','gyro','energy']
   if undefined(fpi_data_rate) then begin
-    fpi_data_rate='brst'
-    datagap=4.6d
-  endif else begin
     fpi_data_rate='fast'
     datagap=4.6d
+  endif else begin
+    if fpi_data_rate eq 'fast' then datagap=4.6d
+    if fpi_data_rate eq 'slow' then datagap=65.d
+    if fpi_data_rate eq 'brst' then begin
+      if undefined(ion) then datagap=0.032d else datagap=0.16d
+    endif
   endelse
+  if undefined(ion) then species='e' else species='i'
+  
   probe=string(probe,format='(i0)')
   if undefined(trange) then begin
     if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 and undefined(dfg_ql) then begin
@@ -88,13 +93,6 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
   pos_name='mms'+probe+'_mec_r_eci'
 
   ;load particle data
-  if undefined(ion) then begin
-    species='e'
-    datagap=0.032d
-  endif else begin
-    species='i'
-    datagap=0.16d
-  endelse
   
   if not undefined(load_fpi) then begin
     mms_load_fpi,probe=probe,trange=trange,data_rate=fpi_data_rate,level='l2',datatype='d'+species+'s-dist',no_update=no_update,/center_measurement,/time_clip
@@ -158,10 +156,13 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
     endif else begin
       copy_data,'mms'+probe+'_d'+species+'s_dist_brst_'+outputs[i],'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname     
     endelse
-    options,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytitle='mms'+probe+'!Cd'+species+'s_'+outputs[i]+erange_title+parange_title+gyrorange_title
-    if outputs[i] eq 'phi' or outputs[i] eq 'theta' or outputs[i] eq 'pa' or outputs[i] eq 'gyro' then options,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,yticks=4
-    if outputs[i] eq 'energy' then options,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytickformat='mms_exponent2'
-    if outputs[i] eq 'gyro' then fpi_gyroasy,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
+    options,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytitle='mms'+probe+'!Cd'+species+'s_'+outputs[i]+erange_title+parange_title+gyrorange_title
+    if outputs[i] eq 'phi' or outputs[i] eq 'theta' or outputs[i] eq 'pa' or outputs[i] eq 'gyro' then options,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,yticks=4
+    if outputs[i] eq 'energy' then options,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytickformat='mms_exponent2'
+    if outputs[i] eq 'gyro' then begin
+      if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname)) gt 0 then fpi_gyroasy,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
+      if strlen(tnames('mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname)) gt 0 then fpi_gyroasy,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
+    endif
   endfor
  
 end

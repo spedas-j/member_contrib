@@ -35,6 +35,7 @@
 ;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
 ;         no_avg_fgm:   set this flag to skip making 2.5 sec averaged FGM(DFG) data
 ;         fom:          set this flag to plot FOMs (team member only)
+;         tail:         set this flag to use color scale for tail region
 ;
 ; EXAMPLE:
 ;
@@ -59,7 +60,7 @@
 pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                                  no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,no_output=no_output,$
                                  add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,$
-                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom
+                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom,tail=tail
 
   probe=strcompress(string(probe),/remove_all)
 
@@ -182,10 +183,16 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     time_stamp,/off
   endelse
 
+  if not undefined(tail) then begin
+    zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e3,1e6,1
+    zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',1e4,3e7,1
+  endif
+
   if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) eq 0 then ncoord='DSC' else ncoord='gsm'
-  if not undefined(gse) then ncoord='gse'
+  if not undefined(gse) and strlen(tnames('mms'+probe+'_fpi_iBulkV_gse')) gt 0 then ncoord='gse'
 
   fpi_set=['mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord]
+  print,fpi_set
 
   if strlen(tnames('mms'+probe+'_fgm_b_gsm_srvy_l2')) gt 0 then begin
 ;    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec_avg','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_btot']

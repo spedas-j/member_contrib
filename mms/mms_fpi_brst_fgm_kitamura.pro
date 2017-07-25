@@ -28,6 +28,7 @@
 ;         fpi_l1b:      set this flag to use FPI level-1b data if available (team member only)
 ;         time_clip:    set this flag to time clip the FPI and EDP data
 ;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
+;         tail:         set this flag to use color scale for tail region
 ;
 ; EXAMPLE:
 ;
@@ -41,7 +42,7 @@
 
 pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                               no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,$
-                              fpi_l1b=fpi_l1b,time_clip=time_clip,gse=gse
+                              fpi_l1b=fpi_l1b,time_clip=time_clip,gse=gse,tail=tail
 
   mms_init
   
@@ -137,5 +138,10 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
   if undefined(gse) then gsm=1
   mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,time_clip=time_clip,gsm=gsm,/load_fpi,/no_plot,/no_avg
   mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,full_bss=full_bss,time_clip=time_clip,gsm=gsm,/magplot,/no_load_mec
+  if not undefined(tail) then begin
+    zlim,['mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni_mix'],3e3,1e6,1
+    zlim,['mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_eEnergySpectr_omni_mix'],1e4,3e7,1
+    tplot
+  endif
 
 end

@@ -39,7 +39,7 @@
 ; EXAMPLE:
 ;
 ;     To plot fast plasma investigation (FPI) fast survey data
-;     MMS>  mms_fpi_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe='1',/no_avg
+;     MMS>  mms_fpi_plot_kitamura,trange=['2015-09-01/12:00:00','2015-09-01/15:00:00'],probe='1',/no_avg,/load_fpi
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
