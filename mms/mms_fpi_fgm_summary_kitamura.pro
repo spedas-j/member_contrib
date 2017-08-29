@@ -113,7 +113,9 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
         endif
       endif else begin
         get_data,'mms'+probe+'_fgm_b_gse_srvy_l2_bvec',data=d
-        if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+        if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]+1.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+          print,time_string(d.x[n_elements(d.x)-1]+1.d,format=0)
+          print,time_string(roi[1],format=0)
           store_data,'mms'+probe+'_fgm_*',/delete 
           mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='l2pre',no_update=no_update_fgm,versions=fgm_versions
           if strlen(tnames('mms'+probe+'_dfg_b_gse_srvy_l2pre')) eq 0 and strlen(tnames('mms'+probe+'_dfg_srvy_l2pre_gse')) gt 0 then begin
@@ -143,7 +145,9 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     endif else begin
       if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) eq 0 then begin
         get_data,'mms'+probe+'_dfg_b_gse_srvy_l2pre',data=d
-        if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]-10.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+        if d.x[0] gt roi[1] or time_double(time_string(d.x[n_elements(d.x)-1]+1.d,format=0,precision=-3)) lt time_double(time_string(roi[1],format=0,precision=-3)) then begin
+          print,time_string(d.x[n_elements(d.x)-1]+1.d,format=0)
+          print,time_string(roi[1],format=0)
           store_data,'mms'+probe+'_dfg_b_*_srvy_l2pre',/delete
           store_data,'mms'+probe+'_pos*',/delete
           mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',no_update=no_update_fgm,versions=fgm_versions

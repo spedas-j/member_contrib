@@ -87,7 +87,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
 
-  hpca_min_version='2.0.0'
+  hpca_min_version='3.2.0'
   if undefined(pa_zrange) then pa_zrange=[1e3,1e7]
 
   trange=time_double(trange_orig)
@@ -281,6 +281,11 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
     options,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,spec=1,ytitle='MMS'+probe+'!CHPCA O+!C'+erangename_o+'!CPA',ysubtitle='[deg]',datagap=gap_hpca,yticks=4,minzlog=0,ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     if undefined(opa_zrange) then opa_zrange=pa_zrange
     zlim,prefix+'_hpca_oplus_phase_space_density_pa_'+erangename_o,opa_zrange[0],opa_zrange[1],1
+  endif
+
+  if not undefined(tail) then begin
+    zlim,'mms'+probe+'_dis_dist_fast_energy_omni',3e3,1e6,1
+    zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',1e4,3e7,1
   endif
   
   if undefined(no_bss) then begin
