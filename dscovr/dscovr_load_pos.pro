@@ -57,24 +57,27 @@ pro dscovr_load_pos, debug=debug, dat=dat, $
     
     ;Add data to arrays
     append_array, time, dat.time / 1000.D 
-    append_array, pos_xgse, dat.sat_x_gse 
-    append_array, pos_ygse, dat.sat_y_gse 
-    append_array, pos_zgse, dat.sat_z_gse  
-    append_array, pos_xgsm, dat.sat_x_gsm
-    append_array, pos_ygsm, dat.sat_y_gsm
-    append_array, pos_zgsm, dat.sat_z_gsm
+    append_array, pos_xgse, float(dat.sat_x_gse) 
+    append_array, pos_ygse, float(dat.sat_y_gse) 
+    append_array, pos_zgse, float(dat.sat_z_gse)  
+    append_array, pos_xgsm, float(dat.sat_x_gsm)
+    append_array, pos_ygsm, float(dat.sat_y_gsm)
+    append_array, pos_zgsm, float(dat.sat_z_gsm)
+
+    if debug then print, 'time = ', time_string(time)
+    if debug then print, 'pos_xgse = ', dat.sat_x_gse
     
   endfor
   if n_elements( time ) lt 2 then return
   
   
   ;Create tplot variables containing the data 
-  prefix = 'dscovr_m1m_'
+  prefix = 'dscovr_'
   store_data, prefix + 'pos_gse', data={x:time, y:[[pos_xgse],[pos_ygse],[pos_zgse]] }
   store_data, prefix + 'pos_gsm', data={x:time, y:[[pos_xgsm],[pos_ygsm],[pos_zgsm]] }
   
   ;Remove abnormal values 
-  tclip, prefix + 'pos_gs?', -2000., 2000., /overwrite 
+  tclip, prefix + 'pos_gs?', -2000000., 2000000., /overwrite 
   
   ;Decorate the variables 
   options, prefix + 'pos_gs?', ytitle='DSCOVR!CPOP', ysubtitle='[Re]', $
