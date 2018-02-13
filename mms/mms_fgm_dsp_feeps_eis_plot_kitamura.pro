@@ -34,7 +34,9 @@
 ;        if multiple cdf files are loaded for FGM(DFG)
 ;-
 
-pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_fast=wave_fast,no_wave=no_wave,no_feeps=no_feeps,no_eis=no_eis,eis_pa_energy=eis_pa_energy,dfg_ql=dfg_ql,delete=delete
+pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_fast=wave_fast,no_wave=no_wave,$
+                                        no_feeps=no_feeps,no_eis=no_eis,eis_pa_energy=eis_pa_energy,$
+                                        dfg_ql=dfg_ql,delete=delete,bss=bss
 
   loadct2,43
   time_stamp,/off
@@ -193,11 +195,18 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
     options,'mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin',yticks=3
   endif
 
+  if not undefined(bss) then begin
+    spd_mms_load_bss,trange=trange,datatype=['fast','burst']
+    calc,'"mms_bss_burst"="mms_bss_burst"-0.1d'
+    store_data,'mms_bss',data=['mms_bss_fast','mms_bss_burst']
+    options,'mms_bss',colors=[6,2],panel_size=0.2,thick=10.0,xstyle=4,ystyle=4,ticklen=0,yrange=[-0.125d,0.025d],ylabel='',labels=['Fast','Burst'],labflag=-1
+  endif
+
   tplot_options,'xmargin',[18,10]
   if undefined(dfg_ql) then begin
-    tplot,['mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
+    tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
   endif else begin  
-    tplot,['mms'+probe+'_dfg_srvy_dmpa_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
+    tplot,['mms_bss','mms'+probe+'_dfg_srvy_dmpa_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
   endelse
 ;  tplot,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
 

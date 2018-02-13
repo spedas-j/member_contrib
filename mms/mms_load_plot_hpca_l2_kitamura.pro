@@ -6,55 +6,56 @@
 ;         Plot magnetic field (FGM (or DFG)), FPI, and HPCA data obtained by MMS
 ;
 ; KEYWORDS:
-;         trange:        time range of interest [starttime, endtime] with the format
-;                        ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
-;                        ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
-;                        if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
-;                        the time range is set as from 210 (or 30 (brst)) minutes before the 
-;                        beginning of the ROI just after the specified time to 210
-;                        (or 30 (brst)) minutes after the end of the ROI.
-;         probe:         a probe - value for MMS SC #
-;         delete:        set this flag to delete all tplot variables at the beginning
-;         brst:          set this flag to use HPCA burst data
-;         no_load_fgm:   set this flag to skip loading FGM data
-;         dfg_ql:        set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
-;                        are used, if available (team member only)
-;         no_update_fgm: set this flag to preserve the original FGM data. if not set and
-;                        newer data is found the existing data will be overwritten
-;         no_load_fpi:   set this flag to skip loading FPI data
-;         no_update_fpi: set this flag to preserve the original FPI data. if not set and
-;                        newer data is found the existing data will be overwritten
-;         no_update_hpca:set this flag to preserve the original HPCA data. if not set and
-;                        newer data is found the existing data will be overwritten
-;         no_update_mec: set this flag to preserve the original MEC data. if not set and
-;                        newer data is found the existing data will be overwritten
-;         no_bss:        set this flag to skip loading bss data
-;         full_bss:      set this flag to load detailed bss data (team member only)
-;         gsm:           set this flag to plot data in the GSM coordinate
-;         flux:          set this flag to set the differential flux as the unit for HPCA
-;                        E-t spectra
-;         lowi_pa:       set this flag to plot PA-t spectra for FPI-DIS data  
-;         lowh_pa:       set this flag to plot PA-t spectra for HPCA proton data
-;         lowhe_pa:      set this flag to plot PA-t spectra for HPCA helium data
-;         lowo_pa:       set this flag to plot PA-t spectra for HPCA oxygen data
-;         pa_erange:     set this to specify energy range of PA-t spectra
-;         hpa_erange:    set this to specify energy range of H+ PA-t spectra
-;         hepa_erange:   set this to specify energy range of He+ PA-t spectra
-;         opa_erange:    set this to specify energy range of O+ PA-t spectra
-;         pa_zrange:     set this to specify color range of PA-t spectra
-;         hpa_zrange:    set this to specify color range of H+ PA-t spectra
-;         hepa_zrange:   set this to specify color range of He+ PA-t spectra
-;         opa_zrange:    set this to specify color range of O+ PA-t spectra
-;         zrange:        set this to specify zrange of HPCA E-t spectra 
-;         v_hpca:        set this flag to use HPCA proton velocity data. if not set, ion
-;                        velocity data from FPI-DIS are plotted
-;         plot_wave:     set this flag to plot with wave data
-;         plotdir:       set this to assine a directory for plots
-;         esp_plotcdir:  set this to assine a directory for plots with high frequency electric field
-;                        wave data
-;         no_short:      set this flag to skip short plots (1 hour)
-;         margin:        set this flag to use a specific margin
-;         tail:          set this flag to use special ranges for tail region
+;         trange:           time range of interest [starttime, endtime] with the format
+;                           ['YYYY-MM-DD','YYYY-MM-DD'] or to specify more or less than a day
+;                           ['YYYY-MM-DD/hh:mm:ss','YYYY-MM-DD/hh:mm:ss']
+;                           if the format is 'YYYY-MM-DD' or 'YYYY-MM-DD/hh:mm:ss' (one element)
+;                           the time range is set as from 210 (or 30 (brst)) minutes before the 
+;                           beginning of the ROI just after the specified time to 210
+;                           (or 30 (brst)) minutes after the end of the ROI.
+;         probe:            a probe - value for MMS SC #
+;         delete:           set this flag to delete all tplot variables at the beginning
+;         brst:             set this flag to use HPCA burst data
+;         no_load_fgm:      set this flag to skip loading FGM data
+;         dfg_ql:           set this flag to use DFG ql data forcibly. if not set, DFG l2pre data
+;                           are used, if available (team member only)
+;         no_update_fgm:    set this flag to preserve the original FGM data. if not set and
+;                           newer data is found the existing data will be overwritten
+;         no_load_fpi:      set this flag to skip loading FPI data
+;         no_update_fpi:    set this flag to preserve the original FPI data. if not set and
+;                           newer data is found the existing data will be overwritten
+;         no_update_hpca:   set this flag to preserve the original HPCA data. if not set and
+;                           newer data is found the existing data will be overwritten
+;         no_update_mec:    set this flag to preserve the original MEC data. if not set and
+;                           newer data is found the existing data will be overwritten
+;         no_bss:           set this flag to skip loading bss data
+;         full_bss:         set this flag to load detailed bss data (team member only)
+;         gsm:              set this flag to plot data in the GSM coordinate
+;         flux:             set this flag to set the differential flux as the unit for HPCA
+;                           E-t spectra
+;         lowi_pa:          set this flag to plot PA-t spectra for FPI-DIS data  
+;         lowh_pa:          set this flag to plot PA-t spectra for HPCA proton data
+;         lowhe_pa:         set this flag to plot PA-t spectra for HPCA helium data
+;         lowo_pa:          set this flag to plot PA-t spectra for HPCA oxygen data
+;         pa_erange:        set this to specify energy range of PA-t spectra
+;         hpa_erange:       set this to specify energy range of H+ PA-t spectra
+;         hepa_erange:      set this to specify energy range of He+ PA-t spectra
+;         opa_erange:       set this to specify energy range of O+ PA-t spectra
+;         pa_zrange:        set this to specify color range of PA-t spectra
+;         hpa_zrange:       set this to specify color range of H+ PA-t spectra
+;         hepa_zrange:      set this to specify color range of He+ PA-t spectra
+;         opa_zrange:       set this to specify color range of O+ PA-t spectra
+;         zrange:           set this to specify zrange of HPCA E-t spectra 
+;         v_hpca:           set this flag to use HPCA proton velocity data. if not set, ion
+;                           velocity data from FPI-DIS are plotted
+;         plot_wave:        set this flag to plot with wave data
+;         plotdir:          set this to assine a directory for plots
+;         esp_plotcdir:     set this to assine a directory for plots with high frequency electric field
+;                           wave data
+;         no_short:         set this flag to skip short plots (1 hour)
+;         margin:           set this flag to use a specific margin
+;         tail:             set this flag to use special ranges for tail region
+;         hpca_min_version: specify a minimum CDF version # to load
 ;
 ; EXAMPLE:
 ;
@@ -79,7 +80,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
                                    no_bss=no_bss,full_bss=full_bss,gsm=gsm,flux=flux,lowi_pa=lowi_pa,lowh_pa=lowh_pa,lowhe_pa=lowhe_pa,lowo_pa=lowo_pa,$
                                    pa_erange=pa_erange,hpa_erange=hpa_erange,hepa_erange=hepa_erange,opa_erange=opa_erange,pa_zrange=pa_zrange,$
                                    hpa_zrange=hpa_zrange,hepa_zrange=hepa_zrange,opa_zrange=opa_zrange,zrange=zrange,v_hpca=v_hpca,plot_wave=plot_wave,$
-                                   plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short,margin=margin,tail=tail
+                                   plotdir=plotdir,esp_plotdir=esp_plotdir,no_short=no_short,margin=margin,tail=tail,hpca_min_version=hpca_min_version
 
   if not undefined(delete) then store_data,'*',/delete
   if undefined(gsm) then coord='gse' else coord='gsm'
@@ -87,7 +88,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
 
-  hpca_min_version='3.2.0'
+  if undefined(hpca_min_version) then hpca_min_version='3.2.0'
   if undefined(pa_zrange) then pa_zrange=[1e3,1e7]
 
   trange=time_double(trange_orig)
@@ -353,7 +354,7 @@ pro mms_load_plot_hpca_l2_kitamura,trange_orig,probe=probe,delete=delete,brst=br
     thisDevice=!D.NAME
     tplot_options,'ymargin'
     tplot_options,'charsize',0.7
-    tplot_options,'tickinterval',3600
+    if roi[1]-roi[0] lt 18.d*3600.d then tplot_options,'tickinterval',3600
     tplot_options,'xmargin',[15,15]
     options,'mms_bss',labsize=0.9
     set_plot,'ps'

@@ -31,10 +31,12 @@
 ;         fpi_sitl:     set this flag to use FPI fast sitl data forcibly. if not set, FPI fast ql
 ;                       data are used, if available (team member only)
 ;         plotdir:      set this flag to assine a directory for plots
-;         plotcdir:     set this flag to assine a directory for plots with currents in the LMN coordinate
+;         plotcdir:     set this flag to assine a directory for plots with currents
+;         clmn:        set this flag to plot currents in the LMN coordinate (use with plotcdir)
 ;         gse:          set this flag to plot data in the GSE (or DMPA) coordinate
 ;         no_avg_fgm:   set this flag to skip making 2.5 sec averaged FGM(DFG) data
 ;         fom:          set this flag to plot FOMs (team member only)
+;         day:          set this flag to use color scale for dayside regions
 ;         tail:         set this flag to use color scale for tail region
 ;
 ; EXAMPLE:
@@ -60,7 +62,7 @@
 pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                                  no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,no_output=no_output,$
                                  add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,$
-                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom,tail=tail
+                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom,day=day,tail=tail,clmn=clmn
 
   probe=strcompress(string(probe),/remove_all)
 
@@ -160,10 +162,10 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       endif
     endelse
     if undefined(gse) then gsm=1
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,no_avg=no_avg_fgm,/load_fpi,/magplot
+    mms_fpi_plot_kitamura,trange=[trange[0]-3600.d*2.d,trange[1]+3600.d*2.d],probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,no_update_fpi=no_update_fpi,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,no_avg=no_avg_fgm,/load_fpi,/magplot
   endif else begin
     if undefined(gse) then gsm=1
-    mms_fpi_plot_kitamura,trange=trange,probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,no_avg=no_avg_fgm,/magplot
+    mms_fpi_plot_kitamura,trange=[trange[0]-3600.d*2.d,trange[1]+3600.d*2.d],probe=probe,add_scpot=add_scpot,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,gsm=gsm,no_avg=no_avg_fgm,/magplot
   endelse
   
   if undefined(no_bss) then begin
@@ -190,6 +192,10 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
   if not undefined(tail) then begin
     zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e3,1e6,1
     zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',1e4,3e7,1
+  endif
+  if not undefined(day) then begin
+    zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e4,3e8,1
+    zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',3e5,3e9,1
   endif
 
   if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) eq 0 then ncoord='DSC' else ncoord='gsm'
@@ -229,9 +235,9 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     
     thisDevice=!D.NAME
     tplot_options,'charsize'
-    tplot_options,'xmargin'
+    tplot_options,'xmargin',[20,12]
     tplot_options,'ymargin'
-    tplot_options,'tickinterval',3600
+    if roi[1]-roi[0] lt 18.d*3600.d then tplot_options,'tickinterval',3600
     set_plot,'ps'
     device,filename=dn+'\mms'+probe+'_fpi_ROI_'+time_string(roi[0],format=2,precision=0)+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
     tplot,trange=trange
@@ -275,7 +281,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       endwhile      
       tplot_options,'tickinterval'
     endif
-    
+    tplot_options,'xmargin'
   endif
 
   if undefined(no_output) and not undefined(plotcdir) then begin
@@ -283,6 +289,23 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
     if undefined(roi) then roi=trange
 
     mms_curlometer,trange=[roi[0]-3600.d,roi[1]+3600.d],ref_probe=probe,data_rate='srvy',/gsm,/lmn
+    if not undefined(gse) then begin
+      mms_cotrans,'Current_gsm','Current_gse',in_coord='gsm',out_coord='gse',/ignore_dlimit
+      options,'Current_gse',constant=0.0,ytitle='Current!CDensity!CGSE',ysubtitle='[nA/m!U2!N]',colors=[2,4,6],labels=['J!DX!N','J!DY!N','J!DZ!N'],labflag=-1,datagap=0.13d
+      bt=dblarr(n_elements(b.x))
+      get_data,'mms'+probe+'_b_for_curlometer',data=b
+      for i=0l,n_elements(b.x)-1 do bt[i]=norm(reform(b.y[i,*]),/double)
+      store_data,'mms'+probe+'_b_for_curlometer_tgse',data={x:b.x,y:[[bt],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+      options,'mms'+probe+'_b_for_curlometer_tgse',constant=0.0,ytitle='MMS'+probe+'!CFGM_srvy!CGSE',ysubtitle='[nT]',colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],labflag=-1,datagap=0.13d
+      undefine,b
+    endif else begin
+      get_data,'mms'+probe+'_b_for_curlometer_gsm',data=b
+      bt=dblarr(n_elements(b.x))
+      for i=0l,n_elements(b.x)-1 do bt[i]=norm(reform(b.y[i,*]),/double)
+      store_data,'mms'+probe+'_b_for_curlometer_tgsm',data={x:b.x,y:[[bt],[b.y[*,0]],[b.y[*,1]],[b.y[*,2]]]}
+      options,'mms'+probe+'_b_for_curlometer_tgsm',constant=0.0,ytitle='MMS'+probe+'!CFGM_srvy!CGSM',ysubtitle='[nT]',colors=[0,2,4,6],labels=['|B|','B!DX!N','B!DY!N','B!DZ!N'],labflag=-1,datagap=0.13d
+      undefine,b      
+    endelse
     if strlen(tnames('mms'+probe+'_fpi_iBulkV_gsm')) gt 0 then begin
       tinterpol_mxn,'mms_avg_pos_gsm','mms'+probe+'_fpi_iBulkV_gsm',newname='mms_avg_pos_gsm_ion'
       get_data,'mms_avg_pos_gsm_ion',data=pos
@@ -297,14 +320,24 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       undefine,pos,vi_gsm,vi_lmn,dl
     endif else begin
       dis_level='L2'
+      store_data,'mms'+probe+'_fpi_iBulkV_gsm',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      store_data,'mms'+probe+'_fpi_iBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
       store_data,'mms'+probe+'_fpi_iBulkV_lmn',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      options,'mms'+probe+'_fpi_iBulkV_gsm',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=4.6d
+      options,'mms'+probe+'_fpi_iBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=4.6d
+      ylim,'mms'+probe+'_fpi_iBulkV_???',-100.d,100.d
     endelse
     options,'mms'+probe+'_fpi_iBulkV_lmn',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_LMN',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DL!N','V!DM!N','V!DN!N'],labflag=-1,datagap=4.6d
-    tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_lmn','mms'+probe+'_b_for_curlometer_tlmn','Current_lmn','Current_magnitude','divB_over_rotB']
+    if not undefined(clmn) then begin
+      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_lmn','mms'+probe+'_b_for_curlometer_tlmn','Current_lmn','Current_magnitude','divB_over_rotB']
+    endif else begin
+      tplot,['mms_bss','mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_numberDensity','mms'+probe+'_fpi_iBulkV_'+coord,'mms'+probe+'_b_for_curlometer_t'+coord,'Current_'+coord,'Current_magnitude','divB_over_rotB']
+    endelse
 
     thisDevice=!D.NAME
     start_time=time_double(time_string(roi[0],format=0,precision=-2))
     tplot_options,'tickinterval',300
+    tplot_options,'xmargin',[20,12]
     while start_time lt roi[1] do begin
       ts=strsplit(time_string(time_double(start_time),format=3,precision=-2),/extract)
       dn=plotcdir+'\'+ts[0]+'\'+ts[1]
@@ -327,7 +360,7 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
       start_time=time_double(time_string(start_time+3601.d,format=0,precision=-2))
     endwhile
     tplot_options,'tickinterval'
-
+    tplot_options,'xmargin'
   endif
 
 
