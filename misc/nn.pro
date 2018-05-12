@@ -6,6 +6,13 @@
 ; IDL> b = [ 1.2, 4.3, 8.8 ]
 ; IDL> nn2( a, b )
 ;           1           4           9
+;
+;!!!CAUTION!!!
+;This routine accepts a simple numerical array as arguments, and does
+;not work directly with a tplot variable, SPEDAS data structure {x:??,
+;y:??}, or a time string, which can be given to the original nn() in
+;SPEDAS. If you want to give time values, they should be converted to
+;decimal UNIX times with time_double() beforehand. 
 ;-
 Function nn,  time1, time2
 
