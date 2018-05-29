@@ -16,6 +16,7 @@
 ;-
 Function nn,  time1, time2
 
+  time2 = time_double(time2)
   w = value_locate( time1, time2 )
   w1 = (w > 0) < (n_elements(time1)-1)
   w2 = ((w1+1) > 0) < (n_elements(time1)-1)
