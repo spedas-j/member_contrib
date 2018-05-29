@@ -4,6 +4,7 @@
 PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   plottime=plottime, $
   force_chscale=force_chscale, changle=changle,$
+  force_charthick=force_charthick, $
   geo_plot=geo_plot, $
   spellout=spellout, $
   notimelabel=notimelabel, $
@@ -120,6 +121,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
 
         IF !D.WINDOW EQ 1 THEN chscale=1.0 ELSE chscale=1.0
         IF KEYWORD_SET(force_chscale) THEN chscale = force_chscale
+        if keyword_set(force_charthick) then charthick = force_charthick else charthick = 1.
         if keyword_set(force_symsize) then symsz = force_symsize else symsz = 1.0
         if keyword_set(force_symthick) then symthk = force_symthick else symthk = 1.0
         if ~keyword_set(notick) then $
@@ -137,7 +139,8 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
             /device,/to_data)
           XYOUTS, xyzch[0],xyzch[1], $
                   time_string(tdbl[0],tformat='hh:mm')+'!C'+scname, $
-                  SIZE=!P.CHARSIZE*chscale,orientation=changle,color=trace_color
+                  SIZE=!P.CHARSIZE*chscale,orientation=changle,color=trace_color, $
+                  charthick=charthick
           
           xch0 = x[N_ELEMENTS(tdbl)-1] & ych0 = y[N_ELEMENTS(tdbl)-1]
           devc = convert_coord(xch0,ych0,/data,/to_device)
@@ -146,7 +149,8 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
             /device,/to_data)
           XYOUTS, xyzch[0],xyzch[1], $
                   time_string(tdbl[N_ELEMENTS(tdbl)-1],tformat='hh:mm'), $
-                  SIZE=!P.CHARSIZE*chscale,orientation=changle,color=trace_color
+                  SIZE=!P.CHARSIZE*chscale,orientation=changle,color=trace_color, $
+                  charthick=charthick
 
         endif
         
