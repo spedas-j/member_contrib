@@ -36,7 +36,7 @@
 
 pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_fast=wave_fast,no_wave=no_wave,$
                                         no_feeps=no_feeps,no_eis=no_eis,eis_pa_energy=eis_pa_energy,$
-                                        dfg_ql=dfg_ql,delete=delete,bss=bss
+                                        dfg_ql=dfg_ql,delete=delete,bss=bss,margin=margin
 
   loadct2,43
   time_stamp,/off
@@ -50,20 +50,28 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
 
   if undefined(wave_fast) then dsp_data_rate='slow' else dsp_data_rate='fast'
 
+  trange=time_double(trange)
   if n_elements(trange) eq 1 then begin
     if public eq 0 and status eq 1 then begin
       roi=mms_get_roi(trange,/next)
-      trange=dblarr(2)
-      trange[0]=roi[0]-60.d*30.d
-      trange[1]=roi[1]+60.d*30.d
     endif else begin
-      print
-      print,'Please input start and end time to use public data'
-      print
-      return
+      mms_data_time_takada,[trange,trange+3.d*86400.d],rois,datatype='fast'
+      i=0
+      while trange gt time_double(rois[0,i]) do i=i+1
+      roi=[time_double(rois[0,i]),time_double(rois[1,i])]
     endelse
+    trange=dblarr(2)
+    if undefined(margin) then margin=30.d
+    if n_elements(margin) eq 1 then begin
+      smargin=margin
+      emargin=margin
+    endif else begin
+      smargin=abs(margin[0])
+      emargin=margin[1]
+    endelse
+    trange[0]=roi[0]-60.d*smargin
+    trange[1]=roi[1]+60.d*emargin
   endif else begin
-    trange=time_double(trange)
     roi=trange
   endelse
   dt=trange[1]-trange[0]
@@ -73,7 +81,7 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
   
   if undefined(dfg_ql) then begin
     
-    mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2'
+    mms_load_fgm,trange=trange,instrument='fgm',probes=probe,data_rate='srvy',level='l2',versions=fgm_versions
 
     if strlen(tnames('mms'+probe+'_fgm_b_gse_srvy_l2_bvec')) gt 0 then begin
       get_data,'mms'+probe+'_fgm_b_'+coord+'_srvy_l2_bvec',dlim=dl
@@ -118,7 +126,7 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
       
   endif else begin
     
-    mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql'
+    mms_load_fgm,trange=trange,instrument='dfg',probes=probe,data_rate='srvy',level='ql',versions=fgm_versions
 
     if strlen(tnames('mms'+probe+'_dfg_srvy_dmpa_bvec')) gt 0 then begin
       get_data,'mms'+probe+'_dfg_srvy_dmpa_bvec',dlim=dl
@@ -165,7 +173,8 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
   tplot_options,var_label=['mms'+probe+'_mec_l_dipole','mms'+probe+'_mec_mlt','mms'+probe+'_mec_mlat']
 
   if undefined(no_wave) then begin
-    mms_load_dsp,trange=trange,probes=probe,datatype=['epsd','bpsd'],data_rate=dsp_data_rate,level='l2'
+    mms_load_dsp,trange=trange,probes=probe,datatype='epsd',data_rate=dsp_data_rate,level='l2',versions=dspe_versions
+    mms_load_dsp,trange=trange,probes=probe,datatype='bpsd',data_rate=dsp_data_rate,level='l2',versions=dspb_versions
     store_data,'mms'+probe+'_dsp_epsd_x_gyro',data=['mms'+probe+'_dsp_epsd_x','mms'+probe+'_gyro']
     store_data,'mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro',data=['mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2','mms'+probe+'_gyro']
     ylim,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro'],30.d,8000.d,1
@@ -174,7 +183,7 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
     zlim,['mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro'],1e-10,1e-4,1
   endif
   if undefined(no_eis) then begin
-    mms_load_eis,trange=trange,probes=probe,datatype=['electronenergy'],data_rate='srvy',level='l2',/no_interp
+    mms_load_eis,trange=trange,probes=probe,datatype=['electronenergy'],data_rate='srvy',level='l2',versions=eis_versions,/no_interp
     ylim,'mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin',40.d,400.d,1
     zlim,'mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin',1.d,100000.d,1
     if not undefined(eis_pa_energy) then begin
@@ -186,7 +195,8 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
   endif
   if undefined(en_range_string) then en_range_string=''
   if undefined(no_feeps) then begin
-    mms_load_feeps,trange=trange,probes=probe,datatype=['ion','electron'],data_rate='srvy',level='l2'
+    mms_load_feeps,trange=trange,probes=probe,datatype='ion',data_rate='srvy',level='l2',versions=feepsi_versions
+    mms_load_feeps,trange=trange,probes=probe,datatype='electron',data_rate='srvy',level='l2',versions=feepse_versions
     ylim,'mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin',80.d,600.d,1
     zlim,'mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin',1.d,100000.d,1
     options,'mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin',yticks=3
@@ -209,5 +219,11 @@ pro mms_fgm_dsp_feeps_eis_plot_kitamura,trange=trange,probe=probe,gsm=gsm,wave_f
     tplot,['mms_bss','mms'+probe+'_dfg_srvy_dmpa_mod','mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
   endelse
 ;  tplot,['mms'+probe+'_dsp_epsd_x_gyro','mms'+probe+'_dsp_bpsd_scm1_'+dsp_data_rate+'_l2_gyro','mms'+probe+'_epd_eis_electronenergy_electron_flux_omni_spin','mms'+probe+'_epd_eis_electronenergy_'+en_range_string+'_electron_flux_omni_pad_spin','mms'+probe+'_epd_feeps_srvy_l2_electron_intensity_omni_spin','mms'+probe+'_epd_feeps_srvy_l2_ion_intensity_omni_spin']
+  mms_add_cdf_versions,'fgm',fgm_versions,/reset,/right_align
+  if not undefined(eis_versions) then mms_add_cdf_versions,'eis_e',eis_versions,/right_align
+  if not undefined(feepsi_versions) then mms_add_cdf_versions,'feeps_i',feepsi_versions,/right_align
+  if not undefined(feepse_versions) then mms_add_cdf_versions,'feeps_e',feepse_versions,/right_align
+  if not undefined(dspe_versions) then mms_add_cdf_versions,'dsp_e',dspe_versions,/right_align
+  if not undefined(dspb_versions) then mms_add_cdf_versions,'dsp_b',dspb_versions,/right_align
 
 end

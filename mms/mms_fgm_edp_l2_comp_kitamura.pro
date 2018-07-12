@@ -45,7 +45,8 @@
 
 PRO mms_fgm_edp_l2_comp_kitamura,trange,probes=probes,no_E=no_E,no_B=no_B,edp_brst=edp_brst,fgm_brst=fgm_brst,$
                                  lmn=lmn,na=na,almn=almn,out_lmn=out_lmn,vn=vn,gsm=gsm,no_update=no_update,$
-                                 label_gsm=label_gsm,ion_plot=ion_plot,ion_fast=ion_fast,delete=delete,no_load=no_load
+                                 label_gsm=label_gsm,ion_plot=ion_plot,ion_fast=ion_fast,delete=delete,$
+                                 no_load=no_load,no_plot=no_plot
 
   if not undefined(delete) then store_data,'*', /delete
 
@@ -199,11 +200,13 @@ PRO mms_fgm_edp_l2_comp_kitamura,trange,probes=probes,no_E=no_E,no_B=no_B,edp_br
   tplot_options,'xmargin',[20,10]
 
   if undefined(ion_plot) then begin
-    if n_elements(probes) gt 1 then begin
-      tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms_edp_dce_'+edp_data_rate+'_l2_lmn_?']
-    endif else begin
-      tplot,['mms'+probes+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms'+probes+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms'+probes+'_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms'+probes+'_fgm_b_'+fgm_data_rate+'_l2_arb','mms'+probes+'_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms'+probes+'_edp_dce_'+edp_data_rate+'_l2_lmn_?']
-    endelse
+    if undefined(no_plot) then begin
+      if n_elements(probes) gt 1 then begin
+        tplot,['mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms_fgm_b_'+fgm_data_rate+'_l2_arb','mms_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms_edp_dce_'+edp_data_rate+'_l2_lmn_?']
+      endif else begin
+        tplot,['mms'+probes+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_btot','mms'+probes+'_fgm_b_'+coord+'_'+fgm_data_rate+'_l2_bvec_?','mms'+probes+'_fgm_b_'+fgm_data_rate+'_l2_lmn_?','mms'+probes+'_fgm_b_'+fgm_data_rate+'_l2_arb','mms'+probes+'_edp_dce_'+coord+'_'+edp_data_rate+'_l2_?','mms'+probes+'_edp_dce_'+edp_data_rate+'_l2_lmn_?']
+      endelse
+    endif
   endif else begin
     if undefined(gsm) then gse=1
     mms_fpi_l2_comp_kitamura,trange,probes=probes,/no_ele,/no_load_mec,/no_load_fgm,no_load_fpi=no_load,lmn=lmn,va=na,vn=vn,gsm=gsm,gse=gse,fast=ion_fast

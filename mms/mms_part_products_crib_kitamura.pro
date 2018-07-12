@@ -151,17 +151,17 @@ PRO mms_part_products_crib_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,
 
   for i=0,n_elements(outputs)-1 do begin
     mms_part_products,name,probe=probe,mag_name=bname,pos_name=pos_name,trange=trange,outputs=outputs,energy=erange,pitch=parange,gyro=gyrorange,regrid=regrid,fac_type=fac_type,datagap=datagap
-    if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate)) eq 0 then begin
-      copy_data,'mms'+probe+'_d'+species+'s_brstSkyMap_dist_'+outputs[i],'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
+    if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate+'_'+outputs[i])) eq 0 then begin
+      copy_data,'mms'+probe+'_d'+species+'s_brstSkyMap_dist_'+outputs[i],'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
     endif else begin
-      copy_data,'mms'+probe+'_d'+species+'s_dist_brst_'+outputs[i],'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname     
+      copy_data,'mms'+probe+'_d'+species+'s_dist_'+fpi_data_rate+'_'+outputs[i],'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname     
     endelse
     options,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytitle='mms'+probe+'!Cd'+species+'s_'+outputs[i]+erange_title+parange_title+gyrorange_title
     if outputs[i] eq 'phi' or outputs[i] eq 'theta' or outputs[i] eq 'pa' or outputs[i] eq 'gyro' then options,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,yticks=4
     if outputs[i] eq 'energy' then options,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname,ytickformat='mms_exponent2'
     if outputs[i] eq 'gyro' then begin
       if strlen(tnames('mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname)) gt 0 then fpi_gyroasy,'mms'+probe+'_d'+species+'s_dist_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
-      if strlen(tnames('mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname)) gt 0 then fpi_gyroasy,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
+;      if strlen(tnames('mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname)) gt 0 then fpi_gyroasy,'mms'+probe+'_d'+species+'s_'+outputs[i]+erange_tname+parange_tname+gyrorange_tname
     endif
   endfor
  

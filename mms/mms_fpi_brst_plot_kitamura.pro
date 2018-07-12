@@ -22,6 +22,7 @@
 ;         no_load_mec:  set this flag to skip loading MEC data
 ;         gsm:          set this flag to plot data in the GSM (or DMPA_GSM) coordinate
 ;         time_clip:    set this flag to time clip the FPI data
+;         tail:         set this flag to use color scale for tail region
 ;
 ; EXAMPLE:
 ;
@@ -36,7 +37,7 @@
 
 
 pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_load=no_load,no_update=no_update,$
-                               no_bss=no_bss,full_bss=full_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b,time_clip=time_clip
+                               no_bss=no_bss,full_bss=full_bss,gsm=gsm,no_load_mec=no_load_mec,l1b=l1b,time_clip=time_clip,tail=tail
 
   loadct2,43
   time_stamp,/off
@@ -135,11 +136,12 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     options,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CElectron!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     options,omni_spec_des,datagap=0.04d
     ylim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',6.d,30000.d,1
-    zlim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',3e5,3e9,1
+    if undefined(tail) then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',3e5,3e9,1 else zlim,'mms'+probe+'_fpi_eEnergySpectr_omni_mix',1e4,3e7,1
     espec_name='mms'+probe+'_fpi_eEnergySpectr_omni_mix'
   endif else begin
     espec_name='mms'+probe+'_fpi_eEnergySpectr_omni'
   endelse
+  if not undefined(tail) then zlim,'mms'+probe+'_fpi_eEnergySpectr_omni',1e4,3e7,1
 
   if undefined(dis_versions) then begin
     dis_versions=intarr(1,3)
@@ -151,11 +153,12 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
     options,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',spec=1,ytitle='MMS'+probe+'_FPI!CIon!CL2_MIX!Comni',ysubtitle='[eV]',ytickformat='mms_exponent2',ztitle='eV/(cm!U2!N s sr eV)',ztickformat='mms_exponent2'
     options,omni_spec_dis,datagap=0.16d
     ylim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',2.d,30000.d,1
-    zlim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',3e4,3e8,1
+    if undefined(tail) then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',3e4,3e8,1 else zlim,'mms'+probe+'_fpi_iEnergySpectr_omni_mix',3e3,1e6,1
     ispec_name='mms'+probe+'_fpi_iEnergySpectr_omni_mix'
   endif else begin
     ispec_name='mms'+probe+'_fpi_iEnergySpectr_omni'
   endelse
+  if not undefined(tail) then zlim,'mms'+probe+'_fpi_iEnergySpectr_omni',3e3,1e6,1
   
   store_data,'mms'+probe+'_fpi_dis_numberDensity',data=['mms'+probe+'_fpi_DISnumberDensity','mms'+probe+'_dis_numberdensity_brst']
   
@@ -183,15 +186,11 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   if dis_versions[0,0] le 2 or des_versions[0,0] le 2 then if strlen(tnames('mms'+probe+'_defatt_spinras')) eq 0 or strlen(tnames('mms'+probe+'_defatt_spindec')) eq 0 then skip_cotrans=1
 
   if undefined(skip_cotrans) then begin
-    if des_versions[0,0] le 2 then begin
-      mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+    if strlen(tnames('mms'+probe+'_des_bulkv_gse_brst')) eq 0 then begin
+      store_data,'mms'+probe+'_des_bulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      ylim,'mms'+probe+'_des_bulkV_gse',-100.d,100.d,0
     endif else begin
-      if strlen(tnames('mms'+probe+'_des_bulkv_gse_brst')) eq 0 then begin
-        store_data,'mms'+probe+'_des_bulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-        ylim,'mms'+probe+'_des_bulkV_gse',-100.d,100.d,0
-      endif else begin
-        copy_data,'mms'+probe+'_des_bulkv_gse_brst','mms'+probe+'_des_bulkV_gse'
-      endelse
+      copy_data,'mms'+probe+'_des_bulkv_gse_brst','mms'+probe+'_des_bulkV_gse'
     endelse
     options,'mms'+probe+'_des_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DES!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.032d
     mms_cotrans,'mms'+probe+'_des_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -205,15 +204,11 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
   options,'mms'+probe+'_dis_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
   
   if undefined(skip_cotrans) then begin
-    if dis_versions[0,0] le 2 then begin
-      mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+    if strlen(tnames('mms'+probe+'_dis_bulkv_gse_brst')) eq 0 then begin
+      store_data,'mms'+probe+'_dis_bulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      ylim,'mms'+probe+'_dis_bulkV_gse',-100.d,100.d,0
     endif else begin
-      if strlen(tnames('mms'+probe+'_dis_bulkv_gse_brst')) eq 0 then begin
-        store_data,'mms'+probe+'_dis_bulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-        ylim,'mms'+probe+'_dis_bulkV_gse',-100.d,100.d,0
-      endif else begin
-        copy_data,'mms'+probe+'_dis_bulkv_gse_brst','mms'+probe+'_dis_bulkV_gse'
-      endelse  
+      copy_data,'mms'+probe+'_dis_bulkv_gse_brst','mms'+probe+'_dis_bulkV_gse'
     endelse
     options,'mms'+probe+'_dis_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     mms_cotrans,'mms'+probe+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -274,13 +269,20 @@ pro mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot
 
     if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+strlowcase(ncoord))) eq 0 then ncoord='DSC' else ncoord=strlowcase(ncoord)
     tplot,['mms_bss',espec_name,ispec_name,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,fgm_name+'_bvec',fgm_name+'_btot']
-  
+    if not undefined(dis_versions) then mms_add_cdf_versions,'dis_brst_moms',dis_versions,/reset,/right_align
+    if not undefined(des_versions) then begin
+      if undefined(dis_versions) then mms_add_cdf_versions,'des_brst_moms',des_versions,/reset,/right_align else mms_add_cdf_versions,'des_brst_moms',des_versions,/right_align
+    endif
   endif else begin
     if not undefined(no_plot) then begin
       if undefined(gsm) then ncoord='gse' else ncoord='gsm'
       if strlen(tnames('mms'+probe+'_fpi_iBulkV_'+ncoord)) eq 0 then ncoord='DSC'
       tplot_options,'xmargin',[20,10]
       tplot,['mms_bss',espec_name,ispec_name,'mms'+probe+'_fpi_dis_des_numberDensity','mms'+probe+'_fpi_temp','mms'+probe+'_des_bulkV_'+ncoord,'mms'+probe+'_dis_bulkV_'+ncoord,'mms'+probe+'_fpi_iBulkV_'+ncoord,'mms'+probe+'_fpi_bentPipeB_DSC']
+      if not undefined(dis_versions) then mms_add_cdf_versions,'dis_brst_moms',dis_versions,/reset,/right_align
+      if not undefined(des_versions) then begin
+        if undefined(dis_versions) then mms_add_cdf_versions,'des_brst_moms',des_versions,/reset,/right_align else mms_add_cdf_versions,'des_brst_moms',des_versions,/right_align
+      endif
     endif
   endelse
 

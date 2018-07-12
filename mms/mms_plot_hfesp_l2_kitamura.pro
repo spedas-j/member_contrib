@@ -63,31 +63,29 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   status=mms_login_lasp(login_info=login_info,username=username)
   if username eq '' or username eq 'public' then public=1 else public=0
   
-  hpca_min_version='2.0.0'
+  hpca_min_version='3.2.0'
   
   trange=time_double(trange)
   if n_elements(trange) eq 1 then begin
-    if public eq 0 then begin
+    if public eq 0 and status eq 1 then begin
       roi=mms_get_roi(trange,/next)
-      trange=dblarr(2)
-      if undefined(margin) then begin
-        if undefined(hpca_brst) then margin=210.d else margin=30.d
-      endif
-      if n_elements(margin) eq 1 then begin
-        smargin=margin
-        emargin=margin
-      endif else begin
-        smargin=abs(margin[0])
-        emargin=margin[1]
-      endelse
-      trange[0]=roi[0]-60.d*smargin
-      trange[1]=roi[1]+60.d*emargin
     endif else begin
-      print
-      print,'Please input start and end time to use public data'
-      print
-      return
+      mms_data_time_takada,[trange,trange+3.d*86400.d],rois,datatype='fast'
+      i=0
+      while trange gt time_double(rois[0,i]) do i=i+1
+      roi=[time_double(rois[0,i]),time_double(rois[1,i])]
     endelse
+    trange=dblarr(2)
+    if undefined(margin) then margin=30.d
+    if n_elements(margin) eq 1 then begin
+      smargin=margin
+      emargin=margin
+    endif else begin
+      smargin=abs(margin[0])
+      emargin=margin[1]
+    endelse
+    trange[0]=roi[0]-60.d*smargin
+    trange[1]=roi[1]+60.d*emargin
   endif else begin
     roi=trange
   endelse
@@ -167,14 +165,8 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     ylim,dis_spec,2e0,3e4,1
     zlim,dis_spec,1e4,1e8,1
     
-    
-    if strlen(tnames('mms'+probe+'_dis_bulkv_gse_brst')) gt 0 then begin
-      copy_data,prefix+'_dis_bulkv_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
-      copy_data,prefix+'_dis_bulkv_gse_brst','mms'+probe+'_dis_bulkV_gse'
-    endif else begin
-      join_vec,prefix+'_dis_bulk'+['x','y','z']+'_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
-      mms_cotrans,prefix+'_dis_bulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-    endelse
+    copy_data,prefix+'_dis_bulkv_dbcs_brst','mms'+probe+'_dis_bulkV_DSC'
+    copy_data,prefix+'_dis_bulkv_gse_brst','mms'+probe+'_dis_bulkV_gse'
     options,prefix+'_dis_bulkV_DSC',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CDBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     options,prefix+'_dis_bulkV_gse',constant=0.0,ytitle='MMS'+probe+'_DIS!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=0.16d
     mms_cotrans,prefix+'_dis_bulkV',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
@@ -188,7 +180,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   endelse
 
   if not undefined(load_hpca) then begin
-    mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=hpca_data_rate,no_update=no_update_hpca,min_version=hpca_min_version/time_clip
+    mms_load_hpca,probes=probe,trange=trange,datatype='moments',level='l2',data_rate=hpca_data_rate,no_update=no_update_hpca,min_version=hpca_min_version,/time_clip
     if undefined(hpca_brst) then begin
       options,prefix+'_hpca_*plus_number_density',datagap=600.d
     endif else begin
@@ -236,7 +228,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   endelse
   options,prefix+'_fpi_fp',colors=255,thick=1.25,datagap=4.6d
 
-  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp'
+  mms_load_edp,trange=[trange[0]-60.d*300.d,trange[1]+60.d*300.d],probes=probe,level='l2',data_rate='srvy',datatype='hfesp',versions=edp_versions
   
   tplot_force_monotonic,prefix+'_edp_hfesp_srvy_l2',/forward
   get_data,prefix+'_edp_hfesp_srvy_l2',data=hfesp,lim=l,dlim=dl
@@ -282,7 +274,8 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
   if undefined(h_erangename) then h_erangename=''
 
   tplot,['mms_bss','mms'+probe+'_fgm_b_'+coord+'_srvy_l2_mod','mms'+probe+'_fpi_eEnergySpectr_omni',dis_spec,'mms'+probe+'_dis_dist_'+ion_pa_rate+'_pa_'+erangename,'mms'+probe+'_dis_dist_brst_theta_'+erangename,'mms'+probe+'_hpca_hplus_phase_space_density_pa_'+h_erangename,'mms'+probe+'_hpca_hplus_eflux_elev_0-360','mms'+probe+'_fp_fc_hfesp',tname_density,tname_velocity]
-
+  mms_add_cdf_versions,'edp_hfesp',edp_versions,/reset,/right_align
+  
   if not undefined(plotdir) then begin
 
     if strlen(tnames('mms'+probe+'_hpca_fp')) eq 0 then inst_name='fpi_hfesp' else inst_name='hpca_fpi_hfesp'
@@ -300,6 +293,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     set_plot,'ps'
     device,filename=dn+'\mms'+probe+'_'+inst_name+'_ROI_'+time_string(roi[0],format=2,precision=0)+'.ps',xsize=60.0,ysize=30.0,/color,/encapsulated,bits=8
     tplot,trange=trange
+    mms_add_cdf_versions,'edp_hfesp',edp_versions,/reset,/right_align
     device,/close
     set_plot,thisDevice
     !p.background=255
@@ -309,6 +303,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
     tplot_options,'xmargin',[17,13]
     tplot_options,'ymargin',[2.5,0.2]
     tplot,trange=trange
+    mms_add_cdf_versions,'edp_hfesp',edp_versions,/reset,/right_align
     makepng,dn+'\mms'+probe+'_'+inst_name+'_ROI_'+time_string(roi[0],format=2,precision=0)
     if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
     options,'mms_bss','labsize'
@@ -327,6 +322,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
         set_plot,'ps'
         device,filename=dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour.ps',xsize=40.0,ysize=30.0,/color,/encapsulated,bits=8
         tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
+        mms_add_cdf_versions,'edp_hfesp',edp_versions,/reset,/right_align
         device,/close
         set_plot,thisDevice
         !p.background=255
@@ -336,6 +332,7 @@ pro mms_plot_hfesp_l2_kitamura,trange,probe=probe,delete=delete,fpi_brst=fpi_brs
         tplot_options,'xmargin',[17,13]
         tplot_options,'ymargin',[2.5,0.2]
         tplot,trange=[start_time,time_double(time_string(start_time+3601.d,format=0,precision=-2))]
+        mms_add_cdf_versions,'edp_hfesp',edp_versions,/reset,/right_align
         makepng,dn+'\mms'+probe+'_'+inst_name+'_'+time_string(start_time,format=2,precision=-2)+'_1hour'
         if not undefined(full_bss) then options,'mms_bss',thick=10.0,panel_size=0.5 else options,'mms_bss',thick=10.0,panel_size=0.2
         options,'mms_bss','labsize'

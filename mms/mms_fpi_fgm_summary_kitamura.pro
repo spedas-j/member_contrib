@@ -42,15 +42,13 @@
 ; EXAMPLE:
 ;
 ;     To make summary plots of fluxgate magnetometers (FGM (or DFG)) and fast plasma investigation (FPI) data
-;     team members
 ;      (normal use)
 ;        MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output,/no_avg_fgm
+;        MMS>  mms_fpi_fgm_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/add_scpot,/no_avg_fgm
 ;      (to check FOMs and status of data downlink)
 ;        MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output,/no_avg_fgm,/full_bss,/fom
 ;      (to check data in current SITL window)
 ;        MMS>  mms_fpi_fgm_summary_kitamura,'2015-09-01/08:00:00','3',/delete,/add_scpot,/no_output,/no_avg_fgm,/no_bss
-;     public users
-;        MMS>  mms_fpi_fgm_summary_kitamura,['2015-09-01/08:00:00','2015-09-02/00:00:00'],'3',/delete,/no_output,/add_scpot,/no_avg_fgm
 ;
 ; NOTES:
 ;     1) See the notes in mms_load_data for rules on the use of MMS data
@@ -62,7 +60,7 @@
 pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                                  no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,no_output=no_output,$
                                  add_scpot=add_scpot,no_update_edp=no_update_edp,edp_comm=edp_comm,fpi_l1b=fpi_l1b,fpi_sitl=fpi_sitl,$
-                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom,day=day,tail=tail,clmn=clmn
+                                 plotdir=plotdir,plotcdir=plotcdir,gse=gse,no_avg_fgm=no_avg_fgm,fom=fom,day=day,tail=tail,clmn=clmn,margin=margin
 
   probe=strcompress(string(probe),/remove_all)
 
@@ -76,17 +74,25 @@ pro mms_fpi_fgm_summary_kitamura,trange,probe,delete=delete,no_short=no_short,no
 
   stime=time_double(trange)
   if n_elements(stime) eq 1 then begin
-    if public eq 0 then begin
+    if public eq 0 and status eq 1 then begin
       roi=mms_get_roi(stime,/next)
-      trange=dblarr(2)
-      trange[0]=roi[0]-60.d*30.d
-      trange[1]=roi[1]+60.d*30.d
     endif else begin
-      print
-      print,'Please input start and end time to use public data'
-      print
-      return
+      mms_data_time_takada,[stime,stime+3.d*86400.d],rois,datatype='fast'
+      i=0
+      while stime gt time_double(rois[0,i]) do i=i+1
+      roi=[time_double(rois[0,i]),time_double(rois[1,i])]
     endelse
+    trange=dblarr(2)
+    if undefined(margin) then margin=30.d
+    if n_elements(margin) eq 1 then begin
+      smargin=margin
+      emargin=margin
+    endif else begin
+      smargin=abs(margin[0])
+      emargin=margin[1]
+    endelse
+    trange[0]=roi[0]-60.d*smargin
+    trange[1]=roi[1]+60.d*emargin
   endif else begin
     trange=stime
     roi=trange

@@ -85,16 +85,9 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
   if undefined(no_ele) then begin
     for i=0,n_elements(probes)-1 do begin
       if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='des-moms',no_update=no_update,versions=des_versions,/center_measurement
-      if des_versions[0,0] le 2 then begin
-        copy_data,'mms'+probes[i]+'_des_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
-        join_vec,'mms'+probes[i]+'_des_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_DSC'
-        options,'mms'+probes[i]+'_des_bulkv_DSC',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
-        mms_cotrans,'mms'+probes[i]+'_des_bulkv',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-      endif else begin
-        copy_data,'mms'+probes[i]+'_des_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
-        copy_data,'mms'+probes[i]+'_des_bulkv_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_DSC'
-        copy_data,'mms'+probes[i]+'_des_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_gse'
-      endelse
+      copy_data,'mms'+probes[i]+'_des_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_des_numberDensity'
+      copy_data,'mms'+probes[i]+'_des_bulkv_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_DSC'
+      copy_data,'mms'+probes[i]+'_des_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_des_bulkv_gse'
       options,'mms'+probes[i]+'_des_bulkv_gse',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
       mms_cotrans,'mms'+probes[i]+'_des_bulkv',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
       options,'mms'+probes[i]+'_des_bulkv_gsm',constant=0.0,ytitle='mms'+probes[i]+'_des!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
@@ -243,17 +236,9 @@ PRO mms_fpi_l2_comp_kitamura,trange,probes=probes,no_ele=no_ele,no_ion=no_ion,lm
   if undefined(no_ion) then begin
     for i=0,n_elements(probes)-1 do begin
       if undefined(no_load_fpi) then mms_load_fpi,trange=trange,probes=probes[i],level='l2',data_rate=fpi_data_rate,datatype='dis-moms',no_update=no_update,versions=dis_versions,/center_measurement
-
-      if dis_versions[0,0] le 2 then begin
-        copy_data,'mms'+probes[i]+'_dis_numberdensity_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
-        join_vec,'mms'+probes[i]+'_dis_bulk'+['x','y','z']+'_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_DSC'
-        options,'mms'+probes[i]+'_dis_bulkv_DSC',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CDSC',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
-        mms_cotrans,'mms'+probes[i]+'_dis_bulkv',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
-      endif else begin
-        copy_data,'mms'+probes[i]+'_dis_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
-        copy_data,'mms'+probes[i]+'_dis_bulkv_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_DSC'
-        copy_data,'mms'+probes[i]+'_dis_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_gse'
-      endelse
+      copy_data,'mms'+probes[i]+'_dis_numberdensity_'+fpi_data_rate,'mms'+probes[i]+'_dis_numberDensity'
+      copy_data,'mms'+probes[i]+'_dis_bulkv_dbcs_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_DSC'
+      copy_data,'mms'+probes[i]+'_dis_bulkv_gse_'+fpi_data_rate,'mms'+probes[i]+'_dis_bulkv_gse'
       options,'mms'+probes[i]+'_dis_bulkv_gse',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
       mms_cotrans,'mms'+probes[i]+'_dis_bulkv',in_coord='gse',in_suffix='_gse',out_coord='gsm',out_suffix='_gsm',/ignore_dlimits
       options,'mms'+probes[i]+'_dis_bulkv_gsm',constant=0.0,ytitle='mms'+probes[i]+'_dis!CBulkV!CGSM',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i

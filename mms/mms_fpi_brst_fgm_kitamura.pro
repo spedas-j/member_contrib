@@ -42,7 +42,7 @@
 
 pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update_fpi,no_update_fgm=no_update_fgm,$
                               no_bss=no_bss,full_bss=full_bss,no_load=no_load,dfg_ql=dfg_ql,fpi_sitl=fpi_sitl,$
-                              fpi_l1b=fpi_l1b,time_clip=time_clip,gse=gse,tail=tail
+                              fpi_l1b=fpi_l1b,time_clip=time_clip,gse=gse,tail=tail,margin=margin
 
   mms_init
   
@@ -55,15 +55,23 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
   if n_elements(stime) eq 1 then begin
     if public eq 0 and status eq 1 then begin
       roi=mms_get_roi(stime,/next)
-      trange=dblarr(2)
-      trange[0]=roi[0]-60.d*30.d
-      trange[1]=roi[1]+60.d*30.d
     endif else begin
-      print
-      print,'Please input start and end time to use public data'
-      print
-      return
+      mms_data_time_takada,[stime,stime+3.d*86400.d],rois,datatype='fast'
+      i=0
+      while stime gt time_double(rois[0,i]) do i=i+1
+      roi=[time_double(rois[0,i]),time_double(rois[1,i])]
     endelse
+    trange=dblarr(2)
+    if undefined(margin) then margin=30.d
+    if n_elements(margin) eq 1 then begin
+      smargin=margin
+      emargin=margin
+    endif else begin
+      smargin=abs(margin[0])
+      emargin=margin[1]
+    endelse
+    trange[0]=roi[0]-60.d*smargin
+    trange[1]=roi[1]+60.d*emargin
   endif else begin
     trange=stime
     roi=trange
@@ -137,11 +145,6 @@ pro mms_fpi_brst_fgm_kitamura,trange,probe,delete=delete,no_update_fpi=no_update
   
   if undefined(gse) then gsm=1
   mms_fpi_plot_kitamura,trange=trange,probe=probe,no_update_fpi=no_update_fpi,fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,time_clip=time_clip,gsm=gsm,/load_fpi,/no_plot,/no_avg
-  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,full_bss=full_bss,time_clip=time_clip,gsm=gsm,/magplot,/no_load_mec
-  if not undefined(tail) then begin
-    zlim,['mms'+probe+'_fpi_iEnergySpectr_omni','mms'+probe+'_fpi_iEnergySpectr_omni_mix'],3e3,1e6,1
-    zlim,['mms'+probe+'_fpi_eEnergySpectr_omni','mms'+probe+'_fpi_eEnergySpectr_omni_mix'],1e4,3e7,1
-    tplot
-  endif
+  mms_fpi_brst_plot_kitamura,trange=trange,probe=probe,no_update=no_update_fpi,no_bss=no_bss,full_bss=full_bss,time_clip=time_clip,gsm=gsm,tail=tail,/magplot,/no_load_mec
 
 end

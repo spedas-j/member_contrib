@@ -35,7 +35,7 @@
 ;        if multiple cdf files are loaded for FGM(DFG)
 ;-
 
-pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no_plot,no_avg=no_avg,no_update=no_update,dfg_ql=dfg_ql,gsm=gsm
+pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no_plot,no_avg=no_avg,no_update=no_update,dfg_ql=dfg_ql,gsm=gsm,margin=margin
 
   loadct2,43
   time_stamp,/off
@@ -61,20 +61,28 @@ pro mms_fgm_plot_kitamura,trange=trange,probe=probe,load_fgm=load_fgm,no_plot=no
       timespan,trange[0],dt,/seconds
     endelse
   endif else begin
+    trange=time_double(trange)
     if n_elements(trange) eq 1 then begin
       if public eq 0 and status eq 1 then begin
         roi=mms_get_roi(trange,/next)
-        trange=dblarr(2)
-        trange[0]=roi[0]-60.d*30.d
-        trange[1]=roi[1]+60.d*30.d
       endif else begin
-        print
-        print,'Please input start and end time to use public data'
-        print
-        return
+        mms_data_time_takada,[trange,trange+3.d*86400.d],rois,datatype='fast'
+        i=0
+        while trange gt time_double(rois[0,i]) do i=i+1
+        roi=[time_double(rois[0,i]),time_double(rois[1,i])]
       endelse
+      trange=dblarr(2)
+      if undefined(margin) then margin=30.d
+      if n_elements(margin) eq 1 then begin
+        smargin=margin
+        emargin=margin
+      endif else begin
+        smargin=abs(margin[0])
+        emargin=margin[1]
+      endelse
+      trange[0]=roi[0]-60.d*smargin
+      trange[1]=roi[1]+60.d*emargin
     endif else begin
-      trange=time_double(trange)
       roi=trange
     endelse
     dt=trange[1]-trange[0]

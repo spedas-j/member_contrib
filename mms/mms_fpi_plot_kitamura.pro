@@ -50,7 +50,7 @@
 pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magplot,no_avg=no_avg,load_fgm=load_fgm,$
                           dfg_ql=dfg_ql,no_update_fgm=no_update_fgm,load_fpi=load_fpi,no_update_fpi=no_update_fpi,$
                           fpi_sitl=fpi_sitl,fpi_l1b=fpi_l1b,add_scpot=add_scpot,edp_comm=edp_comm,no_update_edp=no_update_edp,$
-                          gsm=gsm,no_load_mec=no_load_mec,time_clip=time_clip
+                          gsm=gsm,no_load_mec=no_load_mec,time_clip=time_clip,margin=margin
 
   loadct2,43
   time_stamp,/off
@@ -59,17 +59,27 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   if username eq '' or username eq 'public' then public=1 else public=0
   
   if undefined(trange) then trange=timerange()
+  trange=time_double(trange)
   if n_elements(trange) eq 1 then begin
     if public eq 0 and status eq 1 then begin
-      trange=mms_get_roi(trange,/next)
-      trange[0]=trange[0]-60.d*30.d
-      trange[1]=trange[1]+60.d*30.d
+      roi=mms_get_roi(trange,/next)
     endif else begin
-      print
-      print,'Please input start and end time to use public data'
-      print
-      return
+      mms_data_time_takada,[trange,trange+3.d*86400.d],rois,datatype='fast'
+      i=0
+      while trange gt time_double(rois[0,i]) do i=i+1
+      roi=[time_double(rois[0,i]),time_double(rois[1,i])]
     endelse
+    trange=dblarr(2)
+    if undefined(margin) then margin=30.d
+    if n_elements(margin) eq 1 then begin
+      smargin=margin
+      emargin=margin
+    endif else begin
+      smargin=abs(margin[0])
+      emargin=margin[1]
+    endelse
+    trange[0]=roi[0]-60.d*smargin
+    trange[1]=roi[1]+60.d*emargin
   endif
   trange=time_double(trange)
   if undefined(probe) then probe='1'
@@ -463,30 +473,21 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   endif else begin
     skip_cotrans=1
   endelse
-  
-  if strlen(tnames('mms'+probe+'_dis_bulkv_gse_fast'+fpi_suffix)) gt 0 then begin
-    copy_data,'mms'+probe+'_dis_bulkv_dbcs_fast'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_DSC'
-    copy_data,'mms'+probe+'_dis_bulkv_gse_fast'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_gse'
-    if strlen(tnames('mms'+probe+'_fpi_iBulkV_DSC')) eq 0 then begin
-      store_data,'mms'+probe+'_fpi_iBulkV_DSC',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-      ylim,'mms'+probe+'_fpi_iBulkV_DSC',-100.d,100.d,0
-    endif
-    if strlen(tnames('mms'+probe+'_fpi_iBulkV_gse')) eq 0 then begin
-      store_data,'mms'+probe+'_fpi_iBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-      ylim,'mms'+probe+'_fpi_iBulkV_gse',-100.d,100.d,0
-    endif else begin
-      get_data,'mms'+probe+'_fpi_iBulkV_gse',data=vi
-      if max(vi.y) eq 0.d and min(vi.y) eq 0.d then store_data,'mms'+probe+'_fpi_iBulkV_gse',/delete
-      undefine,vi
-    endelse  
+  if strlen(tnames('mms'+probe+'_dis_bulkv_dbcs_fast'+fpi_suffix)) eq 0 then begin
+    store_data,'mms'+probe+'_fpi_iBulkV_DSC',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+    ylim,'mms'+probe+'_fpi_iBulkV_DSC',-100.d,100.d,0
   endif else begin
-    join_vec,'mms'+probe+'_fpi_iBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_iBulkV_DSC'
-    if strlen(tnames('mms'+probe+'_fpi_iBulkV_DSC')) eq 0 then begin
-      store_data,'mms'+probe+'_fpi_iBulkV_DSC',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-      ylim,'mms'+probe+'_fpi_iBulkV_DSC',-100.d,100.d,0
-    endif
-    if undefined(skip_cotrans) then mms_cotrans,'mms'+probe+'_fpi_iBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+    copy_data,'mms'+probe+'_dis_bulkv_dbcs_fast'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_DSC'
   endelse
+  if strlen(tnames('mms'+probe+'_dis_bulkv_gse_fast'+fpi_suffix)) eq 0 then begin
+    store_data,'mms'+probe+'_fpi_iBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+    ylim,'mms'+probe+'_fpi_iBulkV_gse',-100.d,100.d,0
+  endif else begin
+    copy_data,'mms'+probe+'_dis_bulkv_gse_fast'+fpi_suffix,'mms'+probe+'_fpi_iBulkV_gse'
+    get_data,'mms'+probe+'_fpi_iBulkV_gse',data=vi
+    if max(vi.y) eq 0.d and min(vi.y) eq 0.d then store_data,'mms'+probe+'_fpi_iBulkV_gse',/delete
+    undefine,vi
+  endelse  
   options,'mms'+probe+'_fpi_iBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_i
   options,'mms'+probe+'_fpi_iBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CIon!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_i
   if undefined(skip_cotrans) and strlen(tnames('mms'+probe+'_fpi_iBulkV_gse')) gt 0 then begin
@@ -495,29 +496,22 @@ pro mms_fpi_plot_kitamura,trange=trange,probe=probe,no_plot=no_plot,magplot=magp
   endif
   
   if des_level eq 'QL' or des_level eq 'L1B' or des_level eq 'L2' then begin
-    if strlen(tnames('mms'+probe+'_des_bulkv_gse_fast'+fpi_suffix)) gt 0 then begin
-      copy_data,'mms'+probe+'_des_bulkv_dbcs_fast'+fpi_suffix,'mms'+probe+'_fpi_eBulkV_DSC'
-      copy_data,'mms'+probe+'_des_bulkv_gse_fast'+fpi_suffix,'mms'+probe+'_fpi_eBulkV_gse'
-      if strlen(tnames('mms'+probe+'_fpi_eBulkV_DSC')) eq 0 then begin
-        store_data,'mms'+probe+'_fpi_eBulkV_DSC',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-        ylim,'mms'+probe+'_fpi_eBulkV_DSC',-100.d,100.d,0
-      endif
-      if strlen(tnames('mms'+probe+'_fpi_eBulkV_gse')) eq 0 then begin
-        store_data,'mms'+probe+'_fpi_eBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-        ylim,'mms'+probe+'_fpi_eBulkV_gse',-100.d,100.d,0
-      endif else begin
-        get_data,'mms'+probe+'_fpi_eBulkV_gse',data=ve
-        if max(ve.y) eq 0.d and min(ve.y) eq 0.d then store_data,'mms'+probe+'_fpi_eBulkV_gse',/delete
-        undefine,ve
-      endelse
+    if strlen(tnames('mms'+probe+'_des_bulkv_dbcs_fast'+fpi_suffix)) eq 0 then begin
+      store_data,'mms'+probe+'_fpi_eBulkV_DSC',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      ylim,'mms'+probe+'_fpi_eBulkV_DSC',-100.d,100.d,0
     endif else begin
-      join_vec,'mms'+probe+'_fpi_eBulkV'+['_X_DSC','_Y_DSC','_Z_DSC'],'mms'+probe+'_fpi_eBulkV_DSC'
-      if strlen(tnames('mms'+probe+'_fpi_eBulkV_DSC')) eq 0 then begin
-        store_data,'mms'+probe+'_fpi_eBulkV_DSC',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
-        ylim,'mms'+probe+'_fpi_eBulkV_gse',-100.d,100.d,0
-      endif
-      if undefined(skip_cotrans) then mms_cotrans,'mms'+probe+'_fpi_eBulkV',in_coord='dmpa',in_suffix='_DSC',out_coord='gse',out_suffix='_gse',/ignore_dlimits
+      copy_data,'mms'+probe+'_des_bulkv_dbcs_fast'+fpi_suffix,'mms'+probe+'_fpi_eBulkV_DSC'
+    endelse  
+    if strlen(tnames('mms'+probe+'_des_bulkv_gse_fast'+fpi_suffix)) eq 0 then begin
+      store_data,'mms'+probe+'_fpi_eBulkV_gse',data={x:[trange],y:[[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan],[!values.f_nan,!values.f_nan]]}
+      ylim,'mms'+probe+'_fpi_eBulkV_gse',-100.d,100.d,0
+    endif else begin
+      copy_data,'mms'+probe+'_des_bulkv_gse_fast'+fpi_suffix,'mms'+probe+'_fpi_eBulkV_gse'
+      get_data,'mms'+probe+'_fpi_eBulkV_gse',data=ve
+      if max(ve.y) eq 0.d and min(ve.y) eq 0.d then store_data,'mms'+probe+'_fpi_eBulkV_gse',/delete
+      undefine,ve
     endelse
+
     options,'mms'+probe+'_fpi_eBulkV_DSC',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CElectron!CBulkV_DBCS',ysubtitle='[km/s]',colors=[2,4,1],labels=['V!DX_DBCS!N','V!DY_DBCS!N','V!DZ_DBCS!N'],labflag=-1,datagap=dgap_e
     options,'mms'+probe+'_fpi_eBulkV_gse',constant=0.0,ytitle='MMS'+probe+'!CFPI_'+dis_level+'!CElectron!CBulkV_GSE',ysubtitle='[km/s]',colors=[2,4,6],labels=['V!DX!N','V!DY!N','V!DZ!N'],labflag=-1,datagap=dgap_e
     if undefined(skip_cotrans) and strlen(tnames('mms'+probe+'_fpi_eBulkV_gse')) gt 0 then begin
