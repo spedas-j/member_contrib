@@ -93,7 +93,7 @@
 ;written by vassilis
 pro bin2Dmain, x, y,arrs2bin,xmin,xmax,xbinsize,ymin,ymax,ybinsize,kinbin,bincenters,$
                averages, stdevs, medians, maxvarvec=maxvarvec, minvarvec=minvarvec,$
-               flag4nodata=flag4nodata, nan=nan
+               flag4nodata=flag4nodata, nan=nan, doubleprecision=doubleprecision
 
 ;hidden to prevent clutter when the user uses
 compile_opt hidden
@@ -113,16 +113,24 @@ iz=iy*nxbin+ix
 if (joffsite gt 0) then iz(ioffsite)=nxbin*nybin+1
 ;
 if (arg_present(maxvarvec) or arg_present(minvarvec)) then begin
-  bin1D, iz, arrs2bin,0,maxval, 1, kinbin, bincenters, averages, stdevs, medians,maxvarvec=maxvarvec,minvarvec=minvarvec,flag4nodata=flag4nodata,nan=nan
+  bin1D, iz, arrs2bin,0,maxval, 1, kinbin, bincenters, averages, stdevs, medians,maxvarvec=maxvarvec,minvarvec=minvarvec,flag4nodata=flag4nodata,nan=nan, doubleprecision=doubleprecision
 endif else begin
-  bin1D, iz, arrs2bin,0,maxval, 1, kinbin, bincenters, averages, stdevs, medians,flag4nodata=flag4nodata,nan=nan
+  bin1D, iz, arrs2bin,0,maxval, 1, kinbin, bincenters, averages, stdevs, medians,flag4nodata=flag4nodata,nan=nan, doubleprecision=doubleprecision
 endelse
 ;
-xbincenters=make_array(nxbin, /float,/index)*xbinsize+(xmin)+xbinsize/2.
-xbincenters=xbincenters#make_array(nybin,/float,value=1)
-ybincenters=make_array(nybin, /float,/index)*ybinsize+(ymin)+ybinsize/2.
-ybincenters=make_array(nxbin,/float,value=1)#ybincenters
-bincenters=make_array(nxbin,nybin,2)
+if undefined(doubleprecision) then begin
+  xbincenters=make_array(nxbin, /float,/index)*xbinsize+(xmin)+xbinsize/2.
+  xbincenters=xbincenters#make_array(nybin,/float,value=1)
+  ybincenters=make_array(nybin, /float,/index)*ybinsize+(ymin)+ybinsize/2.
+  ybincenters=make_array(nxbin,/float,value=1)#ybincenters
+  bincenters=make_array(nxbin,nybin,2)
+endif else begin
+  xbincenters=make_array(nxbin, /double,/index)*xbinsize+(xmin)+xbinsize/2.
+  xbincenters=xbincenters#make_array(nybin,/double,value=1)
+  ybincenters=make_array(nybin, /double,/index)*ybinsize+(ymin)+ybinsize/2.
+  ybincenters=make_array(nxbin,/double,value=1)#ybincenters
+  bincenters=make_array(nxbin,nybin,2,/double)
+endelse
 bincenters(*,*,0)=xbincenters
 bincenters(*,*,1)=ybincenters
 ;
@@ -137,7 +145,7 @@ end
 
 pro bin2d,x,y,arrs2bin,binsize=binsize,binum=binum,xrange=xrange,yrange=yrange,flagnodata=flagnodata,$
           averages=averages,medians=medians,stdevs=stdevs,binhistogram=binhistogram,xcenters=xcenters,$
-          ycenters=ycenters,minvarvec=minvarvec,maxvarvec=maxvarvec,nan=nan
+          ycenters=ycenters,minvarvec=minvarvec,maxvarvec=maxvarvec,nan=nan,doubleprecision=doubleprecision
 
 
   ;validate and set parameters, pretty straightforward
@@ -232,14 +240,14 @@ pro bin2d,x,y,arrs2bin,binsize=binsize,binum=binum,xrange=xrange,yrange=yrange,f
         message,'maxvarvec or minvarvec cannot be set if second dimension of arrs2bin is less than 2'
      endif
      
-     bin2dmain,x,y,arrs2bin,xmin,xmax,xbinsz,ymin,ymax,ybinsz,binhistogram,bincenters,averages,stdevs,medians,flag4nodata=flagnodata,maxvarvec=maxvarvec,minvarvec=minvarvec,nan=nan
+     bin2dmain,x,y,arrs2bin,xmin,xmax,xbinsz,ymin,ymax,ybinsz,binhistogram,bincenters,averages,stdevs,medians,flag4nodata=flagnodata,maxvarvec=maxvarvec,minvarvec=minvarvec,nan=nan,doubleprecision=doubleprecision
      
      maxvarvec = reform(maxvarvec)
      minvarvec = reform(minvarvec)
 
   endif else begin
      
-     bin2dmain,x,y,arrs2bin,xmin,xmax,xbinsz,ymin,ymax,ybinsz,binhistogram,bincenters,averages,stdevs,medians,flag4nodata=flagnodata,nan=nan
+     bin2dmain,x,y,arrs2bin,xmin,xmax,xbinsz,ymin,ymax,ybinsz,binhistogram,bincenters,averages,stdevs,medians,flag4nodata=flagnodata,nan=nan,doubleprecision=doubleprecision
 
   endelse
 

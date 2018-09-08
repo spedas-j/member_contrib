@@ -38,9 +38,11 @@
 ; $LastChangedRevision: 1661 $
 ; $URL: svn+ssh://thmsvn@ambrosia.ssl.berkeley.edu/repos/idl_socware/trunk/external/IDL_GEOPACK/t01/t01.pro $
 ;-
-pro bin1D,binarr,arrs2bin,minval,maxval,binwidth,kinbin,bincenters,averages,stdevs,medians,revarr=iinbin,maxvarvec=maxvarvec,minvarvec=minvarvec,flag4nodata=flag4nodata, nan=nan
-if (keyword_set(flag4nodata) eq 0) then flag4nodata=0
+pro bin1D,binarr,arrs2bin,minval,maxval,binwidth,kinbin,bincenters,averages,stdevs,medians,revarr=iinbin,maxvarvec=maxvarvec,minvarvec=minvarvec,flag4nodata=flag4nodata, $
+          nan=nan, doubleprecision=doubleprecision
 
+if (keyword_set(flag4nodata) eq 0) then flag4nodata=0
+use_double = 0 & if defined(doubleprecision) then use_double=1 
 ;
 ; Check the arguments
 ;
@@ -64,7 +66,11 @@ endif
 kinbin=histogram(binarr,min=minval,max=maxval,binsize=binwidth,reverse=iinbin,nan=nan)
 nbins=n_elements(kinbin)-1
 kinbin=kinbin(0:nbins-1)
-bincenters=binwidth*make_array(nbins,/float,/index)+binwidth/2.+minval
+if ~use_double then begin
+  bincenters=binwidth*make_array(nbins,/float,/index)+binwidth/2.+minval
+endif else begin
+  bincenters=binwidth*make_array(nbins,/double,/index)+binwidth/2.+minval
+endelse
 ;
 ; define begin and end positions within reverse index array denoting
 ; points within each bin
@@ -88,9 +94,15 @@ if (arg_present(minvarvec) or arg_present(maxvarvec)) then begin
   maxvarvec=make_array(nbins,2,/double)
   minvarvec=make_array(nbins,2,/double)
 endif
-averages=make_array(nbins,marrays,/float)
-stdevs=make_array(nbins,marrays,/float)
-medians=make_array(nbins,marrays,/float)
+if ~use_double then begin
+  averages=make_array(nbins,marrays,/float)
+  stdevs=make_array(nbins,marrays,/float)
+  medians=make_array(nbins,marrays,/float)
+endif else begin
+  averages=make_array(nbins,marrays,/double)
+  stdevs=make_array(nbins,marrays,/double)
+  medians=make_array(nbins,marrays,/double)
+endelse
 for mtharr=0L,marrays-1L do begin
   for nthbin=0L,nbins-1L do begin
     if (kinbin(nthbin) ne 0) then begin
