@@ -18,9 +18,9 @@
 ;    
 ; :Author: horit
 ;-
-pro comp_vap_b_t04s, smooth=smooth, noplot=noplot
+pro comp_vap_b_t04s, probe=prob, smooth=smooth, noplot=noplot
 
-  prob='a'
+  if undefined(prob) then prob='a'
   prefix = 'rbsp'+prob+'_'
   
   rbsp_emfisis_init
@@ -40,7 +40,7 @@ pro comp_vap_b_t04s, smooth=smooth, noplot=noplot
   rslt = tsy_params('t04s')
   
   timespan, tr
-  add_coord_sys, 'rbspa_emfisis_l3_4sec_gsm_coordinates', 'gsm' ;To avoid the error check in tt04s.pro
+  spd_set_coord, prefix+'emfisis_l3_4sec_gsm_coordinates', 'gsm' ;To avoid the error check in tt04s.pro
   tt04s, prefix+'emfisis_l3_4sec_gsm_coordinates',parmod='t04s_par'
   if keyword_set(smooth) then begin
     tsmooth_in_time, prefix+'emfisis_l3_4sec_gsm_coordinates_bt04s', 600., $
