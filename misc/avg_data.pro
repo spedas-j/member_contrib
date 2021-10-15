@@ -108,21 +108,21 @@ dat = {x:newtime,y:y}
 v=0
 str_element,p1,'v',v
 if keyword_set(v) then begin
-  if ndimen(*v) gt 2 then str_element,/add,dat,'v',average_bins(*v,ind,1) $
+  if ndimen(*v) gt 1 then str_element,/add,dat,'v',average_bins(*v,ind,1) $
   else str_element,/add,dat,'v',*v
 endif
 
 v=0
 str_element,p1,'v1',v
 if keyword_set(v) then begin
-  if ndimen(*v) gt 2 then str_element,/add,dat,'v1',average_bins(*v,ind,1) $
+  if ndimen(*v) gt 1 then str_element,/add,dat,'v1',average_bins(*v,ind,1) $
   else str_element,/add,dat,'v1',*v
 endif
 
 v=0
 str_element,p1,'v2',v
 if keyword_set(v) then begin
-  if ndimen(*v) gt 2 then str_element,/add,dat,'v2',average_bins(*v,ind,1) $
+  if ndimen(*v) gt 1 then str_element,/add,dat,'v2',average_bins(*v,ind,1) $
   else str_element,/add,dat,'v2',*v
 endif
 
