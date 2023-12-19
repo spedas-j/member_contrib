@@ -5,6 +5,8 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   plottime=plottime, $
   force_chscale=force_chscale, changle=changle,$
   force_charthick=force_charthick, $
+  choffset=choffset, $
+  scname=scname, $
   geo_plot=geo_plot, $
   spellout=spellout, $
   notimelabel=notimelabel, $
@@ -42,8 +44,9 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
   trange = time_double(trange)
   if keyword_set(plottime) then tp=time_double(plottime) $
   ELSE tp=0
+  if undefined(choffset) then choffset = 0. 
   
-  scname = (strsplit(vn_glat, '_',/ext))[0] 
+  if undefined(scname) then scname = (strsplit(vn_glat, '_',/ext))[0] 
   
 ; Set the paramters
 
@@ -133,7 +136,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
           dr =1. & chunit = 10. ;apart by dr*chunit*chsz
           chsz = !p.charsize*chscale
           xch0 = x[0] & ych0 = y[0]
-          devc = convert_coord(xch0,ych0,/data,/to_device)
+          devc = convert_coord(xch0,ych0,/data,/to_device) + choffset*[!d.x_size, !d.y_size] 
           xyzch = convert_coord(devc[0]+dr*chsz*chunit*cos(changle*!dtor),$
             devc[1]+dr*chsz*chunit*sin(changle*!dtor),$
             /device,/to_data)
@@ -143,7 +146,7 @@ PRO overlay_map_sc_ifoot, vn_glat, vn_glon, trange, $
                   charthick=charthick
           
           xch0 = x[N_ELEMENTS(tdbl)-1] & ych0 = y[N_ELEMENTS(tdbl)-1]
-          devc = convert_coord(xch0,ych0,/data,/to_device)
+          devc = convert_coord(xch0,ych0,/data,/to_device) + choffset*[!d.x_size, !d.y_size]
           xyzch = convert_coord(devc[0]+dr*chsz*chunit*cos(changle*!dtor),$
             devc[1]+dr*chsz*chunit*sin(changle*!dtor),$
             /device,/to_data)
