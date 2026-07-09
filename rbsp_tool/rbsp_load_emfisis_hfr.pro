@@ -13,7 +13,19 @@
 ; 
 ; History:
 ;    1. Prepared by Kunihiro Keika, August 2014
-;
+;    2. Updated by Y. Obana, July 2026
+;       - Changed the EMFISIS HFR remote data directory from
+;         http://emfisis.physics.uiowa.edu/Flight/...
+;         to
+;         https://space.physics.uiowa.edu/emfisis/Flight/...
+;         following the migration of the Iowa EMFISIS data server.
+;       - Added a fallback curl download when file_retrieve fails to
+;         resolve the v?.?.?.cdf version wildcard on the new HTTPS server.
+;       - Added deletion of old HFR tplot variables before loading new data
+;         to avoid using stale spectra from a previous timespan.
+;       - Added a check for successful creation of the HFR_Spectra tplot
+;         variable before applying plotting options.
+;       - Reformatted the HFR frequency axis for tplot/specplot compatibility.
 ;
 ;--------------------------------------------------------------------
 function GyroFreq, b, emu, charge
@@ -41,7 +53,8 @@ for i=0, n_elements(probes)-1 do begin
     ;source.local_data_dir = root_data_dir()+'rbsp/rbsp'+probe+'/emfisis/fr/'  
     ;source.local_data_dir = root_data_dir()+'rbsp/emfisis/Flight/rbsp'+probe+'/'  
     source.local_data_dir = root_data_dir()+'rbsp/emfisis/Flight/RBSP-'+strupcase(probe)+'/'  
-    source.remote_data_dir = 'http://emfisis.physics.uiowa.edu/Flight/RBSP-'+strupcase(probe)+'/'
+    ;source.remote_data_dir = 'http://emfisis.physics.uiowa.edu/Flight/RBSP-'+strupcase(probe)+'/'
+    source.remote_data_dir = 'https://space.physics.uiowa.edu/emfisis/Flight/RBSP-'+strupcase(probe)+'/'
 
     pathformat = strupcase(level)+'/YYYY/MM/DD/rbsp-'+probe $ 
                + '_HFR-'+datatype+'_emfisis-'+strupcase(level) $ 
@@ -52,8 +65,39 @@ for i=0, n_elements(probes)-1 do begin
         relpathnames = file_dailynames(file_format=pathformat,/hour_res)
   
     files = file_retrieve(relpathnames, _extra=source, /last_version)
+    
+    ; If file_retrieve fails to resolve v?.?.?.cdf on the new Iowa HTTPS server,
+    ; try downloading the known HFR spectra file via curl.
+    if n_elements(files) eq 1 then begin
+      if strpos(files[0], '?') ge 0 then begin
 
+        tr = timerange()
+        ymd = time_string(tr[0], tformat='YYYYMMDD')
+        yyyy = strmid(ymd, 0, 4)
+        mm   = strmid(ymd, 4, 2)
+        dd   = strmid(ymd, 6, 2)
+
+        local_dir = source.local_data_dir + strupcase(level) + '\' + yyyy + '\' + mm + '\' + dd + '\'
+        spawn, 'cmd /c if not exist "' + local_dir + '" mkdir "' + local_dir + '"'
+
+        ; Most 2017 HFR spectra L2 files use v1.6.5. If this fails, the file will remain missing.
+        fname = 'rbsp-' + probe + '_HFR-' + datatype + '_emfisis-' + strupcase(level) + '_' + ymd + '_v1.6.5.cdf'
+        url = source.remote_data_dir + strupcase(level) + '/' + yyyy + '/' + mm + '/' + dd + '/' + fname
+        local_file = local_dir + fname
+
+        print, 'Trying curl download: ', url
+        spawn, 'curl -L -o "' + local_file + '" "' + url + '"'
+
+        if file_test(local_file) then files = [local_file]
+      endif
+    endif
+    
     prefix = 'rbsp'+probe+'_emfisis_' ;Prefix for tplot variable name
+    
+    ; remove old HFR variables to avoid using stale data
+    del_data, prefix + 'HFR_Spectra'
+    del_data, prefix + 'HFR_Spectra_gyro'
+    
     cdf2tplot,file=files,verbose=source.verbose,prefix=prefix
 
     ;---GYROFREQ---(USE 4-SEC FLUXGATE MAGNETOMETER DATA)---
@@ -74,8 +118,19 @@ for i=0, n_elements(probes)-1 do begin
     store_data, tvar_gyro+'_gyro_e_tenth', data={x:data.x,y:gyrofreq_e_tenth}, dlim={colors:5}  
     ;---OPTIONS---
        get_data, prefix + 'HFR_Spectra', data=data, dlim=dlim
+       
+       if size(data, /type) ne 8 then begin
+         dprint, dlevel=0, 'No tplot variable found: '+prefix+'HFR_Spectra'
+         continue
+       endif
+
+       freq = reform(data.v[0,*])
+       spec = data.y
+
+       store_data, prefix + 'HFR_Spectra', data={x:data.x, y:spec, v:freq}
+       
        ;store_data, 'HFR_Spectra', data={x:data.x,y:data.y,v:reform(data.v)}
-       store_data, prefix + 'HFR_Spectra', data={x:data.x,y:data.y,v:reform(data.v[0,*])}
+       ;store_data, prefix + 'HFR_Spectra', data={x:data.x,y:data.y,v:reform(data.v[0,*])}
        options, prefix + 'HFR_Spectra', 'ylog', 1
        options, prefix + 'HFR_Spectra', 'zlog', 1
        options, prefix + 'HFR_Spectra', 'ytitle', 'Freq [Hz]' 
